@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bienvenido a SIGEVIR</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f4f7fa;font-family:'Inter','Segoe UI',Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f7fa;padding:20px 0;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background-color:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.08);">
+          <!-- Header -->
+          <tr>
+            <td style="background:linear-gradient(135deg,#1B2A3B 0%,#2E75B6 100%);padding:30px;text-align:center;">
+              <h1 style="color:#ffffff;font-size:22px;font-weight:700;margin:0;letter-spacing:1px;">SIGEVIR</h1>
+              <p style="color:#b8d4f0;font-size:13px;margin:4px 0 0 0;">¡Bienvenido al Sistema!</p>
+            </td>
+          </tr>
+          <!-- Body -->
+          <tr>
+            <td style="padding:32px 28px;">
+              <p style="font-size:16px;color:#1B2A3B;font-weight:600;margin:0 0 16px 0;">Hola {{nombre}},</p>
+              <p style="font-size:14px;color:#4a5568;line-height:1.6;margin:0 0 20px 0;">
+                Se ha creado una cuenta para vos en el <strong>Sistema Integral de Gestión de Vehículos Retenidos (SIGEVIR)</strong>.
+              </p>
+
+              <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f8fafc;border-radius:8px;border-left:4px solid #2E75B6;margin-bottom:24px;">
+                <tr>
+                  <td style="padding:16px 20px;">
+                    <p style="font-size:13px;color:#718096;margin:0 0 8px 0;font-weight:600;">Tus credenciales de acceso:</p>
+                    <table width="100%" cellpadding="6" cellspacing="0">
+                      <tr>
+                        <td style="font-size:13px;color:#718096;width:140px;">Contraseña temporal:</td>
+                        <td style="font-size:14px;color:#1B2A3B;font-family:monospace;font-weight:600;">{{password_temporal}}</td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+              <div style="background-color:#fff3cd;border:1px solid #ffc107;border-radius:8px;padding:12px 16px;margin-bottom:24px;">
+                <p style="font-size:13px;color:#856404;margin:0;">
+                  <strong>Importante:</strong> Al iniciar sesión por primera vez, deberás cambiar esta contraseña temporal por una nueva.
+                </p>
+              </div>
+
+              <!-- CTA Button -->
+              <table width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td align="center" style="padding:0 0 24px 0;">
+                    <a href="{{login_url}}" style="display:inline-block;background-color:#2E75B6;color:#ffffff;text-decoration:none;font-size:15px;font-weight:600;padding:12px 32px;border-radius:8px;box-shadow:0 2px 8px rgba(46,117,182,0.3);">
+                      Ir al Login
+                    </a>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <!-- Footer -->
+          <tr>
+            <td style="background-color:#f8fafc;padding:20px 28px;border-top:1px solid #e2e8f0;">
+              <p style="font-size:12px;color:#a0aec0;text-align:center;margin:0 0 6px 0;">
+                Sistema SIGEVIR &mdash; Ministerio de Justicia
+              </p>
+              <p style="font-size:11px;color:#a0aec0;text-align:center;margin:0;">
+                Este mensaje fue generado automáticamente. No responda a este correo.<br />
+                <a href="{{sistema_url}}/unsubscribe" style="color:#2E75B6;text-decoration:underline;">Cancelar suscripción</a>
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

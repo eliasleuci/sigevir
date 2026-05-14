@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Acta de Retención SIGEVIR</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #333;
+            line-height: 1.4;
+            margin: 0;
+            padding: 40px;
+            font-size: 12px;
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            border-bottom: 2px solid #2c3e50;
+            padding-bottom: 20px;
+            margin-bottom: 20px;
+        }
+        .logo {
+            width: 80px;
+            height: 80px;
+            margin-right: 20px;
+        }
+        .institution-info h1 {
+            margin: 0;
+            font-size: 18px;
+            color: #2c3e50;
+        }
+        .institution-info p {
+            margin: 2px 0;
+            color: #7f8c8d;
+        }
+        .title-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .title-section h2 {
+            margin: 0;
+            font-size: 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #2c3e50;
+        }
+        .expediente-info {
+            margin-top: 10px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        .section {
+            margin-bottom: 20px;
+            border: 1px solid #ecf0f1;
+            border-radius: 4px;
+        }
+        .section-header {
+            background-color: #f7f9fa;
+            padding: 8px 15px;
+            font-weight: bold;
+            border-bottom: 1px solid #ecf0f1;
+            text-transform: uppercase;
+            font-size: 10px;
+            color: #34495e;
+        }
+        .section-body {
+            padding: 15px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .field {
+            margin-bottom: 5px;
+        }
+        .label {
+            font-weight: bold;
+            color: #7f8c8d;
+            margin-right: 5px;
+        }
+        .photos-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            padding: 15px;
+        }
+        .photo-item {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            border: 1px solid #ecf0f1;
+            border-radius: 4px;
+        }
+        .footer-qr {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-top: 40px;
+            border-top: 1px solid #ecf0f1;
+            padding-top: 20px;
+        }
+        .qr-container {
+            text-align: center;
+        }
+        .qr-image {
+            width: 150px;
+            height: 150px;
+        }
+        .qr-text {
+            font-size: 8px;
+            color: #7f8c8d;
+            margin-top: 5px;
+        }
+        .signature-container {
+            text-align: center;
+            width: 250px;
+        }
+        .signature-line {
+            border-top: 1px solid #333;
+            margin-top: 80px;
+            padding-top: 5px;
+        }
+        .full-width {
+            grid-column: span 2;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <img src="{{logo_url}}" alt="Logo" class="logo">
+        <div class="institution-info">
+            <h1>{{institucion_nombre}}</h1>
+            <p>{{institucion_tipo}} - {{institucion_jurisdiccion}}</p>
+        </div>
+    </div>
+
+    <div class="title-section">
+        <h2>Acta de Retención de Vehículo</h2>
+        <div class="expediente-info">Expediente: {{numero_expediente}}</div>
+        <p>Fecha y Hora: {{fecha_hora}}</p>
+    </div>
+
+    <div class="section">
+        <div class="section-header">Datos del Vehículo</div>
+        <div class="section-body">
+            <div class="field"><span class="label">Dominio:</span> {{vehiculo_dominio}}</div>
+            <div class="field"><span class="label">Tipo:</span> {{vehiculo_tipo}}</div>
+            <div class="field"><span class="label">Marca/Modelo:</span> {{vehiculo_marca}} {{vehiculo_modelo}}</div>
+            <div class="field"><span class="label">Año:</span> {{vehiculo_anio}}</div>
+            <div class="field"><span class="label">Color:</span> {{vehiculo_color}}</div>
+            <div class="field"><span class="label">Motor:</span> {{vehiculo_motor}}</div>
+            <div class="field"><span class="label">Cuadro:</span> {{vehiculo_cuadro}}</div>
+            <div class="field full-width"><span class="label">Daños Visibles:</span> {{vehiculo_danios}}</div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">Lugar y Motivo de la Retención</div>
+        <div class="section-body">
+            <div class="field"><span class="label">Provincia:</span> {{provincia}}</div>
+            <div class="field"><span class="label">Localidad:</span> {{localidad}}</div>
+            <div class="field full-width"><span class="label">Dirección:</span> {{direccion}}</div>
+            <div class="field full-width"><span class="label">Motivo:</span> {{motivo_retencion}}</div>
+            {{#if versus}}
+            <div class="field full-width"><span class="label">Versus:</span> {{versus}}</div>
+            {{/if}}
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">Datos del Oficial Interviniente</div>
+        <div class="section-body">
+            <div class="field"><span class="label">Nombre:</span> {{agente_nombre}}</div>
+            <div class="field"><span class="label">DNI:</span> {{agente_dni}}</div>
+            <div class="field"><span class="label">Sección:</span> {{agente_seccion}}</div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">Datos del Titular / Conductor</div>
+        <div class="section-body">
+            <div class="field"><span class="label">Nombre:</span> {{titular_nombre}}</div>
+            <div class="field"><span class="label">DNI:</span> {{titular_dni}}</div>
+            <div class="field"><span class="label">Contacto:</span> {{titular_contacto}}</div>
+        </div>
+    </div>
+
+    <div style="page-break-before: always;"></div>
+
+    <div class="section">
+        <div class="section-header">Registro Fotográfico</div>
+        <div class="photos-grid">
+            {{#each fotos}}
+            <img src="{{this}}" class="photo-item">
+            {{/each}}
+        </div>
+    </div>
+
+    <div class="footer-qr">
+        <div class="signature-container">
+            <div class="signature-line">
+                Firma del Oficial Interviniente<br>
+                Fecha: {{fecha_firma}}
+            </div>
+        </div>
+        <div class="qr-container">
+            <img src="{{qr_data_url}}" class="qr-image">
+            <div class="qr-text">Escanee para acceder al registro digital oficial</div>
+        </div>
+    </div>
+</body>
+</html>
