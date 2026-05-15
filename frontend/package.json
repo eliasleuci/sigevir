@@ -12,6 +12,7 @@
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
     "@react-oauth/google": "^0.12.1",
+    "@supabase/supabase-js": "^2.105.4",
     "@zxing/library": "^0.11.0",
     "axios": "^1.6.8",
     "browser-image-compression": "^2.0.2",

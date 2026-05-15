@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { authenticate, authorize } from '../middleware/auth.js';
+import { authenticate, authorize } from '../middleware/supabaseAuth.js';
 import checkPermanenciaProlongada from '../jobs/checkPermanenciaProlongada.js';
 import db from '../models/index.js';
 import logger from '../utils/logger.js';
@@ -13,12 +13,9 @@ router.use(authorize('ADMIN_GENERAL', 'ADMIN_INSTITUCION'));
 router.get('/check-permanencias', async (req, res, next) => {
   try {
     const resultado = await checkPermanenciaProlongada.execute();
-    res.status(200).json({
-      success: true,
-      data: resultado,
-    });
+    res.status(200).json({ success: true, data: resultado });
   } catch (error) {
-    logger.error(`Error en trigger manual de check-permanencias: ${error.message}`);
+    logger.error(`Error en trigger manual de check-permanencias: ${error?.message}`);
     next(error);
   }
 });
@@ -31,7 +28,7 @@ router.get('/usuarios', async (req, res, next) => {
     if (activo !== undefined) where.activo = activo === 'true';
     if (rol) where.rol = rol;
 
-    if (req.user.role !== 'ADMIN_GENERAL' && req.user.institucion_id) {
+    if (req.user.role !== 'admin' && req.user.institucion_id) {
       where.institucion_id = req.user.institucion_id;
     }
 

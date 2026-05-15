@@ -1,12 +1,7 @@
 import React, { useState } from 'react';
-import { 
-  HiOutlineUsers, 
-  HiOutlineOfficeBuilding, 
-  HiOutlineShieldCheck, 
-  HiOutlineCog,
-  HiOutlineDatabase
-} from 'react-icons/hi';
-import GestionUsuarios from '../components/admin/GestionUsuarios';
+import { HiOutlineUsers, HiOutlineOfficeBuilding, HiOutlineShieldCheck, HiOutlineCog, HiOutlineDatabase } from 'react-icons/hi';
+import GestionUsuariosPage from './admin/GestionUsuariosPage';
+import GestionRoles from '../components/admin/GestionRoles';
 import VisorAuditoria from '../components/admin/VisorAuditoria';
 
 const Administracion = () => {
@@ -32,15 +27,14 @@ const Administracion = () => {
         </div>
       </div>
 
-      {/* Navegación por Tabs */}
       <div className="flex gap-2 bg-white p-2 rounded-3xl border border-gray-100 shadow-xl overflow-x-auto no-scrollbar">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
             className={`flex items-center gap-3 px-4 md:px-8 py-4 rounded-2xl text-sm font-black uppercase tracking-widest transition-all whitespace-nowrap ${
-              activeTab === tab.id 
-              ? 'bg-blue-600 text-white shadow-xl shadow-blue-200 translate-y-[-2px]' 
+              activeTab === tab.id
+              ? 'bg-blue-600 text-white shadow-xl shadow-blue-200 translate-y-[-2px]'
               : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50'
             }`}
           >
@@ -50,10 +44,8 @@ const Administracion = () => {
         ))}
       </div>
 
-      {/* Contenido Dinámico */}
       <div className="min-h-[500px]">
-        {activeTab === 'usuarios' && <GestionUsuarios />}
-        
+        {activeTab === 'usuarios' && <GestionUsuariosPage />}
         {activeTab === 'instituciones' && (
           <div className="py-20 text-center bg-white rounded-[40px] border border-dashed border-gray-200">
             <HiOutlineOfficeBuilding className="w-20 h-20 text-gray-100 mx-auto mb-6" />
@@ -61,10 +53,9 @@ const Administracion = () => {
             <p className="text-gray-400 font-medium">Módulo en proceso de implementación para el próximo despliegue.</p>
           </div>
         )}
-
         {activeTab === 'auditoria' && <VisorAuditoria />}
-
-        {['roles', 'config'].includes(activeTab) && (
+        {activeTab === 'roles' && <GestionRoles />}
+        {activeTab === 'config' && (
           <div className="py-20 text-center bg-white rounded-[40px] border border-dashed border-gray-200">
             <HiOutlineShieldCheck className="w-20 h-20 text-gray-100 mx-auto mb-6" />
             <h3 className="text-2xl font-black text-gray-900 mb-2 uppercase tracking-tighter">Panel de Control</h3>

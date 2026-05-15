@@ -18,7 +18,7 @@ const Sidebar = ({ isOpen, onClose }) => {
   const menuItems = [
     { name: 'Dashboard', path: '/dashboard', icon: HiOutlineHome, roles: ['ADMIN_GENERAL', 'ADMIN_INSTITUCION', 'AGENTE_CAMPO', 'FISCAL_JUEZ', 'DEPOSITO', 'CONTROLADOR'] },
     { name: 'Nueva Retención', path: '/retenciones/nueva', icon: HiOutlineClipboardList, roles: ['ADMIN_GENERAL', 'ADMIN_INSTITUCION', 'AGENTE_CAMPO'] },
-    { name: 'Búsqueda', path: '/busqueda', icon: HiOutlineSearch, roles: ['ADMIN_GENERAL', 'ADMIN_INSTITUCION', 'AGENTE_CAMPO', 'FISCAL_JUEZ', 'CONTROLADOR'] },
+    { name: 'Búsqueda', path: '/busqueda', icon: HiOutlineSearch, roles: ['ADMIN_GENERAL', 'ADMIN_INSTITUCION', 'FISCAL_JUEZ', 'CONTROLADOR'] },
     { name: 'Ingreso Depósito', path: '/deposito/ingreso', icon: HiOutlineOfficeBuilding, roles: ['ADMIN_GENERAL', 'ADMIN_INSTITUCION', 'DEPOSITO'] },
     { name: 'Causas Judiciales', path: '/judicial/causas', icon: HiOutlineDocumentText, roles: ['ADMIN_GENERAL', 'FISCAL_JUEZ'] },
     { name: 'Administración', path: '/admin', icon: HiOutlineUsers, roles: ['ADMIN_GENERAL', 'ADMIN_INSTITUCION'] },

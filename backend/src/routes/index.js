@@ -6,11 +6,15 @@ import busquedaRoutes from './busqueda.routes.js';
 import causasRoutes from './causas.routes.js';
 import notificacionesRoutes from './notificaciones.routes.js';
 import adminRoutes from './admin.routes.js';
+import tiposPersonalRoutes from './tiposPersonal.routes.js';
 
 const router = Router();
 
 // Rutas de autenticación
 router.use('/auth', authRoutes);
+
+// Rutas de tipos de personal (catálogo de roles)
+router.use('/tipos-personal', tiposPersonalRoutes);
 
 // Rutas del módulo de registro de retenciones
 router.use('/retenciones', retencionesRoutes);

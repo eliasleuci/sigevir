@@ -22,23 +22,78 @@ export const RESOLUTION_TYPES = {
   COMPACTACION: 'Compactación',
 };
 
-export const USER_ROLES = {
-  ADMIN_GENERAL: 'Admin General',
-  ADMIN_INSTITUCION: 'Admin Institución',
-  FISCAL_JUEZ: 'Fiscal / Juez',
-  AGENTE_CAMPO: 'Agente de Campo',
-  DEPOSITO: 'Depósito',
-  CONTROLADOR: 'Controlador',
+export const ROLES = {
+  agente_campo: 'Agente de Campo',
+  deposito: 'Depósito',
+  fiscal_juez: 'Fiscal / Juez',
+  admin: 'Administrador',
 };
 
-export const USER_ROLE_COLORS = {
-  ADMIN_GENERAL: 'red',
-  ADMIN_INSTITUCION: 'purple',
-  FISCAL_JUEZ: 'blue',
-  AGENTE_CAMPO: 'green',
-  DEPOSITO: 'orange',
-  CONTROLADOR: 'teal',
+export const ROLE_COLORS = {
+  agente_campo: { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-200', dot: 'bg-blue-500' },
+  deposito: { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200', dot: 'bg-emerald-500' },
+  fiscal_juez: { bg: 'bg-violet-50', text: 'text-violet-700', border: 'border-violet-200', dot: 'bg-violet-500' },
+  admin: { bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200', dot: 'bg-amber-500' },
 };
+
+export const ROLE_DESCRIPTIONS = {
+  agente_campo: 'Registra vehículos retenidos en vía pública, carga documentación y genera actas.',
+  deposito: 'Gestiona el ingreso, inventario y egreso de vehículos en el depósito.',
+  fiscal_juez: 'Control judicial, emisión de resoluciones y trazabilidad legal completa.',
+  admin: 'Administración total del sistema: usuarios, instituciones y configuración global.',
+};
+
+export const ROLE_PERMISSIONS = {
+  agente_campo: [
+    'Registrar retenciones',
+    'Cargar datos del vehículo y conductor',
+    'Cargar fotografías',
+    'Generar PDF y QR',
+    'Consultar retenciones propias',
+    'Editar registros abiertos',
+  ],
+  deposito: [
+    'Confirmar ingreso al depósito',
+    'Registrar inventario y daños',
+    'Registrar egreso',
+    'Actualizar estado del vehículo',
+    'Consultar vehículos de su institución',
+  ],
+  fiscal_juez: [
+    'Ver historial completo',
+    'Ver fotografías y documentos',
+    'Emitir resoluciones judiciales',
+    'Aprobar liberaciones',
+    'Consultar trazabilidad completa',
+    'Acceso multi-institucional',
+  ],
+  admin: [
+    'Crear y gestionar usuarios',
+    'Configurar instituciones',
+    'Ver auditorías completas',
+    'Configuración global del sistema',
+    'Acceso total a todos los módulos',
+  ],
+};
+
+export const TIPO_PERSONAL_MAP = {
+  'Policía': 'agente_campo',
+  'Inspector de tránsito': 'agente_campo',
+  'Responsable de depósito': 'deposito',
+  'Juez': 'fiscal_juez',
+  'Fiscal': 'fiscal_juez',
+  'Secretario judicial': 'fiscal_juez',
+  'Administrador': 'admin',
+};
+
+export const TIPOS_PERSONAL_PUBLICOS = [
+  { id: 1, nombre: 'Policía', rol: 'agente_campo' },
+  { id: 2, nombre: 'Inspector de tránsito', rol: 'agente_campo' },
+  { id: 3, nombre: 'Responsable de depósito', rol: 'deposito' },
+  { id: 4, nombre: 'Juez', rol: 'fiscal_juez' },
+  { id: 5, nombre: 'Fiscal', rol: 'fiscal_juez' },
+  { id: 6, nombre: 'Secretario judicial', rol: 'fiscal_juez' },
+];
 
 export const NOTIFICATION_TYPES = {
   NUEVA_RETENCION: 'Nueva Retención',
@@ -82,7 +137,6 @@ export const VEHICLE_TYPES = [
 
 export const API_ENDPOINTS = {
   LOGIN: '/auth/login',
-  GOOGLE_SIGNIN: '/auth/google/signin',
   REFRESH: '/auth/refresh',
   LOGOUT: '/auth/logout',
   RECOVER_PASSWORD: '/auth/recover-password',
@@ -91,4 +145,6 @@ export const API_ENDPOINTS = {
   ADMIN_USUARIOS: '/admin/usuarios',
   ADMIN_LOGS: '/admin/logs',
   ADMIN_CHECK_PERMANENCIAS: '/admin/check-permanencias',
+  TIPOS_PERSONAL: '/tipos-personal',
+  TIPOS_PERSONAL_ALL: '/tipos-personal/all',
 };

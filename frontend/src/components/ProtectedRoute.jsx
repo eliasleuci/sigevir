@@ -1,8 +1,7 @@
-import React from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 
-const ProtectedRoute = ({ allowedRoles }) => {
+const ProtectedRoute = ({ allowedRoles, children }) => {
   const { isAuthenticated, loading, role } = useAuth();
   const location = useLocation();
 
@@ -22,7 +21,7 @@ const ProtectedRoute = ({ allowedRoles }) => {
     return <Navigate to="/unauthorized" replace />;
   }
 
-  return <Outlet />;
+  return children || <Outlet />;
 };
 
 export default ProtectedRoute;

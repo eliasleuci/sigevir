@@ -1,8 +1,3 @@
-// ════════════════════════════════════════════════════════════════════════════════
-// Dashboard.jsx - Dashboard Principal Interactiva
-// ════════════════════════════════════════════════════════════════════════════════
-
-import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { useNotifications } from '../hooks/useNotifications';
@@ -16,56 +11,63 @@ import {
 } from 'react-icons/hi';
 import { FaGavel } from 'react-icons/fa';
 
+const MODULES = [
+  {
+    title: 'Registrar Retencion',
+    description: 'Crear un nuevo registro de vehiculo retenido',
+    icon: HiOutlineClipboardList,
+    path: '/retenciones/nueva',
+    color: 'blue',
+    roles: ['ADMIN_GENERAL', 'ADMIN_INSTITUCION', 'AGENTE_CAMPO'],
+  },
+  {
+    title: 'Confirmar Ingreso',
+    description: 'Escanear QR y confirmar ingreso al deposito',
+    icon: HiOutlineCamera,
+    path: '/deposito/ingreso',
+    color: 'indigo',
+    roles: ['ADMIN_GENERAL', 'ADMIN_INSTITUCION', 'DEPOSITO'],
+  },
+  {
+    title: 'Gestion de Causas',
+    description: 'Buscar y resolver causas judiciales',
+    icon: FaGavel,
+    path: '/judicial/causas',
+    color: 'amber',
+    roles: ['ADMIN_GENERAL', 'FISCAL_JUEZ'],
+  },
+  {
+    title: 'Busqueda Avanzada',
+    description: 'Buscar vehiculos por multiples criterios',
+    icon: HiOutlineSearch,
+    path: '/busqueda',
+    color: 'slate',
+    roles: ['ADMIN_GENERAL', 'ADMIN_INSTITUCION', 'FISCAL_JUEZ', 'CONTROLADOR'],
+  },
+  {
+    title: 'Administracion',
+    description: 'Gestionar usuarios e instituciones',
+    icon: HiOutlineCog,
+    path: '/admin',
+    color: 'gray',
+    roles: ['ADMIN_GENERAL', 'ADMIN_INSTITUCION'],
+  },
+  {
+    title: 'Reportes',
+    description: 'Ver estadisticas y generar reportes',
+    icon: HiOutlineChartBar,
+    path: '/dashboard',
+    color: 'green',
+    roles: ['ADMIN_GENERAL', 'ADMIN_INSTITUCION'],
+  },
+];
+
 export default function Dashboard() {
-  const { user, logout } = useAuth();
-  const { notifications, getUnreadCount } = useNotifications();
+  const { user, role, logout } = useAuth();
+  const { getUnreadCount } = useNotifications();
 
   const unreadCount = getUnreadCount();
-
-  const modules = [
-    {
-      title: 'Registrar Retención',
-      description: 'Crear un nuevo registro de vehículo retenido',
-      icon: HiOutlineClipboardList,
-      path: '/retenciones/nueva',
-      color: 'blue'
-    },
-    {
-      title: 'Confirmar Ingreso',
-      description: 'Escanear QR y confirmar ingreso al depósito',
-      icon: HiOutlineCamera,
-      path: '/deposito/ingreso',
-      color: 'indigo'
-    },
-    {
-      title: 'Gestión de Causas',
-      description: 'Buscar y resolver causas judiciales',
-      icon: FaGavel,
-      path: '/judicial/causas',
-      color: 'amber'
-    },
-    {
-      title: 'Búsqueda Avanzada',
-      description: 'Buscar vehículos por múltiples criterios',
-      icon: HiOutlineSearch,
-      path: '/busqueda',
-      color: 'slate'
-    },
-    {
-      title: 'Administración',
-      description: 'Gestionar usuarios e instituciones',
-      icon: HiOutlineCog,
-      path: '/admin',
-      color: 'gray'
-    },
-    {
-      title: 'Reportes',
-      description: 'Ver estadísticas y generar reportes',
-      icon: HiOutlineChartBar,
-      path: '/dashboard', // Temporalmente redirige aquí
-      color: 'green'
-    }
-  ];
+  const visibleModules = MODULES.filter(m => !m.roles || m.roles.includes(role));
 
   return (
     <div className="min-h-screen bg-blue-50 pb-12 font-sans">
@@ -97,7 +99,7 @@ export default function Dashboard() {
                   {user?.nombre_completo || 'Administrador'}
                 </p>
                 <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest mt-1">
-                  {user?.rol?.replace('_', ' ') || 'MODO DEMO'}
+                  {role?.replace('_', ' ') || 'MODO DEMO'}
                 </p>
               </div>
               <button
@@ -116,30 +118,29 @@ export default function Dashboard() {
         <div className="bg-blue-600 rounded-[40px] p-8 md:p-12 text-white shadow-2xl shadow-blue-500/20 flex flex-col md:flex-row justify-between items-center gap-8 overflow-hidden relative">
           <div className="relative z-10">
             <h2 className="text-3xl md:text-5xl font-black tracking-tighter mb-4">
-              ¡Bienvenido, {user?.nombre_completo?.split(' ')[0] || 'Hola'}!
+              Bienvenido, {user?.nombre_completo?.split(' ')[0] || 'Hola'}!
             </h2>
             <p className="text-blue-100 text-lg font-medium max-w-xl">
-              Sistema Integral de Gestión de Vehículos Retenidos. 
-              Selecciona un módulo para comenzar tu jornada.
+              Sistema Integral de Gestion de Vehiculos Retenidos. 
+              Selecciona un modulo para comenzar tu jornada.
             </p>
           </div>
           <div className="hidden md:block opacity-20 transform rotate-12">
             <HiOutlineChartBar className="w-64 h-64" />
           </div>
-          {/* Círculos decorativos */}
           <div className="absolute -top-24 -right-24 w-64 h-64 bg-blue-500 rounded-full blur-3xl opacity-50"></div>
           <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-indigo-500 rounded-full blur-3xl opacity-50"></div>
         </div>
 
-        {/* Grid de Módulos Interactivos */}
+        {/* Grid de Modulos Interactivos */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-12">
-          {modules.map((module, idx) => (
+          {visibleModules.map((module, idx) => (
             <Link 
               key={idx} 
               to={module.path}
               className="group bg-white p-8 rounded-[32px] border border-gray-100 shadow-sm hover:shadow-2xl hover:border-blue-100 transition-all duration-300 flex flex-col items-start text-left relative overflow-hidden"
             >
-              <div className={`w-16 h-16 rounded-2xl bg-${module.color}-50 text-${module.color}-600 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500`}>
+              <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500 bg-blue-50 text-blue-600">
                 <module.icon className="w-8 h-8" />
               </div>
               <h3 className="text-xl font-black text-gray-900 mb-2">{module.title}</h3>
@@ -147,9 +148,8 @@ export default function Dashboard() {
                 {module.description}
               </p>
               
-              {/* Flecha indicativa que aparece al hover */}
               <div className="mt-6 flex items-center text-blue-600 font-black text-xs uppercase tracking-widest opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all md:translate-x-[-10px] md:group-hover:translate-x-0">
-                Entrar al módulo ➜
+                Entrar al modulo &gt;
               </div>
             </Link>
           ))}

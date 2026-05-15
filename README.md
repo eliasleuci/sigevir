@@ -1,17 +1,16 @@
-# SIGEVIR - Sistema Integral de Gestión de Vehículos Retenidos
+﻿# SIGEVIR - Sistema Integral de Gestión de Vehículos Retenidos
 
-Plataforma web moderna para gestionar el ciclo de vida completo de vehículos retenidos en contextos judicales.
+Plataforma web moderna para gestionar el ciclo de vida completo de vehículos retenidos en contextos judiciales.
 
-## 📋 Descripción del Proyecto
+## 🏗️ Stack Tecnológico
 
-SIGEVIR es un sistema multi-rol diseñado para:
-- Registrar vehículos retenidos en el lugar del hecho
-- Gestionar el traslado y depósito de vehículos
-- Facilitar la intervención judicial (resoluciones)
-- Mantener una cadena de custodia legal inmutable
-- Generar reportes y estadísticas
-
-**Arquitectura:** Node.js + React.js + PostgreSQL
+- **Frontend:** React 18 + Vite + TailwindCSS + Framer Motion
+- **Backend:** Node.js + Express + Sequelize (PostgreSQL)
+- **Autenticación:** Supabase Auth (email/password + Google OAuth)
+- **Base de datos:** PostgreSQL (vía Sequelize para datos de negocio) + Supabase (perfiles, RLS)
+- **WebSockets:** Socket.IO
+- **Almacenamiento:** AWS S3 / Cloudflare R2
+- **Notificaciones:** Email (SendGrid) + Tiempo real (Socket.IO)
 
 ## 🚀 Inicio rápido
 
@@ -20,188 +19,159 @@ SIGEVIR es un sistema multi-rol diseñado para:
 - PostgreSQL 13+
 - Git
 - npm o yarn
+- Proyecto en [Supabase](https://supabase.com) (opcional para desarrollo)
 
 ### Instalación
 
 1. **Clonar repositorio**
-   ```bash
+   `ash
    git clone https://github.com/eliasleuci/sigevir.git
-   cd sigevir-app
-   ```
+   cd sigevir
+   `
 
 2. **Instalar dependencias - Backend**
-   ```bash
+   `ash
    cd backend
    npm install
    cp .env.example .env
    # Editar .env con tus variables
-   ```
+   `
 
 3. **Instalar dependencias - Frontend**
-   ```bash
+   `ash
    cd frontend
    npm install
    cp .env.example .env
-   # Editar .env con tus variables
-   ```
+   # Editar .env con tus variables de Supabase
+   `
 
 4. **Configurar Base de Datos**
-   ```bash
-   # Crear BD
+   `ash
    createdb sigevir
-   
-   # Importar esquema
    psql -U postgres -d sigevir -f database/schema.sql
-   ```
+   `
+
+5. **Configurar Supabase** (ver docs/CONFIGURACION_SUPABASE.md)
+   - Crear proyecto en [supabase.com](https://supabase.com)
+   - Ejecutar database/supabase_setup.sql en SQL Editor
+   - Configurar Auth providers (email + Google)
+   - Copiar URL y keys a .env
 
 ### Ejecutar en desarrollo
 
 **Terminal 1 - Backend:**
-```bash
+`ash
 cd backend
 npm run dev
 # Backend corriendo en http://localhost:3001
-```
+`
 
 **Terminal 2 - Frontend:**
-```bash
+`ash
 cd frontend
 npm run dev
-# Frontend corriendo en http://localhost:3000
-```
-
-Abre http://localhost:3000 en tu navegador.
+# Frontend corriendo en http://localhost:5173
+`
 
 ## 📁 Estructura de carpetas
 
-```
-sigevir-app/
-├── backend/                    # API Node.js + Express
+`
+sigevir/
+├── backend/
 │   ├── src/
-│   │   ├── app.js             # Aplicación Express
-│   │   ├── config/            # Configuraciones
-│   │   ├── middleware/        # Middlewares (auth, errorHandler, etc)
-│   │   ├── models/            # Modelos Sequelize
-│   │   ├── controllers/       # Lógica de negocios
-│   │   ├── services/          # Servicios reutilizables
-│   │   ├── routes/            # Definición de rutas
-│   │   └── utils/             # Utilidades
+│   │   ├── app.js
+│   │   ├── config/             # Configuración (database, supabase)
+│   │   ├── middleware/          # auth, errorHandler, supabaseAuth
+│   │   ├── models/             # Modelos Sequelize
+│   │   ├── controllers/        # Lógica de negocio
+│   │   ├── services/           # Servicios reutilizables
+│   │   ├── routes/             # Definición de rutas
+│   │   └── utils/              # Utilidades
 │   ├── package.json
-│   └── .env.example
+│   └── .env
 │
-├── frontend/                   # App React + Vite
+├── frontend/
 │   ├── src/
-│   │   ├── App.jsx            # Componente raíz
-│   │   ├── main.jsx           # Entry point
-│   │   ├── components/        # Componentes reutilizables
-│   │   ├── pages/             # Páginas principales
-│   │   ├── hooks/             # Custom React hooks
-│   │   ├── context/           # Context API
-│   │   ├── services/          # Servicios (API, WebSocket, etc)
-│   │   ├── utils/             # Utilidades
-│   │   └── styles/            # CSS y Tailwind
+│   │   ├── App.jsx
+│   │   ├── main.jsx
+│   │   ├── config/             # Supabase client
+│   │   ├── components/         # Componentes reutilizables
+│   │   ├── pages/              # Páginas principales
+│   │   │   ├── admin/          # GestionUsuariosPage
+│   │   │   ├── deposito/
+│   │   │   └── judicial/
+│   │   ├── hooks/              # Custom React hooks
+│   │   ├── context/            # AuthContext, NotificationContext
+│   │   ├── services/           # API client, etc.
+│   │   └── utils/              # Constantes, validadores
 │   ├── package.json
-│   └── .env.example
+│   └── .env
 │
-├── database/                   # SQL schemas
-│   └── schema.sql             # Esquema completo
+├── database/
+│   ├── schema.sql              # Esquema Sequelize
+│   └── supabase_setup.sql      # Esquema Supabase (perfiles, RLS)
 │
+├── docs/
+│   └── CONFIGURACION_SUPABASE.md
 ├── README.md
-├── PROGRESO.md               # Tracking del desarrollo
-└── INDEX.md                  # Índice de archivos generados
-```
+└── package.json
+`
+
+## 👥 Sistema de Roles
+
+| Rol | Tipo de personal | Color | Permisos principales |
+|-----|-----------------|-------|---------------------|
+| gente_campo | Policía, Inspector | Azul | Registrar retenciones, cargar fotos, generar PDF/QR |
+| deposito | Responsable de depósito | Verde | Gestionar ingreso/egreso, inventario |
+| iscal_juez | Juez, Fiscal, Secretario | Violeta | Ver historial, emitir resoluciones |
+| dmin | Administrador | Dorado | Acceso total, gestión de usuarios |
+
+> **Importante:** El usuario nunca elige su rol directamente. Selecciona su tipo de personal y el sistema asigna el rol automáticamente.
+
+## 🔐 Seguridad
+
+- **Autenticación:** Supabase Auth (JWT gestionado por Supabase)
+- **RLS:** Row Level Security en tabla perfiles
+- **RBAC:** Middleware de autorización por rol en backend
+- **Validación:** Joi en backend, Zod en frontend
+- **Auditoría:** Log append-only de todas las acciones
+- **Multi-institución:** Separación de datos por institución
 
 ## 🔌 Variables de Entorno
 
 ### Backend (.env)
-```
-NODE_ENV=development
+`
 PORT=3001
 DB_HOST=localhost
 DB_USER=postgres
 DB_PASSWORD=postgres
 DB_NAME=sigevir
-JWT_SECRET=tu_secret_muy_seguro
-GOOGLE_CLIENT_ID=tu_google_client_id
-CORS_ORIGIN=http://localhost:3000
-```
+SUPABASE_URL=tu_url
+SUPABASE_SERVICE_ROLE_KEY=tu_key
+`
 
 ### Frontend (.env)
-```
+`
 VITE_API_URL=http://localhost:3001/api
-VITE_GOOGLE_CLIENT_ID=tu_google_client_id
-VITE_SOCKET_URL=http://localhost:3001
-```
+VITE_SUPABASE_URL=tu_url
+VITE_SUPABASE_ANON_KEY=tu_key
+`
 
-## 🧪 Testing
+## 📚 Documentación adicional
 
-**Tests unitarios (Backend):**
-```bash
-cd backend
-npm test
-```
-
-**Tests E2E (Frontend):**
-```bash
-cd frontend
-npm run test:e2e
-```
-
-## 📊 Endpoints principales
-
-| Método | Ruta | Descripción |
-|--------|------|-------------|
-| POST | `/api/auth/login` | Login con credenciales |
-| POST | `/api/auth/google` | Login con Google |
-| POST | `/api/retenciones` | Crear retención |
-| GET | `/api/retenciones/:id` | Obtener retención |
-| POST | `/api/depositos/confirmar-ingreso` | Confirmar ingreso al depósito |
-| POST | `/api/resoluciones` | Emitir resolución judicial |
-| GET | `/api/busqueda/avanzada` | Búsqueda multicriterio |
-
-Documentación completa: GET `http://localhost:3001/api/docs`
-
-## 🔐 Seguridad
-
-- **Autenticación:** JWT + Google OAuth
-- **RBAC:** Control de acceso basado en roles
-- **Validación:** Joi en backend, Zod en frontend
-- **Encriptación:** Contraseñas con bcrypt, datos en HTTPS
-- **Auditoría:** Log append-only de todas las acciones
-- **Cadena de custodia:** Estados inmutables en BD
+- docs/CONFIGURACION_SUPABASE.md — Guía completa de configuración de Supabase
+- database/supabase_setup.sql — Script SQL para crear tablas y RLS
 
 ## 📱 Módulos principales
 
-1. **Autenticación** - Login, Google OAuth, password recovery
-2. **Registro** - Crear retención, cargar fotos, generar PDF/QR
-3. **Depósito** - Confirmar ingreso (escaneo QR), egreso
-4. **Judicial** - Búsqueda de causas, historial, resoluciones
-5. **Búsqueda** - Multicriterio (dominio, motor, cuadro, DNI, etc)
-6. **Administración** - CRUD usuarios, instituciones
-7. **Notificaciones** - WebSocket en tiempo real + email
-
-## 🚀 Deploy a Producción
-
-Instrucciones en `DEPLOYMENT.md`
-
-```bash
-# Build
-npm run build
-
-# Docker
-docker-compose -f docker-compose.prod.yml up -d
-```
-
-## 📞 Soporte y Contacto
-
-- **Email:** soporte@sigevir.com
-- **Issues:** [GitHub Issues](https://github.com/eliasleuci/sigevir/issues)
-- **Documentación:** [Wiki del Proyecto](https://github.com/eliasleuci/sigevir/wiki)
+1. **Autenticación** — Login, registro, Google OAuth, verificación email
+2. **Registro** — Crear retención, cargar fotos, generar PDF/QR
+3. **Depósito** — Confirmar ingreso, egreso, inventario
+4. **Judicial** — Búsqueda de causas, historial, resoluciones
+5. **Búsqueda** — Multicriterio (dominio, motor, DNI, etc.)
+6. **Administración** — CRUD usuarios, roles, instituciones
+7. **Notificaciones** — WebSocket en tiempo real + email
 
 ## 📜 Licencia
 
 ISC © 2026
-
----
-
-**¿Necesitas ayuda?** Consulta el archivo `PROGRESO.md` para ver el estado actual del desarrollo.

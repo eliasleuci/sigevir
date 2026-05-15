@@ -7,28 +7,55 @@ const apiClient = axios.create({
   },
 });
 
-// Interceptor para agregar el JWT a las peticiones
+function getSupabaseToken() {
+  try {
+    const raw = localStorage.getItem('sigevir-auth');
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return parsed?.access_token || null;
+  } catch {
+    return null;
+  }
+}
+
+function isDemoMode() {
+  try {
+    const raw = localStorage.getItem('sigevir-auth');
+    if (!raw) return false;
+    const parsed = JSON.parse(raw);
+    return parsed?.isDemo === true;
+  } catch {
+    return false;
+  }
+}
+
 apiClient.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token');
+    const token = getSupabaseToken();
+    const demo = isDemoMode();
+    if (demo) {
+      config.headers['X-Demo-Mode'] = 'true';
+      try {
+        const raw = localStorage.getItem('sigevir-auth');
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed.email) config.headers['X-Demo-User-Email'] = parsed.email;
+        }
+      } catch {}
+    }
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+      config.headers.Authorization = 'Bearer ' + token;
     }
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
-// Interceptor para manejar errores globales (ej: 401 Unauthorized)
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Manejar expiración de token o falta de autorización
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
+      try { localStorage.removeItem('sigevir-auth'); } catch {}
       if (!window.location.pathname.includes('/login')) {
         window.location.href = '/login?expired=true';
       }
