@@ -56,7 +56,7 @@ const MODULES = [
     title: 'Reportes',
     description: 'Ver estadisticas y generar reportes',
     icon: HiOutlineChartBar,
-    path: '/dashboard',
+    path: '/reportes',
     color: 'green',
     roles: ['ADMIN_GENERAL', 'ADMIN_INSTITUCION'],
   },

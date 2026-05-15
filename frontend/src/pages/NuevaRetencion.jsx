@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import FormularioNuevaRetencion from '../components/registro/FormularioNuevaRetencion';
 import CargaFotos from '../components/registro/CargaFotos';
 import PreviewActa from '../components/registro/PreviewActa';
@@ -8,13 +8,12 @@ import { toast } from 'react-toastify';
 import { HiOutlineCheckCircle, HiOutlineArrowRight, HiOutlineArrowLeft } from 'react-icons/hi';
 
 const NuevaRetencion = () => {
-  const [step, setStep] = useState(1); // 1: Datos, 2: Fotos, 3: Éxito/Preview
+  const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState(null);
   const [fotos, setFotos] = useState([]);
-  const [result, setResult] = useState(null); // { id, nro_expediente, pdfUrl, qrUrl }
+  const [result, setResult] = useState(null);
 
-  // Cargar borrador si existe
   useEffect(() => {
     const borrador = localStorage.getItem('sigevir_borrador_retencion');
     if (borrador) {
@@ -41,12 +40,12 @@ const NuevaRetencion = () => {
     setLoading(true);
     const data = new FormData();
     
-    // Agregar datos del formulario
     Object.keys(formData).forEach(key => {
-      data.append(key, formData[key]);
+      if (formData[key] !== undefined && formData[key] !== null) {
+        data.append(key, formData[key]);
+      }
     });
 
-    // Agregar fotos
     fotos.forEach(foto => {
       data.append('fotos', foto.file);
     });
@@ -72,7 +71,6 @@ const NuevaRetencion = () => {
 
   return (
     <div className="max-w-5xl mx-auto space-y-8">
-      {/* Stepper */}
       <div className="flex items-center justify-between px-4 sm:px-0">
         {[
           { s: 1, n: 'Datos del Vehículo' },
@@ -99,7 +97,6 @@ const NuevaRetencion = () => {
         ))}
       </div>
 
-      {/* Contenido dinámico */}
       <div className="mt-10">
         {step === 1 && (
           <div className="animate-in fade-in slide-in-from-right-4 duration-300">
@@ -182,7 +179,6 @@ const NuevaRetencion = () => {
                     Registrar Otra Retención
                   </button>
                 </div>
-                {/* Background Decoration */}
                 <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
               </div>
             </div>

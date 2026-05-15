@@ -20,6 +20,7 @@ import RegistrarEgreso from './pages/deposito/RegistrarEgreso.jsx';
 import GestionCausas from './pages/judicial/GestionCausas.jsx';
 import Busqueda from './pages/Busqueda.jsx';
 import Administracion from './pages/Administracion.jsx';
+import Reportes from './pages/Reportes.jsx';
 import Unauthorized from './pages/Unauthorized.jsx';
 
 const ROLES_ADMIN = ['ADMIN_GENERAL', 'ADMIN_INSTITUCION'];
@@ -62,6 +63,9 @@ function App() {
                 } />
                 <Route path="/admin" element={
                   <ProtectedRoute allowedRoles={ROLES_ADMIN}><Administracion /></ProtectedRoute>
+                } />
+                <Route path="/reportes" element={
+                  <ProtectedRoute allowedRoles={['ADMIN_GENERAL', 'ADMIN_INSTITUCION']}><Reportes /></ProtectedRoute>
                 } />
               </Route>
             </Route>

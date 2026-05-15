@@ -1,8 +1,9 @@
-import React, { useEffect } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { retencionSchema } from '../../schemas/retencion.schema';
-import { HiOutlineInformationCircle, HiOutlineUser, HiOutlineTruck, HiOutlineLocationMarker } from 'react-icons/hi';
+import { HiOutlineInformationCircle, HiOutlineUser, HiOutlineTruck, HiOutlineLocationMarker, HiOutlineSearch } from 'react-icons/hi';
+import MapaSelector from './MapaSelector';
 
 const FormularioNuevaRetencion = ({ onSubmit, loading, initialData = {} }) => {
   const { 
@@ -10,13 +11,19 @@ const FormularioNuevaRetencion = ({ onSubmit, loading, initialData = {} }) => {
     handleSubmit, 
     formState: { errors }, 
     watch,
-    reset
+    setValue,
+    reset,
+    getValues
   } = useForm({
     resolver: zodResolver(retencionSchema),
-    defaultValues: initialData
+    defaultValues: initialData || {}
   });
 
-  // Guardado automático en borrador (localStorage)
+  const [coords, setCoords] = useState({
+    latitud: initialData?.latitud ?? undefined,
+    longitud: initialData?.longitud ?? undefined
+  });
+
   const formValues = watch();
   useEffect(() => {
     if (Object.keys(formValues).length > 0) {
@@ -24,9 +31,48 @@ const FormularioNuevaRetencion = ({ onSubmit, loading, initialData = {} }) => {
     }
   }, [formValues]);
 
+  const handleLocationChange = ({ lat, lng, direccion }) => {
+    setCoords({ latitud: lat, longitud: lng });
+    setValue('latitud', lat, { shouldValidate: true });
+    setValue('longitud', lng, { shouldValidate: true });
+    if (direccion) {
+      setValue('lugar_retencion', direccion);
+    }
+  };
+
+  const handleSearchAddress = async () => {
+    const query = getValues('lugar_retencion');
+    if (!query || query.trim().length < 3) return;
+    try {
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=1&accept-language=es`,
+        { headers: { 'User-Agent': 'SIGEVIR-App/1.0' } }
+      );
+      const data = await res.json();
+      if (data && data.length > 0) {
+        const { lat, lon, display_name } = data[0];
+        const latNum = parseFloat(lat);
+        const lngNum = parseFloat(lon);
+        setCoords({ latitud: latNum, longitud: lngNum });
+        setValue('latitud', latNum, { shouldValidate: true });
+        setValue('longitud', lngNum, { shouldValidate: true });
+        setValue('lugar_retencion', display_name);
+      }
+    } catch {
+      // no results
+    }
+  };
+
+  const customSubmit = (data) => {
+    onSubmit({
+      ...data,
+      latitud: coords.latitud ?? null,
+      longitud: coords.longitud ?? null
+    });
+  };
+
   return (
-    <form id="form-retencion" onSubmit={handleSubmit(onSubmit)} className="space-y-8 pb-20">
-      {/* Sección 1: Datos del Vehículo */}
+    <form id="form-retencion" onSubmit={handleSubmit(customSubmit)} className="space-y-8 pb-20">
       <section className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-6">
         <div className="flex items-center gap-2 text-blue-600 mb-4">
           <HiOutlineTruck className="w-6 h-6" />
@@ -106,7 +152,6 @@ const FormularioNuevaRetencion = ({ onSubmit, loading, initialData = {} }) => {
         </div>
       </section>
 
-      {/* Sección 2: Datos del Titular/Infractor */}
       <section className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-6">
         <div className="flex items-center gap-2 text-blue-600 mb-4">
           <HiOutlineUser className="w-6 h-6" />
@@ -145,7 +190,6 @@ const FormularioNuevaRetencion = ({ onSubmit, loading, initialData = {} }) => {
         </div>
       </section>
 
-      {/* Sección 3: Datos del Procedimiento */}
       <section className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-6">
         <div className="flex items-center gap-2 text-blue-600 mb-4">
           <HiOutlineLocationMarker className="w-6 h-6" />
@@ -155,13 +199,31 @@ const FormularioNuevaRetencion = ({ onSubmit, loading, initialData = {} }) => {
         <div className="space-y-6">
           <div className="space-y-1">
             <label className="text-sm font-semibold text-gray-700">Lugar de Retención</label>
-            <input 
-              {...register('lugar_retencion')}
-              placeholder="Calle, intersección o coordenadas"
-              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all"
-            />
+            <div className="flex gap-2">
+              <input 
+                {...register('lugar_retencion')}
+                placeholder="Calle, intersección o coordenadas"
+                className="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all"
+                onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleSearchAddress(); } }}
+              />
+              <button
+                type="button"
+                onClick={handleSearchAddress}
+                className="flex items-center gap-1.5 px-5 py-2.5 bg-blue-600 text-white rounded-xl font-semibold text-sm hover:bg-blue-700 transition-colors shadow-sm"
+              >
+                <HiOutlineSearch className="w-4 h-4" />
+                Buscar
+              </button>
+            </div>
             {errors.lugar_retencion && <p className="text-xs text-red-500 font-medium">{errors.lugar_retencion.message}</p>}
           </div>
+
+          <MapaSelector
+            onLocationChange={handleLocationChange}
+            initialPosition={
+              coords.latitud ? { lat: coords.latitud, lng: coords.longitud } : null
+            }
+          />
 
           <div className="space-y-1">
             <label className="text-sm font-semibold text-gray-700">Motivo de Retención</label>

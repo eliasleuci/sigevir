@@ -7,6 +7,7 @@ import causasRoutes from './causas.routes.js';
 import notificacionesRoutes from './notificaciones.routes.js';
 import adminRoutes from './admin.routes.js';
 import tiposPersonalRoutes from './tiposPersonal.routes.js';
+import reportesRoutes from './reportes.routes.js';
 
 const router = Router();
 
@@ -15,6 +16,9 @@ router.use('/auth', authRoutes);
 
 // Rutas de tipos de personal (catálogo de roles)
 router.use('/tipos-personal', tiposPersonalRoutes);
+
+// Rutas de reportes y estadisticas
+router.use('/reportes', reportesRoutes);
 
 // Rutas del módulo de registro de retenciones
 router.use('/retenciones', retencionesRoutes);
@@ -35,3 +39,4 @@ router.use('/notificaciones', notificacionesRoutes);
 router.use('/admin', adminRoutes);
 
 export default router;
+

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -56,23 +56,23 @@ const Login = () => {
             <div className="absolute -bottom-20 -left-20 w-40 h-40 bg-indigo-500 rounded-full blur-3xl opacity-30"></div>
             <img src="/icono-de-la-app.jpeg" alt="SIGEVIR" className="w-28 h-28 sm:w-36 sm:h-36 rounded-2xl shadow-2xl object-cover mb-6 relative z-10" />
             <h2 className="text-2xl sm:text-3xl font-bold text-white relative z-10">SIGEVIR</h2>
-            <p className="text-blue-200 text-center text-sm mt-2 relative z-10 max-w-xs">Sistema Integral de Gesti&oacute;n de Veh&iacute;culos Retenidos</p>
+            <p className="text-blue-200 text-center text-sm mt-2 relative z-10 max-w-xs">Sistema Integral de Gestion de Vehiculos Retenidos</p>
           </div>
           <div className="sm:w-3/5 p-8 sm:p-10">
             <div className="mb-6">
-              <h2 className="text-2xl font-bold text-gray-900">Iniciar Sesi&oacute;n</h2>
+              <h2 className="text-2xl font-bold text-gray-900">Iniciar Sesion</h2>
               <p className="text-sm text-gray-500 mt-1">Ingresa tus credenciales para acceder al sistema</p>
             </div>
             <form className="space-y-5" onSubmit={handleSubmit(onSubmit)}>
               <div>
-                <label className="block text-sm font-semibold text-gray-700">Correo Electr&oacute;nico</label>
+                <label className="block text-sm font-semibold text-gray-700">Correo Electronico</label>
                 <div className="mt-1 relative">
                   <input {...register('email')} type="email" className={'appearance-none block w-full px-3 py-2.5 border ' + (errors.email ? 'border-red-300' : 'border-gray-300') + ' rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:text-sm transition-all'} placeholder="ejemplo@institucion.gov.ar" />
                   {errors.email && <p className="mt-1 text-sm text-red-600 font-medium">{errors.email.message}</p>}
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-semibold text-gray-700">Contrase&ntilde;a</label>
+                <label className="block text-sm font-semibold text-gray-700">Contrasena</label>
                 <div className="mt-1 relative">
                   <input {...register('password')} type="password" className={'appearance-none block w-full px-3 py-2.5 border ' + (errors.password ? 'border-red-300' : 'border-gray-300') + ' rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:text-sm transition-all'} placeholder="********" />
                   {errors.password && <p className="mt-1 text-sm text-red-600 font-medium">{errors.password.message}</p>}
@@ -84,7 +84,7 @@ const Login = () => {
                   <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">Recordarme</label>
                 </div>
                 <div className="text-sm">
-                  <Link to="/recovery" className="font-semibold text-blue-600 hover:text-blue-500 transition-colors">�Olvidaste tu contrase&ntilde;a?</Link>
+                  <Link to="/recovery" className="font-semibold text-blue-600 hover:text-blue-500 transition-colors">¿Olvidaste tu contrasena?</Link>
                 </div>
               </div>
               <div>
@@ -126,7 +126,7 @@ const Login = () => {
               </div>
             </div>
             <p className="text-center text-xs text-gray-400 mt-6">
-              �No tenes cuenta?{' '}
+              ¿No tenes cuenta?{' '}
               <Link to="/register" className="text-blue-600 font-semibold hover:text-blue-700">Registrarse</Link>
             </p>
           </div>

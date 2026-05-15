@@ -1,7 +1,9 @@
-import React, { createContext, useState, useEffect, useCallback } from 'react';
+﻿import React, { createContext, useState, useEffect, useCallback } from 'react';
 import { supabase, isSupabaseConfigured } from '../config/supabase';
 
 export const AuthContext = createContext();
+
+const DEMO_SESSION_KEY = 'sigevir_demo_session';
 
 const DEMO_USERS = [
   {
@@ -74,12 +76,34 @@ const DEMO_USERS = [
   },
 ];
 
+const saveDemoSession = (userData) => {
+  try {
+    localStorage.setItem(DEMO_SESSION_KEY, JSON.stringify(userData));
+  } catch {}
+};
+
+const loadDemoSession = () => {
+  try {
+    const raw = localStorage.getItem(DEMO_SESSION_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+};
+
+const clearDemoSession = () => {
+  try {
+    localStorage.removeItem(DEMO_SESSION_KEY);
+  } catch {}
+};
+
 const activateDemoSession = (setUserFn, setPerfilFn, setTokenFn, setSessionFn, setIsDemoFn, userData) => {
   setIsDemoFn(true);
   setUserFn(userData);
   setPerfilFn({ id: userData.id, rol: userData.rol, nombre_completo: userData.nombre_completo });
   setTokenFn('demo-token');
   setSessionFn({ user: { id: userData.id, email: userData.email } });
+  saveDemoSession(userData);
 };
 
 export const AuthProvider = ({ children }) => {
@@ -108,6 +132,14 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     if (!isSupabaseConfigured()) {
+      const savedDemo = loadDemoSession();
+      if (savedDemo) {
+        setIsDemo(true);
+        setUser(savedDemo);
+        setPerfil({ id: savedDemo.id, rol: savedDemo.rol, nombre_completo: savedDemo.nombre_completo });
+        setToken('demo-token');
+        setSession({ user: { id: savedDemo.id, email: savedDemo.email } });
+      }
       setLoading(false);
       return;
     }
@@ -184,7 +216,7 @@ export const AuthProvider = ({ children }) => {
         activateDemoSession(setUser, setPerfil, setToken, setSession, setIsDemo, userData);
         return { success: true, data: { user: userData } };
       }
-            const creds = DEMO_USERS.map(u => `${u.email} / ${u.password}`).join(', ');
+      const creds = DEMO_USERS.map(u => `${u.email} / ${u.password}`).join(', ');
       return { success: false, error: "Credenciales inválidas. Usa: " + creds };
     }
     try {
@@ -241,6 +273,7 @@ export const AuthProvider = ({ children }) => {
     if (!isDemo && supabase) {
       try { await supabase.auth.signOut(); } catch {}
     }
+    clearDemoSession();
     setIsDemo(false);
     setSession(null);
     setToken(null);

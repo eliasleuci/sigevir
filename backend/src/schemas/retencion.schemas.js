@@ -2,7 +2,7 @@ import Joi from 'joi';
 
 export const createRetencionSchema = Joi.object({
   dominio: Joi.string().pattern(/^[A-Z]{3}[0-9]{3}$|^[A-Z]{2}[0-9]{3}[A-Z]{2}$/i).required().messages({
-    'string.pattern.base': 'El dominio debe tener formato ARG v√°lido (ABC123 o AB123CD)'
+    'string.pattern.base': 'El dominio debe tener formato ARG v·lido (ABC123 o AB123CD)'
   }),
   marca: Joi.string().required(),
   modelo: Joi.string().required(),
@@ -15,6 +15,8 @@ export const createRetencionSchema = Joi.object({
   provincia: Joi.string().required(),
   localidad: Joi.string().required(),
   calle_direccion: Joi.string().required(),
+  latitud: Joi.number().min(-90).max(90).allow(null),
+  longitud: Joi.number().min(-180).max(180).allow(null),
   motivo_retencion: Joi.string().required(),
   versus: Joi.string().allow('', null),
   num_cooperacion: Joi.string().allow('', null),
@@ -43,6 +45,8 @@ export const updateRetencionSchema = Joi.object({
   numero_motor: Joi.string().allow('', null).optional(),
   numero_cuadro: Joi.string().allow('', null).optional(),
   danios_visibles: Joi.string().allow('', null).optional(),
+  latitud: Joi.number().min(-90).max(90).allow(null).optional(),
+  longitud: Joi.number().min(-180).max(180).allow(null).optional(),
   motivo_retencion: Joi.string().optional(),
   versus: Joi.string().allow('', null).optional(),
   num_cooperacion: Joi.string().allow('', null).optional(),

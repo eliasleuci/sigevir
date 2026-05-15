@@ -13,8 +13,6 @@ Retencion.init({
     type: DataTypes.STRING,
     allowNull: false,
     unique: true
-    // Nota: El usuario mencionó que este campo es generado por un trigger en la BD.
-    // Sequelize lo leerá pero no debería intentar generarlo manualmente en el create si ya existe el trigger.
   },
   vehiculo_id: {
     type: DataTypes.UUID,
@@ -44,6 +42,14 @@ Retencion.init({
   calle_direccion: {
     type: DataTypes.STRING,
     allowNull: false
+  },
+  latitud: {
+    type: DataTypes.DECIMAL(10, 7),
+    allowNull: true
+  },
+  longitud: {
+    type: DataTypes.DECIMAL(10, 7),
+    allowNull: true
   },
   motivo_retencion: {
     type: DataTypes.TEXT,
@@ -101,7 +107,7 @@ Retencion.init({
   sequelize,
   modelName: 'Retencion',
   tableName: 'retenciones',
-  paranoid: true, // Soft delete
+  paranoid: true,
   indexes: [
     { fields: ['numero_expediente'] },
     { fields: ['vehiculo_id'] },
