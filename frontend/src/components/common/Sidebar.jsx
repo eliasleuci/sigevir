@@ -13,18 +13,18 @@ import {
 import { useAuth } from '../../hooks/useAuth';
 
 const Sidebar = ({ isOpen, onClose }) => {
-  const { role, logout } = useAuth();
+  const { rol, logout } = useAuth();
 
   const menuItems = [
-    { name: 'Dashboard', path: '/dashboard', icon: HiOutlineHome, roles: ['ADMIN_GENERAL', 'ADMIN_INSTITUCION', 'AGENTE_CAMPO', 'FISCAL_JUEZ', 'DEPOSITO', 'CONTROLADOR'] },
-    { name: 'Nueva Retención', path: '/retenciones/nueva', icon: HiOutlineClipboardList, roles: ['ADMIN_GENERAL', 'ADMIN_INSTITUCION', 'AGENTE_CAMPO'] },
-    { name: 'Búsqueda', path: '/busqueda', icon: HiOutlineSearch, roles: ['ADMIN_GENERAL', 'ADMIN_INSTITUCION', 'FISCAL_JUEZ', 'CONTROLADOR'] },
-    { name: 'Ingreso Depósito', path: '/deposito/ingreso', icon: HiOutlineOfficeBuilding, roles: ['ADMIN_GENERAL', 'ADMIN_INSTITUCION', 'DEPOSITO'] },
-    { name: 'Causas Judiciales', path: '/judicial/causas', icon: HiOutlineDocumentText, roles: ['ADMIN_GENERAL', 'FISCAL_JUEZ'] },
-    { name: 'Administración', path: '/admin', icon: HiOutlineUsers, roles: ['ADMIN_GENERAL', 'ADMIN_INSTITUCION'] },
+    { name: 'Dashboard', path: '/dashboard', icon: HiOutlineHome, roles: ['admin', 'agente_campo', 'fiscal_juez', 'deposito'] },
+    { name: 'Nueva Retención', path: '/retenciones/nueva', icon: HiOutlineClipboardList, roles: ['admin', 'agente_campo'] },
+    { name: 'Búsqueda', path: '/busqueda', icon: HiOutlineSearch, roles: ['admin', 'fiscal_juez', 'agente_campo', 'deposito'] },
+    { name: 'Ingreso Depósito', path: '/deposito/ingreso', icon: HiOutlineOfficeBuilding, roles: ['admin', 'deposito'] },
+    { name: 'Causas Judiciales', path: '/judicial/causas', icon: HiOutlineDocumentText, roles: ['admin', 'fiscal_juez'] },
+    { name: 'Administración', path: '/admin', icon: HiOutlineUsers, roles: ['admin'] },
   ];
 
-  const filteredMenu = menuItems.filter(item => !item.roles || item.roles.includes(role));
+  const filteredMenu = menuItems.filter(item => !item.roles || item.roles.includes(rol));
 
   return (
     <>

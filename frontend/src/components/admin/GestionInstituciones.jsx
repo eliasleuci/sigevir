@@ -21,7 +21,7 @@ const GestionInstituciones = () => {
         {[
           { id: 1, nombre: 'Juzgado de Faltas Nro. 1', tipo: 'JUZGADO', jurisdiction: 'Sede Central' },
           { id: 2, nombre: 'Dirección de Tránsito', tipo: 'CONTROL_VIAL', jurisdiction: 'Zona Norte' },
-          { id: 3, nombre: 'Depósito Municipal San Luis', tipo: 'DEPOSITO', jurisdiction: 'Parque Industrial' },
+          { id: 3, nombre: 'Depósito Municipal San Luis', tipo: 'deposito', jurisdiction: 'Parque Industrial' },
         ].map((inst) => (
           <div key={inst.id} className="bg-white p-8 rounded-[40px] border border-gray-100 shadow-xl hover:shadow-2xl transition-all group relative overflow-hidden">
             <div className="relative z-10">

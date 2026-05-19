@@ -1,7 +1,7 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import apiClient from '../services/apiClient';
 import { useAuth } from '../hooks/useAuth';
-import { isSupabaseConfigured } from '../config/supabase';
+import { SUPABASE_READY } from '../config/supabase';
 import { HiOutlineChartBar, HiOutlineClipboardList, HiOutlineServer, HiOutlineCheckCircle, HiOutlineClock, HiOutlineExclamationCircle } from 'react-icons/hi';
 
 const ESTADOS_MAP = {
@@ -56,7 +56,7 @@ const Reportes = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      if (!isSupabaseConfigured()) {
+      if (!SUPABASE_READY) {
         setData(DEMO_DATA);
         setLoading(false);
         return;

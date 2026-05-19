@@ -1,4 +1,4 @@
-﻿# SIGEVIR - Sistema Integral de Gestión de Vehículos Retenidos
+# SIGEVIR - Sistema Integral de Gestión de Vehículos Retenidos
 
 Plataforma web moderna para gestionar el ciclo de vida completo de vehículos retenidos en contextos judiciales.
 
@@ -119,12 +119,12 @@ sigevir/
 
 ## 👥 Sistema de Roles
 
-| Rol | Tipo de personal | Color | Permisos principales |
-|-----|-----------------|-------|---------------------|
-| gente_campo | Policía, Inspector | Azul | Registrar retenciones, cargar fotos, generar PDF/QR |
-| deposito | Responsable de depósito | Verde | Gestionar ingreso/egreso, inventario |
-| iscal_juez | Juez, Fiscal, Secretario | Violeta | Ver historial, emitir resoluciones |
-| dmin | Administrador | Dorado | Acceso total, gestión de usuarios |
+| Rol            | Tipo de personal                    | Color   | Permisos principales                              |
+|----------------|-------------------------------------|---------|---------------------------------------------------|
+| agente_campo   | Policía, Inspector de tránsito      | Azul    | Registrar retenciones, cargar fotos, generar PDF/QR |
+| deposito       | Responsable de depósito             | Verde   | Gestionar ingreso/egreso, inventario              |
+| fiscal_juez    | Juez, Fiscal, Secretario judicial   | Violeta | Ver historial, emitir resoluciones                |
+| admin          | Administrador del sistema           | Dorado  | Acceso total, gestión de usuarios                 |
 
 > **Importante:** El usuario nunca elige su rol directamente. Selecciona su tipo de personal y el sistema asigna el rol automáticamente.
 

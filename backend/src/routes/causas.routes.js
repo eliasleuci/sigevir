@@ -30,14 +30,14 @@ router.get(
 
 router.post(
   '/resoluciones',
-  authorize('FISCAL_JUEZ', 'ADMIN_GENERAL', 'ADMIN_INSTITUCION'),
+  authorize('fiscal_juez', 'admin', 'ADMIN_INSTITUCION'),
   validateRequest(emitirResolucionSchema),
   causasController.emitirResolucion
 );
 
 router.put(
   '/resoluciones/:id/cambio-extraordinario',
-  authorize('FISCAL_JUEZ', 'ADMIN_GENERAL', 'ADMIN_INSTITUCION'),
+  authorize('fiscal_juez', 'admin', 'ADMIN_INSTITUCION'),
   validateRequest(cambioExtraordinarioSchema),
   causasController.cambioExtraordinario
 );

@@ -29,7 +29,7 @@ router.get('/', authenticate, async (req, res, next) => {
 // ──────────────────────────────────────────────────────────────
 // GET /api/tipos-personal/all  →  Admin: ver todos incluidos inactivos
 // ──────────────────────────────────────────────────────────────
-router.get('/all', authenticate, authorize('ADMIN_GENERAL', 'ADMIN_INSTITUCION'), async (req, res, next) => {
+router.get('/all', authenticate, authorize('admin', 'ADMIN_INSTITUCION'), async (req, res, next) => {
   try {
     const { data, error } = await supabaseAdmin
       .from('tipos_personal')
@@ -49,7 +49,7 @@ router.get('/all', authenticate, authorize('ADMIN_GENERAL', 'ADMIN_INSTITUCION')
 // PUT /api/tipos-personal/:id  →  Admin: editar tipo (descripcion, activo)
 // El campo "rol_asignado" no se puede cambiar (lógica de negocio estricta)
 // ──────────────────────────────────────────────────────────────
-router.put('/:id', authenticate, authorize('ADMIN_GENERAL', 'ADMIN_INSTITUCION'), async (req, res, next) => {
+router.put('/:id', authenticate, authorize('admin', 'ADMIN_INSTITUCION'), async (req, res, next) => {
   try {
     const { id } = req.params;
     const { descripcion, activo } = req.body;
@@ -83,7 +83,7 @@ router.put('/:id', authenticate, authorize('ADMIN_GENERAL', 'ADMIN_INSTITUCION')
 // ──────────────────────────────────────────────────────────────
 // POST /api/tipos-personal  →  Admin: crear nuevo tipo (uso futuro)
 // ──────────────────────────────────────────────────────────────
-router.post('/', authenticate, authorize('ADMIN_GENERAL', 'ADMIN_INSTITUCION'), async (req, res, next) => {
+router.post('/', authenticate, authorize('admin', 'ADMIN_INSTITUCION'), async (req, res, next) => {
   try {
     const { nombre, rol_asignado, descripcion } = req.body;
 

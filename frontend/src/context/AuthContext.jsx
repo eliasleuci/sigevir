@@ -1,319 +1,281 @@
-﻿import React, { createContext, useState, useEffect, useCallback } from 'react';
-import { supabase, isSupabaseConfigured } from '../config/supabase';
+import { createContext, useState, useEffect, useCallback } from 'react'
+import { supabase, SUPABASE_READY, getUserByEmail } from '../config/supabase'
 
-export const AuthContext = createContext();
+export const AuthContext = createContext()
 
-const DEMO_SESSION_KEY = 'sigevir_demo_session';
+// ── Clave para localStorage ────────────────────────────────────────────────────
+const LS_KEY = 'sigevir_session'
 
-const DEMO_USERS = [
-  {
-    id: 'demo-admin',
-    email: 'admin@sigevir.demo',
-    password: 'admin123',
-    nombre_completo: 'Admin Demo',
-    rol: 'ADMIN_GENERAL',
-    role: 'ADMIN_GENERAL',
-    nombre: 'Admin Demo',
-    name: 'Admin Demo',
-    institucion: 'Policía de Córdoba',
-    institucion_id: 'demo-inst-001',
-    Institucion: { nombre: 'Policía de Córdoba' },
-    dni: '10.000.001',
-    cargo: 'Administrador del Sistema',
-    jurisdiccion: 'Córdoba',
-    telefono: '+54 351 000 0001',
-  },
-  {
-    id: 'demo-campo',
-    email: 'campo@sigevir.demo',
-    password: 'campo123',
-    nombre_completo: 'Oficial Pérez',
-    rol: 'AGENTE_CAMPO',
-    role: 'AGENTE_CAMPO',
-    nombre: 'Oficial Pérez',
-    name: 'Oficial Pérez',
-    institucion: 'Policía de Córdoba',
-    institucion_id: 'demo-inst-001',
-    Institucion: { nombre: 'Policía de Córdoba' },
-    dni: '20.000.002',
-    cargo: 'Oficial de Policía',
-    jurisdiccion: 'Córdoba',
-    telefono: '+54 351 000 0002',
-  },
-  {
-    id: 'demo-deposito',
-    email: 'deposito@sigevir.demo',
-    password: 'deposito123',
-    nombre_completo: 'Juan Depósito',
-    rol: 'DEPOSITO',
-    role: 'DEPOSITO',
-    nombre: 'Juan Depósito',
-    name: 'Juan Depósito',
-    institucion: 'Depósito Municipal',
-    institucion_id: 'demo-inst-002',
-    Institucion: { nombre: 'Depósito Municipal' },
-    dni: '30.000.003',
-    cargo: 'Responsable de Depósito',
-    jurisdiccion: 'Córdoba',
-    telefono: '+54 351 000 0003',
-  },
-  {
-    id: 'demo-fiscal',
-    email: 'fiscal@sigevir.demo',
-    password: 'fiscal123',
-    nombre_completo: 'Dra. Rodríguez',
-    rol: 'FISCAL_JUEZ',
-    role: 'FISCAL_JUEZ',
-    nombre: 'Dra. Rodríguez',
-    name: 'Dra. Rodríguez',
-    institucion: 'Fiscalía de Córdoba',
-    institucion_id: 'demo-inst-003',
-    Institucion: { nombre: 'Fiscalía de Córdoba' },
-    dni: '40.000.004',
-    cargo: 'Fiscal',
-    jurisdiccion: 'Córdoba',
-    telefono: '+54 351 000 0004',
-  },
-];
-
-const saveDemoSession = (userData) => {
+// ── Helper para guardar/leer sesión ───────────────────────────────────────────
+const saveSession = (userData) => {
   try {
-    localStorage.setItem(DEMO_SESSION_KEY, JSON.stringify(userData));
-  } catch {}
-};
-
-const loadDemoSession = () => {
-  try {
-    const raw = localStorage.getItem(DEMO_SESSION_KEY);
-    return raw ? JSON.parse(raw) : null;
-  } catch {
-    return null;
+    localStorage.setItem(LS_KEY, JSON.stringify(userData))
+  } catch (e) {
+    console.error('Error guardando sesión:', e)
   }
-};
+}
 
-const clearDemoSession = () => {
+const loadSession = () => {
   try {
-    localStorage.removeItem(DEMO_SESSION_KEY);
-  } catch {}
-};
+    const raw = localStorage.getItem(LS_KEY)
+    return raw ? JSON.parse(raw) : null
+  } catch (e) {
+    localStorage.removeItem(LS_KEY)
+    return null
+  }
+}
 
-const activateDemoSession = (setUserFn, setPerfilFn, setTokenFn, setSessionFn, setIsDemoFn, userData) => {
-  setIsDemoFn(true);
-  setUserFn(userData);
-  setPerfilFn({ id: userData.id, rol: userData.rol, nombre_completo: userData.nombre_completo });
-  setTokenFn('demo-token');
-  setSessionFn({ user: { id: userData.id, email: userData.email } });
-  saveDemoSession(userData);
-};
+const clearSession = () => {
+  try {
+    localStorage.removeItem(LS_KEY)
+  } catch (e) {}
+}
 
 export const AuthProvider = ({ children }) => {
-  const [session, setSession] = useState(null);
-  const [user, setUser] = useState(null);
-  const [perfil, setPerfil] = useState(null);
-  const [token, setToken] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [isDemo, setIsDemo] = useState(false);
+  const [user,    setUser]    = useState(null)
+  const [perfil,  setPerfil]  = useState(null)
+  const [loading, setLoading] = useState(true)
 
+  // ── Inicializar: recuperar sesión guardada ─────────────────────────────────
+  useEffect(() => {
+    const initAuth = async () => {
+      if (!SUPABASE_READY) {
+        // Modo mock: recuperar del localStorage
+        const saved = loadSession()
+        if (saved) {
+          setUser(saved)
+          setPerfil(saved)
+        }
+        setLoading(false)
+        return
+      }
+
+      // Modo Supabase: verificar sesión activa
+      try {
+        const { data: { session } } = await supabase.auth.getSession()
+        if (session?.user) {
+          setUser(session.user)
+          await cargarPerfil(session.user.id)
+        }
+      } catch (e) {
+        console.error('Error iniciando auth:', e)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    initAuth()
+
+    // Listener de cambios de sesión (solo con Supabase)
+    if (SUPABASE_READY) {
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(
+        async (event, session) => {
+          if (session?.user) {
+            setUser(session.user)
+            await cargarPerfil(session.user.id)
+          } else {
+            setUser(null)
+            setPerfil(null)
+          }
+        }
+      )
+      return () => subscription.unsubscribe()
+    }
+  }, [])
+
+  // ── Cargar perfil desde Supabase ───────────────────────────────────────────
   const cargarPerfil = useCallback(async (userId) => {
-    if (!supabase) return null;
+    if (!SUPABASE_READY) return
     try {
       const { data, error } = await supabase
         .from('perfiles')
-        .select('*, tipo_personal:tipos_personal_id(*)')
+        .select('*, tipos_personal(*)')
         .eq('id', userId)
-        .single();
-      if (error) throw error;
-      setPerfil(data);
-      return data;
+        .single()
+      if (error) throw error
+      setPerfil(data)
+    } catch (e) {
+      console.error('Error cargando perfil:', e)
+    }
+  }, [])
+
+  // ── LOGIN ──────────────────────────────────────────────────────────────────
+  const login = useCallback(async (email, password) => {
+    // ─── MODO MOCK (sin Supabase) ──────────────────────────────────────────
+    if (!SUPABASE_READY) {
+      const found = getUserByEmail(email.trim())
+
+      if (!found) {
+        return { success: false, error: 'Email no encontrado. Verificá el email ingresado.' }
+      }
+
+      if (found.password_mock !== password) {
+        return { success: false, error: 'Contraseña incorrecta.' }
+      }
+
+      if (!found.activo) {
+        return { success: false, error: 'Usuario inactivo. Contactá al administrador.' }
+      }
+
+      // Login exitoso en modo mock
+      const sessionData = {
+        id:              found.id,
+        email:           found.email,
+        nombre_completo: found.nombre_completo,
+        rol:             found.rol,       // SIEMPRE minúscula
+        tipo_personal:   found.tipo_personal,
+        institucion:     found.institucion,
+        cargo:           found.cargo,
+        dni:             found.dni,
+        activo:          found.activo,
+        mock:            true,
+      }
+
+      saveSession(sessionData)
+      setUser(sessionData)
+      setPerfil(sessionData)
+
+      return { success: true, user: sessionData }
+    }
+
+    // ─── MODO SUPABASE ────────────────────────────────────────────────────
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email:    email.trim(),
+        password: password,
+      })
+      if (error) throw error
+      return { success: true, user: data.user }
     } catch (err) {
-      return null;
+      let msg = 'Error al iniciar sesión'
+      if (err.message.includes('Invalid login')) msg = 'Email o contraseña incorrectos'
+      if (err.message.includes('Email not confirmed')) msg = 'Confirmá tu email primero'
+      return { success: false, error: msg }
     }
-  }, []);
+  }, [])
 
-  useEffect(() => {
-    if (!isSupabaseConfigured()) {
-      const savedDemo = loadDemoSession();
-      if (savedDemo) {
-        setIsDemo(true);
-        setUser(savedDemo);
-        setPerfil({ id: savedDemo.id, rol: savedDemo.rol, nombre_completo: savedDemo.nombre_completo });
-        setToken('demo-token');
-        setSession({ user: { id: savedDemo.id, email: savedDemo.email } });
-      }
-      setLoading(false);
-      return;
-    }
-
-    supabase.auth.getSession().then(async ({ data: { session: currentSession } }) => {
-      if (currentSession) {
-        setSession(currentSession);
-        setToken(currentSession.access_token);
-        setUser({
-          id: currentSession.user.id,
-          email: currentSession.user.email,
-          ...currentSession.user.user_metadata,
-        });
-        const perfilData = await cargarPerfil(currentSession.user.id);
-        if (perfilData) {
-          setUser(prev => ({
-            ...prev,
-            rol: perfilData.rol,
-            nombre: perfilData.nombre_completo,
-            nombre_completo: perfilData.nombre_completo,
-            institucion: perfilData.institucion,
-            institucion_id: perfilData.institucion_id,
-            dni: perfilData.dni,
-          }));
-        }
-      }
-      setLoading(false);
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
-      if (currentSession) {
-        setSession(currentSession);
-        setToken(currentSession.access_token);
-        setUser({
-          id: currentSession.user.id,
-          email: currentSession.user.email,
-          ...currentSession.user.user_metadata,
-        });
-        const perfilData = await cargarPerfil(currentSession.user.id);
-        if (perfilData) {
-          setUser(prev => ({
-            ...prev,
-            rol: perfilData.rol,
-            nombre: perfilData.nombre_completo,
-            nombre_completo: perfilData.nombre_completo,
-            institucion: perfilData.institucion,
-            institucion_id: perfilData.institucion_id,
-            dni: perfilData.dni,
-          }));
-        }
-      } else {
-        setSession(null);
-        setToken(null);
-        setUser(null);
-        setPerfil(null);
-      }
-      setLoading(false);
-    });
-
-    return () => {
-      subscription?.unsubscribe();
-    };
-  }, [cargarPerfil]);
-
-  const loginDemo = (role) => {
-    const userData = DEMO_USERS.find(u => u.rol === role) || DEMO_USERS[0];
-    activateDemoSession(setUser, setPerfil, setToken, setSession, setIsDemo, userData);
-  };
-
-  const login = async (email, password) => {
-    if (!isSupabaseConfigured()) {
-      const userData = DEMO_USERS.find(u => u.email === email && u.password === password);
-      if (userData) {
-        activateDemoSession(setUser, setPerfil, setToken, setSession, setIsDemo, userData);
-        return { success: true, data: { user: userData } };
-      }
-      const creds = DEMO_USERS.map(u => `${u.email} / ${u.password}`).join(', ');
-      return { success: false, error: "Credenciales inválidas. Usa: " + creds };
+  // ── LOGIN CON GOOGLE ───────────────────────────────────────────────────────
+  const loginWithGoogle = useCallback(async () => {
+    if (!SUPABASE_READY) {
+      return { success: false, error: 'Google OAuth requiere Supabase configurado. Usá email y contraseña.' }
     }
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) throw error;
-      return { success: true, data };
-    } catch (error) {
-      return { success: false, error: error.message };
-    }
-  };
-
-  const loginGoogle = async () => {
-    if (!supabase) return { success: false, error: 'Supabase no configurado' };
-    try {
-      const { data, error } = await supabase.auth.signInWithOAuth({
+      const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
-        options: {
-          redirectTo: window.location.origin + '/auth/callback',
-        },
-      });
-      if (error) throw error;
-      return { success: true, data };
-    } catch (error) {
-      return { success: false, error: error.message };
+        options: { redirectTo: `${window.location.origin}/auth/callback` }
+      })
+      if (error) throw error
+      return { success: true }
+    } catch (err) {
+      return { success: false, error: err.message }
     }
-  };
+  }, [])
 
-  const register = async (formData) => {
-    if (!supabase) return { success: false, error: 'Supabase no configurado' };
+  // ── LOGOUT ─────────────────────────────────────────────────────────────────
+  const logout = useCallback(async () => {
+    clearSession()
+    setUser(null)
+    setPerfil(null)
+
+    if (SUPABASE_READY) {
+      try {
+        await supabase.auth.signOut()
+      } catch (e) {
+        console.error('Error en logout:', e)
+      }
+    }
+  }, [])
+
+  // ── REGISTRAR USUARIO ──────────────────────────────────────────────────────
+  const register = useCallback(async ({
+    email, password, nombre_completo, dni,
+    telefono, cargo, institucion, tipo_personal
+  }) => {
+    // Validar que el tipo_personal tenga un rol válido
+    const ROLES_VALIDOS = ['admin', 'agente_campo', 'deposito', 'fiscal_juez']
+    if (!ROLES_VALIDOS.includes(tipo_personal?.rol)) {
+      return { success: false, error: 'Tipo de personal inválido' }
+    }
+
+    // ─── MODO MOCK ────────────────────────────────────────────────────────
+    if (!SUPABASE_READY) {
+      const newUser = {
+        id:              `mock-${Date.now()}`,
+        email:           email.trim(),
+        password_mock:   password,
+        nombre_completo,
+        dni,
+        telefono,
+        cargo,
+        institucion,
+        rol:             tipo_personal.rol,  // minúscula, asignado automáticamente
+        tipo_personal,
+        activo:          true,
+        mock:            true,
+        created_at:      new Date().toISOString(),
+      }
+
+      const sessionData = { ...newUser }
+      saveSession(sessionData)
+      setUser(sessionData)
+      setPerfil(sessionData)
+
+      return { success: true, user: newUser, mock: true }
+    }
+
+    // ─── MODO SUPABASE ────────────────────────────────────────────────────
     try {
       const { data, error } = await supabase.auth.signUp({
-        email: formData.email,
-        password: formData.password,
+        email:    email.trim(),
+        password: password,
         options: {
           data: {
-            nombre_completo: formData.nombre_completo,
-            dni: formData.dni,
-            telefono: formData.telefono,
-            institucion: formData.institucion,
-            jurisdiccion: formData.jurisdiccion,
-            cargo: formData.cargo,
-            tipo_personal_id: formData.tipo_personal_id,
-          },
-        },
-      });
-      if (error) throw error;
-      return { success: true, data };
-    } catch (error) {
-      return { success: false, error: error.message };
+            nombre_completo,
+            dni,
+            telefono,
+            cargo,
+            institucion,
+            rol:             tipo_personal.rol,  // minúscula siempre
+            tipo_personal_id: tipo_personal.id,
+          }
+        }
+      })
+      if (error) throw error
+      return { success: true, user: data.user, needsVerification: !data.session }
+    } catch (err) {
+      let msg = 'Error al registrarse'
+      if (err.message.includes('already registered')) msg = 'Este email ya está registrado'
+      if (err.message.includes('weak')) msg = 'La contraseña es muy débil'
+      return { success: false, error: msg }
     }
-  };
+  }, [])
 
-  const logout = async () => {
-    if (!isDemo && supabase) {
-      try { await supabase.auth.signOut(); } catch {}
-    }
-    clearDemoSession();
-    setIsDemo(false);
-    setSession(null);
-    setToken(null);
-    setUser(null);
-    setPerfil(null);
-  };
+  // ── Verificar si el usuario tiene cierto rol ───────────────────────────────
+  const hasRole = useCallback((...roles) => {
+    const currentRol = perfil?.rol || user?.rol
+    return roles.includes(currentRol)
+  }, [perfil, user])
 
-  const refreshSession = async () => {
-    if (!supabase) return null;
-    try {
-      const { data, error } = await supabase.auth.refreshSession();
-      if (error) throw error;
-      return data;
-    } catch {
-      return null;
-    }
-  };
+  // ── Context value ──────────────────────────────────────────────────────────
+  const value = {
+    user,
+    perfil,
+    loading,
+    isAuthenticated:  !!(user),
+    rol:              perfil?.rol || user?.rol || null,
+    supabaseReady:    SUPABASE_READY,
+    isMock:           !SUPABASE_READY,
+    isAdmin:          hasRole('admin'),
+    isAgenteCampo:    hasRole('agente_campo'),
+    isDeposito:       hasRole('deposito'),
+    isFiscalJuez:     hasRole('fiscal_juez'),
+    hasRole,
+    login,
+    loginWithGoogle,
+    logout,
+    register,
+    cargarPerfil,
+  }
 
-  return (
-    <AuthContext.Provider
-      value={{
-        user,
-        perfil,
-        session,
-        token,
-        isAuthenticated: isDemo || (!!session?.user && !!perfil),
-        loading,
-        login,
-        loginGoogle,
-        loginDemo,
-        register,
-        logout,
-        refreshSession,
-        cargarPerfil,
-        role: perfil?.rol || user?.rol,
-        isSupabaseConfigured: isSupabaseConfigured(),
-        isDemo,
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
-  );
-};
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+}

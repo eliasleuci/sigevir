@@ -8,7 +8,7 @@ const { Usuario, HistorialMovimiento } = db;
 const router = Router();
 
 router.use(authenticate);
-router.use(authorize('ADMIN_GENERAL', 'ADMIN_INSTITUCION'));
+router.use(authorize('admin', 'ADMIN_INSTITUCION'));
 
 router.get('/check-permanencias', async (req, res, next) => {
   try {

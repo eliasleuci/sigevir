@@ -1,5 +1,5 @@
-Email	Contraseña	Rol	Nombre
-admin@sigevir.demo	admin123	ADMIN_GENERAL	Admin Demo
-campo@sigevir.demo	campo123	AGENTE_CAMPO	Oficial Pérez
-deposito@sigevir.demo	deposito123	DEPOSITO	Juan Depósito
-fiscal@sigevir.demo	fiscal123	FISCAL_JUEZ	Dra. Rodríguez
+Email                       Contraseña     Rol            Nombre
+admin@sigevir.demo          admin123       admin          Admin Demo
+campo@sigevir.demo          campo123       agente_campo   Oficial Pérez
+deposito@sigevir.demo       deposito123    deposito       Juan Depósito
+fiscal@sigevir.demo         fiscal123      fiscal_juez    Dra. Rodríguez

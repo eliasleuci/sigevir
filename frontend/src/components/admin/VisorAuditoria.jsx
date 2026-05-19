@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { HiOutlineSearch, HiOutlineClock, HiOutlineFilter, HiOutlineDownload, HiOutlineExclamationCircle } from 'react-icons/hi';
 import apiClient from '../../services/apiClient';
-import { isSupabaseConfigured } from '../../config/supabase';
+import { SUPABASE_READY } from '../../config/supabase';
 import { toast } from 'react-toastify';
 
 const DEMO_LOGS = [
@@ -21,7 +21,7 @@ const VisorAuditoria = () => {
   const fetchLogs = async () => {
     setLoading(true);
     try {
-      if (!isSupabaseConfigured()) {
+      if (!SUPABASE_READY) {
         setLogs(DEMO_LOGS);
         setLoading(false);
         return;

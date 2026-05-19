@@ -57,7 +57,7 @@ class AlertaService {
       const admins = await Usuario.findAll({
         where: {
           institucion_id: deposito.institucion_id,
-          rol: { [Op.in]: ['ADMIN_INSTITUCION', 'ADMIN_GENERAL'] },
+          rol: { [Op.in]: ['ADMIN_INSTITUCION', 'admin'] },
           activo: true,
         },
       });
@@ -67,7 +67,7 @@ class AlertaService {
     if (nivel === 'ROJO') {
       const directores = await Usuario.findAll({
         where: {
-          rol: 'FISCAL_JUEZ',
+          rol: 'fiscal_juez',
           activo: true,
         },
       });

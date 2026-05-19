@@ -1,6 +1,6 @@
-﻿import { Router } from 'express';
+import { Router } from 'express';
 import reportesController from '../controllers/reportes.controller.js';
-import { authenticate } from '../middleware/auth.js';
+import { authenticate } from '../middleware/supabaseAuth.js';
 
 const router = Router();
 

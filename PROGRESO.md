@@ -7,18 +7,20 @@
 
 ## 📈 Resumen de progreso
 
-| Fase | Tarea | Estado | % Completado | Notas |
-|------|-------|--------|--------------|-------|
-| 0 | Setup inicial backend | ✅ COMPLETO | 100% | App.js, config, middlewares listos |
-| 0 | Setup inicial frontend | ✅ COMPLETO | 100% | React setup, contextos, hooks listos |
-| 1 | Autenticación | ✅ COMPLETO | 100% | Modelos y servicios listos |
-| 1 | Modelos de BD | ✅ COMPLETO | 100% | Generados con Prompt 1.1 |
-| 2 | Módulo Registro | ✅ COMPLETO | 100% | API, PDF y QR listos (Prompt 2.1 y 2.2) |
-| 3 | Módulo Depósito | ✅ COMPLETO | 100% | API de Ingreso/Egreso lista (Prompt 3.1) |
-| 4 | Módulo Judicial | ✅ COMPLETO | 100% | API de Resoluciones e Historial lista (Prompt 4.1) |
-| 5 | Búsqueda + Notif | ✅ COMPLETO | 100% | API Búsqueda y Notificaciones lista (Prompt 5.1/5.2) |
-| 6 | Frontend completo | ✅ COMPLETO | 95% | Todos los módulos funcionales listos (Prompts 6.1 a 6.5) |
-| 7 | Testing + Deploy | ⏳ PENDIENTE | 0% | Final |
+| Fase | Tarea                 | Estado       | % Real | Notas |
+|------|-----------------------|--------------|--------|-------|
+| 0    | Setup backend         | ✅ COMPLETO  | 100%   | App.js, middlewares, config |
+| 0    | Setup frontend        | ✅ COMPLETO  | 100%   | React, contextos, hooks |
+| 1    | Auth (email/password) | ✅ COMPLETO  | 100%   | Mock + Supabase cuando se conecte |
+| 1    | Google OAuth          | ⏳ PENDIENTE | 0%     | Requiere Supabase configurado |
+| 1    | Modelos Sequelize     | ✅ COMPLETO  | 100%   | 10 modelos generados |
+| 2    | Módulo Registro       | ✅ COMPLETO  | 100%   | API + PDF + QR |
+| 3    | Módulo Depósito       | ✅ COMPLETO  | 100%   | Ingreso + Egreso |
+| 4    | Módulo Judicial       | ✅ COMPLETO  | 100%   | Resoluciones + Historial |
+| 5    | Búsqueda + Notif      | ✅ COMPLETO  | 100%   | Multicriterio + Socket.io |
+| 6    | Frontend completo     | ✅ COMPLETO  | 95%    | Falta pulir UI en algunos módulos |
+| 7    | Testing + Deploy      | ⏳ PENDIENTE | 0%     | Próximo paso |
+| -    | Supabase configurado  | ⏳ PENDIENTE | 0%     | Configurar cuando esté lista la BD |
 
 ---
 

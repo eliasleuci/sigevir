@@ -42,11 +42,11 @@ Usuario.init({
     unique: true
   },
   rol: {
-    type: DataTypes.ENUM('ADMIN_GENERAL', 'ADMIN_INSTITUCION', 'FISCAL_JUEZ', 'AGENTE_CAMPO', 'DEPOSITO', 'CONTROLADOR'),
+    type: DataTypes.ENUM('admin', 'ADMIN_INSTITUCION', 'fiscal_juez', 'agente_campo', 'deposito', 'CONTROLADOR'),
     allowNull: false,
     validate: {
       isIn: {
-        args: [['ADMIN_GENERAL', 'ADMIN_INSTITUCION', 'FISCAL_JUEZ', 'AGENTE_CAMPO', 'DEPOSITO', 'CONTROLADOR']],
+        args: [['admin', 'ADMIN_INSTITUCION', 'fiscal_juez', 'agente_campo', 'deposito', 'CONTROLADOR']],
         msg: 'Rol no válido'
       }
     }

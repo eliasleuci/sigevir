@@ -1,6 +1,6 @@
-﻿import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase, isSupabaseConfigured } from '../config/supabase';
+import { supabase, SUPABASE_READY } from '../config/supabase';
 
 const AuthCallbackPage = () => {
   const navigate = useNavigate();
@@ -8,7 +8,7 @@ const AuthCallbackPage = () => {
 
   useEffect(() => {
     const handleCallback = async () => {
-      if (!isSupabaseConfigured()) {
+      if (!SUPABASE_READY) {
         setStatus('Supabase no configurado');
         return;
       }

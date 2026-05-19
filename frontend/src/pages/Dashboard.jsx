@@ -18,7 +18,7 @@ const MODULES = [
     icon: HiOutlineClipboardList,
     path: '/retenciones/nueva',
     color: 'blue',
-    roles: ['ADMIN_GENERAL', 'ADMIN_INSTITUCION', 'AGENTE_CAMPO'],
+    roles: ['admin', 'agente_campo'],
   },
   {
     title: 'Confirmar Ingreso',
@@ -26,7 +26,7 @@ const MODULES = [
     icon: HiOutlineCamera,
     path: '/deposito/ingreso',
     color: 'indigo',
-    roles: ['ADMIN_GENERAL', 'ADMIN_INSTITUCION', 'DEPOSITO'],
+    roles: ['admin', 'deposito'],
   },
   {
     title: 'Gestion de Causas',
@@ -34,7 +34,7 @@ const MODULES = [
     icon: FaGavel,
     path: '/judicial/causas',
     color: 'amber',
-    roles: ['ADMIN_GENERAL', 'FISCAL_JUEZ'],
+    roles: ['admin', 'fiscal_juez'],
   },
   {
     title: 'Busqueda Avanzada',
@@ -42,7 +42,7 @@ const MODULES = [
     icon: HiOutlineSearch,
     path: '/busqueda',
     color: 'slate',
-    roles: ['ADMIN_GENERAL', 'ADMIN_INSTITUCION', 'FISCAL_JUEZ', 'CONTROLADOR'],
+    roles: ['admin', 'fiscal_juez', 'agente_campo', 'deposito'],
   },
   {
     title: 'Administracion',
@@ -50,7 +50,7 @@ const MODULES = [
     icon: HiOutlineCog,
     path: '/admin',
     color: 'gray',
-    roles: ['ADMIN_GENERAL', 'ADMIN_INSTITUCION'],
+    roles: ['admin'],
   },
   {
     title: 'Reportes',
@@ -58,16 +58,16 @@ const MODULES = [
     icon: HiOutlineChartBar,
     path: '/reportes',
     color: 'green',
-    roles: ['ADMIN_GENERAL', 'ADMIN_INSTITUCION'],
+    roles: ['admin'],
   },
 ];
 
 export default function Dashboard() {
-  const { user, role, logout } = useAuth();
+  const { user, rol, logout } = useAuth();
   const { getUnreadCount } = useNotifications();
 
   const unreadCount = getUnreadCount();
-  const visibleModules = MODULES.filter(m => !m.roles || m.roles.includes(role));
+  const visibleModules = MODULES.filter(m => !m.roles || m.roles.includes(rol));
 
   return (
     <div className="min-h-screen bg-blue-50 pb-12 font-sans">
@@ -99,7 +99,7 @@ export default function Dashboard() {
                   {user?.nombre_completo || 'Administrador'}
                 </p>
                 <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest mt-1">
-                  {role?.replace('_', ' ') || 'MODO DEMO'}
+                  {rol?.replace('_', ' ') || 'MODO DEMO'}
                 </p>
               </div>
               <button

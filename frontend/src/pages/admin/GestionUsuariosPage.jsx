@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-toastify';
 import { supabase } from '../../config/supabase';
 import { useAuth } from '../../hooks/useAuth';
-import { isSupabaseConfigured } from '../../config/supabase';
+import { SUPABASE_READY } from '../../config/supabase';
 import { ROLES, ROLE_COLORS, TIPOS_PERSONAL_PUBLICOS } from '../../utils/constants';
 
 const ITEMS_PER_PAGE = 10;
@@ -35,7 +35,7 @@ const GestionUsuariosPage = () => {
   const fetchUsuarios = useCallback(async () => {
     setLoading(true);
     try {
-      if (!isSupabaseConfigured()) {
+      if (!SUPABASE_READY) {
         let data = [...DEMO_USERS_ADMIN];
         if (filtroRol) data = data.filter(function(u) { return u.rol === filtroRol; });
         if (filtroEstado === 'activo') data = data.filter(function(u) { return u.activo; });

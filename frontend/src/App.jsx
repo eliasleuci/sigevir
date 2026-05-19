@@ -23,11 +23,11 @@ import Administracion from './pages/Administracion.jsx';
 import Reportes from './pages/Reportes.jsx';
 import Unauthorized from './pages/Unauthorized.jsx';
 
-const ROLES_ADMIN = ['ADMIN_GENERAL', 'ADMIN_INSTITUCION'];
-const ROLES_RETENCION = ['ADMIN_GENERAL', 'ADMIN_INSTITUCION', 'AGENTE_CAMPO'];
-const ROLES_DEPOSITO = ['ADMIN_GENERAL', 'ADMIN_INSTITUCION', 'DEPOSITO'];
-const ROLES_JUDICIAL = ['ADMIN_GENERAL', 'FISCAL_JUEZ'];
-const ROLES_BUSQUEDA = ['ADMIN_GENERAL', 'ADMIN_INSTITUCION', 'AGENTE_CAMPO', 'FISCAL_JUEZ', 'CONTROLADOR'];
+const ROLES_ADMIN = ['admin'];
+const ROLES_RETENCION = ['admin', 'agente_campo'];
+const ROLES_DEPOSITO = ['admin', 'deposito'];
+const ROLES_JUDICIAL = ['admin', 'fiscal_juez'];
+const ROLES_BUSQUEDA = ['admin', 'agente_campo', 'fiscal_juez', 'deposito'];
 
 function App() {
   return (
@@ -65,7 +65,7 @@ function App() {
                   <ProtectedRoute allowedRoles={ROLES_ADMIN}><Administracion /></ProtectedRoute>
                 } />
                 <Route path="/reportes" element={
-                  <ProtectedRoute allowedRoles={['ADMIN_GENERAL', 'ADMIN_INSTITUCION']}><Reportes /></ProtectedRoute>
+                  <ProtectedRoute allowedRoles={['admin']}><Reportes /></ProtectedRoute>
                 } />
               </Route>
             </Route>

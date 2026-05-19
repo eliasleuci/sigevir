@@ -15,7 +15,7 @@ ResolucionJudicial.init({
     allowNull: false,
     unique: true
   },
-  // Usuario con rol FISCAL_JUEZ que emitió la resolución
+  // Usuario con rol fiscal_juez que emitió la resolución
   usuario_judicial_id: {
     type: DataTypes.UUID,
     allowNull: false
