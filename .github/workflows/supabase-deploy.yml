@@ -5,6 +5,8 @@ on:
     branches: [ master ]                     # o la rama que uses para producción
     paths:
       - supabase/functions/create_retencion/**   # se dispara solo cuando cambias la función
+      - .github/workflows/**                     # también se dispara al cambiar este archivo
+  workflow_dispatch:                             # permite ejecutarlo manualmente desde GitHub
 
 jobs:
   deploy:
