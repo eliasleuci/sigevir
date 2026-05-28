@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -6,7 +6,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { useAuth } from '../hooks/useAuth';
-import { ROLES, ROLE_COLORS, ROLE_DESCRIPTIONS, ROLE_PERMISSIONS, TIPOS_PERSONAL_PUBLICOS } from '../utils/constants';
+import { ROLES, ROLE_COLORS, ROLE_DESCRIPTIONS, ROLE_PERMISSIONS } from '../utils/constants';
+import { getTiposPersonal } from '../config/supabase';
 
 const passwordSchema = z.string()
   .min(8, 'Mínimo 8 caracteres')
@@ -61,9 +62,9 @@ const PasswordIndicator = ({ value }) => {
   );
 };
 
-const RolePreview = ({ tipoPersonalId }) => {
+const RolePreview = ({ tipoPersonalId, tiposPersonal }) => {
   if (!tipoPersonalId) return null;
-  const tipo = TIPOS_PERSONAL_PUBLICOS.find(t => t.id === Number(tipoPersonalId));
+  const tipo = tiposPersonal.find(t => t.id === tipoPersonalId || t.id === Number(tipoPersonalId));
   if (!tipo) return null;
   const color = ROLE_COLORS[tipo.rol];
   return (
@@ -104,6 +105,17 @@ const RegisterPage = () => {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [passwordValue, setPasswordValue] = useState('');
+  const [tiposPersonal, setTiposPersonal] = useState([]);
+  const [loadingTipos, setLoadingTipos] = useState(true);
+
+  useEffect(() => {
+    const fetchTipos = async () => {
+      const { data } = await getTiposPersonal();
+      if (data) setTiposPersonal(data);
+      setLoadingTipos(false);
+    };
+    fetchTipos();
+  }, []);
 
   const { register, handleSubmit, watch, setValue, formState: { errors, isValid, dirtyFields } } = useForm({
     resolver: zodResolver(registerSchema),
@@ -140,6 +152,7 @@ const RegisterPage = () => {
   const onSubmit = async (data) => {
     setLoading(true);
     try {
+      const tipoPersonal = tiposPersonal.find(t => t.id === data.tipo_personal_id || t.id === Number(data.tipo_personal_id));
       const result = await registerUser({
         nombre_completo: data.nombre_completo,
         dni: data.dni,
@@ -148,7 +161,7 @@ const RegisterPage = () => {
         institucion: data.institucion,
         jurisdiccion: data.jurisdiccion,
         cargo: data.cargo,
-        tipo_personal_id: Number(data.tipo_personal_id),
+        tipo_personal: tipoPersonal,
         password: data.password,
       });
       if (result.success) {
@@ -245,14 +258,14 @@ const RegisterPage = () => {
                 <motion.div key="step3" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-5">
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-1.5">Tipo de personal *</label>
-                    <select {...register('tipo_personal_id')} className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all bg-white">
-                      <option value="">Seleccioná tu tipo...</option>
-                      {TIPOS_PERSONAL_PUBLICOS.map((t) => (
+                    <select {...register('tipo_personal_id')} className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all bg-white" disabled={loadingTipos}>
+                      <option value="">{loadingTipos ? 'Cargando tipos...' : 'Seleccioná tu tipo...'}</option>
+                      {tiposPersonal.map((t) => (
                         <option key={t.id} value={t.id}>{t.nombre}</option>
                       ))}
                     </select>
                     {errors.tipo_personal_id && <p className="mt-1 text-xs text-red-500 font-medium">{errors.tipo_personal_id.message}</p>}
-                    <RolePreview tipoPersonalId={selectedTipoId} />
+                    <RolePreview tipoPersonalId={selectedTipoId} tiposPersonal={tiposPersonal} />
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-1.5">Contraseña *</label>

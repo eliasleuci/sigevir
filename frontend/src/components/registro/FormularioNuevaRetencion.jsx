@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { retencionSchema } from '../../schemas/retencion.schema';
@@ -24,6 +24,8 @@ const FormularioNuevaRetencion = ({ onSubmit, loading, initialData = {} }) => {
     longitud: initialData?.longitud ?? undefined
   });
 
+  const [isSearching, setIsSearching] = useState(false);
+
   const formValues = watch();
   useEffect(() => {
     if (Object.keys(formValues).length > 0) {
@@ -42,12 +44,17 @@ const FormularioNuevaRetencion = ({ onSubmit, loading, initialData = {} }) => {
 
   const handleSearchAddress = async () => {
     const query = getValues('lugar_retencion');
-    if (!query || query.trim().length < 3) return;
+    if (!query || query.trim().length < 3) {
+      alert("Por favor, ingrese al menos 3 caracteres para buscar la dirección.");
+      return;
+    }
+    
+    setIsSearching(true);
     try {
       const res = await fetch(
-        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=1&accept-language=es`,
-        { headers: { 'User-Agent': 'SIGEVIR-App/1.0' } }
+        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=1&accept-language=es&countrycodes=ar&email=contacto@sigevir.com`
       );
+      if (!res.ok) throw new Error("Error en la respuesta del servidor");
       const data = await res.json();
       if (data && data.length > 0) {
         const { lat, lon, display_name } = data[0];
@@ -57,9 +64,14 @@ const FormularioNuevaRetencion = ({ onSubmit, loading, initialData = {} }) => {
         setValue('latitud', latNum, { shouldValidate: true });
         setValue('longitud', lngNum, { shouldValidate: true });
         setValue('lugar_retencion', display_name);
+      } else {
+        alert("No se encontró la dirección exacta. Intente agregar la ciudad (ej: 'Juan Jose Casal 1127, Córdoba').");
       }
-    } catch {
-      // no results
+    } catch (err) {
+      console.error(err);
+      alert("No se pudo conectar con el servicio de mapas. Verifique su conexión.");
+    } finally {
+      setIsSearching(false);
     }
   };
 
@@ -209,10 +221,15 @@ const FormularioNuevaRetencion = ({ onSubmit, loading, initialData = {} }) => {
               <button
                 type="button"
                 onClick={handleSearchAddress}
-                className="flex items-center gap-1.5 px-5 py-2.5 bg-blue-600 text-white rounded-xl font-semibold text-sm hover:bg-blue-700 transition-colors shadow-sm"
+                disabled={isSearching}
+                className="flex items-center gap-1.5 px-5 py-2.5 bg-blue-600 text-white rounded-xl font-semibold text-sm hover:bg-blue-700 transition-colors shadow-sm disabled:opacity-70 disabled:cursor-not-allowed"
               >
-                <HiOutlineSearch className="w-4 h-4" />
-                Buscar
+                {isSearching ? (
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                ) : (
+                  <HiOutlineSearch className="w-4 h-4" />
+                )}
+                {isSearching ? 'Buscando...' : 'Buscar'}
               </button>
             </div>
             {errors.lugar_retencion && <p className="text-xs text-red-500 font-medium">{errors.lugar_retencion.message}</p>}

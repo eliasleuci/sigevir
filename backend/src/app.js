@@ -61,7 +61,7 @@ app.use((req, res) => {
 // 6. Manejo Global de Errores (Siempre al final)
 app.use(errorHandler);
 
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3002;
 
 const httpServer = createServer(app);
 const io = setupSocketIO(httpServer);

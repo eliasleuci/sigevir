@@ -14,9 +14,9 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install Supabase CLI
-        run: |
-          curl -L https://github.com/supabase/cli/releases/download/v2.38.0/supabase_2.38.0_linux_amd64.tar.gz | tar xz
-          sudo mv supabase /usr/local/bin/
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
 
       - name: Deploy create_retencion function
         env:

@@ -1,5 +1,6 @@
 import { createContext, useState, useEffect, useCallback } from 'react'
 import { supabase, SUPABASE_READY, getUserByEmail } from '../config/supabase'
+import { getPrimaryHostedDomain } from '../utils/emailDomains'
 
 export const AuthContext = createContext()
 
@@ -83,15 +84,19 @@ export const AuthProvider = ({ children }) => {
     }
   }, [])
 
-  // ── Cargar perfil desde Supabase ───────────────────────────────────────────
   const cargarPerfil = useCallback(async (userId) => {
     if (!SUPABASE_READY) return
     try {
-      const { data, error } = await supabase
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Timeout cargando perfil')), 5000)
+      );
+      const queryPromise = supabase
         .from('perfiles')
         .select('*, tipos_personal(*)')
         .eq('id', userId)
-        .single()
+        .single();
+
+      const { data, error } = await Promise.race([queryPromise, timeoutPromise]);
       if (error) throw error
       setPerfil(data)
     } catch (e) {
@@ -145,7 +150,17 @@ export const AuthProvider = ({ children }) => {
         password: password,
       })
       if (error) throw error
-      return { success: true, user: data.user }
+
+      // Verificar si el perfil está aprobado por el admin
+      const { data: profileData } = await supabase
+        .from('perfiles')
+        .select('activo, rol, tipo_personal_id')
+        .eq('id', data.user.id)
+        .single()
+
+      const pendingApproval = !profileData?.activo
+
+      return { success: true, user: data.user, pendingApproval }
     } catch (err) {
       let msg = 'Error al iniciar sesión'
       if (err.message.includes('Invalid login')) msg = 'Email o contraseña incorrectos'
@@ -157,16 +172,28 @@ export const AuthProvider = ({ children }) => {
   // ── LOGIN CON GOOGLE ───────────────────────────────────────────────────────
   const loginWithGoogle = useCallback(async () => {
     if (!SUPABASE_READY) {
-      return { success: false, error: 'Google OAuth requiere Supabase configurado. Usá email y contraseña.' }
+      return { success: false, error: 'Google OAuth requiere Supabase configurado. Configurá VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY.' }
     }
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
+      const hostedDomain = getPrimaryHostedDomain()
+      const queryParams = hostedDomain ? { hd: hostedDomain } : {}
+      const redirectTo = `${window.location.origin}/auth/callback`
+
+      console.log('loginWithGoogle: redirectTo =', redirectTo, 'hd =', hostedDomain)
+
+      const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
-        options: { redirectTo: `${window.location.origin}/auth/callback` }
+        options: {
+          redirectTo,
+          queryParams,
+          skipBrowserRedirect: false,
+        },
       })
+      console.log('loginWithGoogle: response =', data, 'error =', error)
       if (error) throw error
       return { success: true }
     } catch (err) {
+      console.error('loginWithGoogle: error =', err)
       return { success: false, error: err.message }
     }
   }, [])
@@ -272,6 +299,7 @@ export const AuthProvider = ({ children }) => {
     hasRole,
     login,
     loginWithGoogle,
+    loginGoogle: loginWithGoogle,
     logout,
     register,
     cargarPerfil,

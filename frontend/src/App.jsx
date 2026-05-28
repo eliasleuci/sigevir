@@ -22,6 +22,7 @@ import Busqueda from './pages/Busqueda.jsx';
 import Administracion from './pages/Administracion.jsx';
 import Reportes from './pages/Reportes.jsx';
 import Unauthorized from './pages/Unauthorized.jsx';
+import PendingPage from './pages/PendingPage.jsx';
 
 const ROLES_ADMIN = ['admin'];
 const ROLES_RETENCION = ['admin', 'agente_campo'];
@@ -41,6 +42,7 @@ function App() {
             <Route path="/recovery" element={<PasswordRecovery />} />
             <Route path="/reset-password/:token" element={<ResetPassword />} />
             <Route path="/unauthorized" element={<Unauthorized />} />
+            <Route path="/pending" element={<PendingPage />} />
 
             <Route element={<ProtectedRoute />}>
               <Route element={<MainLayout />}>

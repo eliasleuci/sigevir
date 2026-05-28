@@ -56,10 +56,22 @@ CREATE INDEX IF NOT EXISTS idx_perfiles_email    ON perfiles(email);
 CREATE OR REPLACE FUNCTION handle_new_user()
 RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER
 SET search_path = public AS $$
+DECLARE
+  v_role TEXT;
+  v_active BOOLEAN;
 BEGIN
+  -- Determinar rol y si el dominio está permitido
+  SELECT rol INTO v_role FROM obtener_rol_por_email(NEW.email) LIMIT 1;
+  IF v_role IS NULL THEN
+    v_role := COALESCE(NEW.raw_user_meta_data->>'rol', 'agente_campo');
+    v_active := false; -- dominio no permitido, marcar como pendiente
+  ELSE
+    v_active := true;
+  END IF;
+
   INSERT INTO public.perfiles (
     id, nombre_completo, dni, telefono,
-    cargo, email, institucion, rol, tipo_personal_id
+    cargo, email, institucion, rol, tipo_personal_id, activo
   ) VALUES (
     NEW.id,
     COALESCE(NEW.raw_user_meta_data->>'nombre_completo', split_part(NEW.email, '@', 1)),
@@ -68,8 +80,9 @@ BEGIN
     NEW.raw_user_meta_data->>'cargo',
     NEW.email,
     NEW.raw_user_meta_data->>'institucion',
-    COALESCE(NEW.raw_user_meta_data->>'rol', 'agente_campo'),
-    NULLIF(NEW.raw_user_meta_data->>'tipo_personal_id', '')::UUID
+    v_role,
+    NULLIF(NEW.raw_user_meta_data->>'tipo_personal_id', '')::UUID,
+    v_active
   )
   ON CONFLICT (id) DO NOTHING;
   RETURN NEW;
@@ -83,6 +96,14 @@ CREATE TRIGGER on_auth_user_created
 
 -- ── 4. Row Level Security (RLS) ─────────────────────────────────────────────
 
+-- ── Función auxiliar para evitar bucle infinito en RLS ────────────────────────
+CREATE OR REPLACE FUNCTION es_admin() RETURNS BOOLEAN LANGUAGE sql SECURITY DEFINER AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM perfiles 
+    WHERE id = auth.uid() AND rol = 'admin'
+  );
+$$;
+
 -- Tipos de personal: lectura pública de activos, escritura solo admin
 ALTER TABLE tipos_personal ENABLE ROW LEVEL SECURITY;
 
@@ -93,7 +114,7 @@ CREATE POLICY "tipos_lectura_publica"
 DROP POLICY IF EXISTS "admin_gestiona_tipos" ON tipos_personal;
 CREATE POLICY "admin_gestiona_tipos"
   ON tipos_personal FOR ALL
-  USING (EXISTS (SELECT 1 FROM perfiles WHERE id = auth.uid() AND rol = 'admin'));
+  USING (es_admin());
 
 -- Perfiles: cada uno ve el suyo; admin ve todos
 ALTER TABLE perfiles ENABLE ROW LEVEL SECURITY;
@@ -105,7 +126,7 @@ CREATE POLICY "ver_propio_perfil"
 DROP POLICY IF EXISTS "admin_gestiona_perfiles" ON perfiles;
 CREATE POLICY "admin_gestiona_perfiles"
   ON perfiles FOR ALL
-  USING (EXISTS (SELECT 1 FROM perfiles WHERE id = auth.uid() AND rol = 'admin'));
+  USING (es_admin());
 
 DROP POLICY IF EXISTS "usuario_actualiza_propio" ON perfiles;
 CREATE POLICY "usuario_actualiza_propio"

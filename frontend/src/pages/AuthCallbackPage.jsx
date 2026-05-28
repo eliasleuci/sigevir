@@ -1,33 +1,101 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase, SUPABASE_READY } from '../config/supabase';
 
 const AuthCallbackPage = () => {
   const navigate = useNavigate();
   const [status, setStatus] = useState('Procesando autenticación...');
+  const handled = useRef(false);
 
   useEffect(() => {
+    if (handled.current) return;
+    handled.current = true;
+
     const handleCallback = async () => {
-      if (!SUPABASE_READY) {
+      if (!SUPABASE_READY || !supabase) {
+        console.warn('Supabase not ready');
         setStatus('Supabase no configurado');
+        setTimeout(() => navigate('/login', { replace: true }), 2000);
         return;
       }
 
       try {
-        const { data: { session }, error } = await supabase.auth.getSession();
-        if (error) throw error;
-        if (session) {
-          setStatus('Autenticación exitosa. Redirigiendo...');
-          navigate('/dashboard', { replace: true });
-        } else {
-          setStatus('No se pudo verificar la sesión');
-          setTimeout(() => navigate('/login', { replace: true }), 2000);
+        const url = new URL(window.location.href);
+        const code = url.searchParams.get('code');
+        const errorParam = url.searchParams.get('error');
+        const errorDescription = url.searchParams.get('error_description');
+
+        // Check for OAuth error returned by provider
+        if (errorParam) {
+          console.error('OAuth error:', errorParam, errorDescription);
+          setStatus(errorDescription || 'Error en la autenticación con Google');
+          setTimeout(() => navigate('/login', { replace: true }), 3000);
+          return;
         }
+
+        // ── Strategy 1: PKCE flow – exchange code for session ──
+        if (code) {
+          console.log('Auth callback: PKCE flow, exchanging code...');
+          const { data: { session }, error } = await supabase.auth.exchangeCodeForSession(code);
+          if (error) throw error;
+          if (session?.user) {
+            setStatus('Autenticación exitosa. Redirigiendo...');
+            navigate('/dashboard', { replace: true });
+            return;
+          }
+        }
+
+        // ── Strategy 2: Implicit flow – tokens in hash fragment ──
+        const hashParams = new URLSearchParams(window.location.hash.substring(1));
+        const accessToken = hashParams.get('access_token');
+        if (accessToken) {
+          console.log('Auth callback: Implicit flow, setting session from hash...');
+          const refreshToken = hashParams.get('refresh_token') || '';
+          const { data: { session }, error } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken,
+          });
+          if (error) throw error;
+          if (session?.user) {
+            setStatus('Autenticación exitosa. Redirigiendo...');
+            navigate('/dashboard', { replace: true });
+            return;
+          }
+        }
+
+        // ── Strategy 3: Wait for onAuthStateChange to pick up the session ──
+        console.log('Auth callback: Waiting for session via onAuthStateChange...');
+        setStatus('Verificando sesión...');
+
+        // Give the auth listener time to process
+        const maxWait = 8000;
+        const pollInterval = 500;
+        let elapsed = 0;
+
+        const poll = async () => {
+          const { data: { session } } = await supabase.auth.getSession();
+          if (session?.user) {
+            setStatus('Autenticación exitosa. Redirigiendo...');
+            navigate('/dashboard', { replace: true });
+            return;
+          }
+          elapsed += pollInterval;
+          if (elapsed < maxWait) {
+            setTimeout(poll, pollInterval);
+          } else {
+            console.warn('Auth callback: No session found after waiting');
+            setStatus('No se pudo verificar la sesión. Redirigiendo al login...');
+            setTimeout(() => navigate('/login', { replace: true }), 2000);
+          }
+        };
+        setTimeout(poll, pollInterval);
       } catch (err) {
-        setStatus('Error en la autenticación');
-        setTimeout(() => navigate('/login', { replace: true }), 2000);
+        console.error('Auth callback error:', err);
+        setStatus(`Error: ${err.message || 'Error en la autenticación'}`);
+        setTimeout(() => navigate('/login', { replace: true }), 3000);
       }
     };
+
     handleCallback();
   }, [navigate]);
 

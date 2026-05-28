@@ -1,4 +1,4 @@
-﻿import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -70,8 +70,8 @@ async function reverseGeocode(lat, lng) {
   geocodingAbort = controller;
   try {
     const res = await fetch(
-      `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=es`,
-      { signal: controller.signal, headers: { 'User-Agent': 'SIGEVIR-App/1.0' } }
+      `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=es&email=contacto@sigevir.com`,
+      { signal: controller.signal }
     );
     const data = await res.json();
     return data.display_name || '';
@@ -92,7 +92,10 @@ const MapaSelector = ({ onLocationChange, initialPosition = null }) => {
   }, [initialPosition]);
 
   const handleGetCurrentLocation = useCallback(() => {
-    if (!navigator.geolocation) return;
+    if (!navigator.geolocation) {
+      alert("Su navegador no soporta geolocalización o está desactivada.");
+      return;
+    }
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         const lat = position.coords.latitude;
@@ -101,7 +104,10 @@ const MapaSelector = ({ onLocationChange, initialPosition = null }) => {
         const direccion = await reverseGeocode(lat, lng);
         onLocationChange?.({ lat, lng, direccion });
       },
-      () => {},
+      (error) => {
+        console.error("Error geolocalización:", error);
+        alert("No se pudo obtener su ubicación actual. Verifique que los permisos de ubicación estén habilitados en su dispositivo/navegador.");
+      },
       { enableHighAccuracy: true, timeout: 10000 }
     );
   }, [onLocationChange]);
@@ -129,8 +135,8 @@ const MapaSelector = ({ onLocationChange, initialPosition = null }) => {
           zoomControl={true}
         >
           <TileLayer
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            attribution='&copy; Google Maps'
+            url="https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}"
           />
           <MapContent
             markerPos={markerPos}

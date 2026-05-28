@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -15,7 +15,7 @@ const Login = () => {
   const { register, handleSubmit, formState: { errors } } = useForm({
     resolver: zodResolver(loginSchema),
   });
-  const { login, loginGoogle } = useAuth();
+  const { login, loginWithGoogle, supabaseReady } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
@@ -25,8 +25,13 @@ const Login = () => {
     try {
       const result = await login(data.email, data.password);
       if (result.success) {
-        toast.success('Sesion iniciada correctamente');
-        navigate('/dashboard');
+        if (result.pendingApproval) {
+          toast.info('Tu cuenta está pendiente de aprobación por el administrador.');
+          navigate('/pending');
+        } else {
+          toast.success('Sesion iniciada correctamente');
+          navigate('/dashboard');
+        }
       } else {
         toast.error(result.error || 'Error al iniciar sesion');
       }
@@ -38,9 +43,18 @@ const Login = () => {
   };
 
   const handleGoogleLogin = async () => {
+    if (!supabaseReady) {
+      toast.error('Google requiere Supabase. Configurá las variables en frontend/.env');
+      return;
+    }
     setGoogleLoading(true);
     try {
-      await loginGoogle();
+      const result = await loginWithGoogle();
+      if (!result.success) {
+        toast.error(result.error || 'Error al iniciar con Google');
+        setGoogleLoading(false);
+      }
+      // Si success, el navegador redirige a Google; no resetear loading
     } catch (error) {
       toast.error('Error al iniciar con Google');
       setGoogleLoading(false);
@@ -121,7 +135,7 @@ const Login = () => {
                       <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
                     </svg>
                   )}
-                  {googleLoading ? 'Conectando...' : 'Continuar con Google'}
+                  {googleLoading ? 'Conectando...' : 'Continuar con correo institucional (Google)'}
                 </button>
               </div>
             </div>

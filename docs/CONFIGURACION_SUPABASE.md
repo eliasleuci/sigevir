@@ -52,18 +52,19 @@ Esto creará:
    - **Secure email change:** ON
    - **Minimum password length:** 8
 
-### Google OAuth (opcional)
+### Google OAuth (correos institucionales)
+
+Para que los usuarios entren con `@tu-institucion.gob.ar` (Google Workspace), seguí la guía detallada:
+
+**→ [docs/GOOGLE_OAUTH_INSTITUCIONAL.md](./GOOGLE_OAUTH_INSTITUCIONAL.md)**
+
+Resumen rápido:
 
 1. En **Authentication → Providers**, habilitá **Google**
-2. Necesitás un proyecto en [Google Cloud Console](https://console.cloud.google.com):
-   - Crear proyecto o seleccionar uno existente
-   - Ir a **APIs & Services → Credentials**
-   - Crear **OAuth consent screen** (tipo External)
-   - Crear **OAuth client ID** (tipo Web application)
-   - Agregar URI de redirección:
-     https://<tu-proyecto>.supabase.co/auth/v1/callback
-3. Copiar **Client ID** y **Client Secret** a Supabase
-4. Activar el provider
+2. En [Google Cloud Console](https://console.cloud.google.com): OAuth **Interno** (Workspace) + Client ID web
+3. Redirect URI: `https://<tu-proyecto>.supabase.co/auth/v1/callback`
+4. En `frontend/.env`: `VITE_ALLOWED_EMAIL_DOMAINS=dominio1.gob.ar,dominio2.gob.ar`
+5. En Supabase **URL Configuration**: agregar `http://localhost:5173/auth/callback` (dev)
 
 ---
 
@@ -88,6 +89,7 @@ VITE_API_URL=http://localhost:3001/api
 VITE_SOCKET_URL=http://localhost:3001
 VITE_SUPABASE_URL=https://tu-proyecto.supabase.co
 VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+VITE_ALLOWED_EMAIL_DOMAINS=policia.gob.ar,fiscalia.gob.ar
 `
 
 ### Backend (ackend/.env)
