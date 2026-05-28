@@ -1,0 +1,27 @@
+name: Deploy Supabase Edge Functions
+
+on:
+  push:
+    branches: [ master ]                     # o la rama que uses para producción
+    paths:
+      - supabase/functions/create_retencion/**   # se dispara solo cuando cambias la función
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest                 # runner con Docker preinstalado
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Supabase CLI
+        run: |
+          curl -L https://github.com/supabase/cli/releases/download/v2.38.0/supabase_2.38.0_linux_amd64.tar.gz | tar xz
+          sudo mv supabase /usr/local/bin/
+
+      - name: Deploy create_retencion function
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+        run: |
+          supabase functions deploy create_retencion \
+            --project-ref $SUPABASE_PROJECT_REF
