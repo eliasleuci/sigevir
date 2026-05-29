@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@emotion/css": "^11.13.5",
     "@hookform/resolvers": "^5.2.2",
     "@react-oauth/google": "^0.12.1",
     "@supabase/supabase-js": "^2.105.4",
@@ -26,6 +27,7 @@
     "react-dom": "^18.2.0",
     "react-dropzone": "^15.0.0",
     "react-hook-form": "^7.51.3",
+    "react-hot-toast": "^2.6.0",
     "react-icons": "^5.1.0",
     "react-leaflet": "^4.2.1",
     "react-router-dom": "^6.22.3",

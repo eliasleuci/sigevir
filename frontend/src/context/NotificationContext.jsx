@@ -1,8 +1,8 @@
 import React, { createContext, useState, useEffect, useContext, useCallback } from 'react';
 import { io } from 'socket.io-client';
 import { AuthContext } from './AuthContext.jsx';
-import { toast } from 'react-toastify';
-
+// Se mantiene react-hot-toast para los toasts personalizados
+import Toast from '../components/notifications/Toast';
 export const NotificationContext = createContext();
 
 const DEMO_NOTIFICATIONS = [
@@ -23,8 +23,9 @@ export const NotificationProvider = ({ children }) => {
       return;
     }
     if (isAuthenticated && token) {
-      const socketUrl = import.meta.env.VITE_SOCKET_URL || 'http://localhost:3001';
-      const newSocket = io(socketUrl, {
+      const socketUrl = import.meta.env.VITE_SOCKET_URL || 'http://localhost:4000';
+      const socketNamespace = '/notifications';
+      const newSocket = io(`${socketUrl}${socketNamespace}`, {
         auth: { token }
       });
 
@@ -36,9 +37,13 @@ export const NotificationProvider = ({ children }) => {
         setIsConnected(false);
       });
 
-      newSocket.on('notification', (notification) => {
+      newSocket.on('nueva_notificacion', (notification) => {
         setNotifications((prev) => [notification, ...prev]);
-        toast.info(notification.mensaje || notification.message || 'Nueva notificacion');
+        // Use a custom toast with premium styling
+        toast.custom((t) => <Toast notification={notification} toast={t} />, {
+          duration: 5000,
+          position: 'bottom-right',
+        });
       });
 
       setSocket(newSocket);

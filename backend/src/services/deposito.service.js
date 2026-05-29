@@ -2,6 +2,7 @@ import { Op } from 'sequelize';
 import db from '../models/index.js';
 import { AppError } from '../middleware/errorHandler.js';
 import logger from '../utils/logger.js';
+import socketService from '../services/socketService.js';
 
 const { Deposito, Retencion, Vehiculo, VehicleStatusLog, HistorialMovimiento, Usuario } = db;
 
@@ -79,6 +80,12 @@ class DepositoService {
       }, { transaction });
 
       await transaction.commit();
+      // Notificar a los usuarios del depósito sobre el ingreso
+      await socketService.broadcastToRole('deposito', retencion.institucion_id, {
+        tipo: 'info',
+        mensaje: `Ingreso: vehículo ${retencion.numero_expediente} ingresó al depósito (Sector ${data.sector})`,
+        retencion_id: retencion.id
+      });
       logger.info(`Ingreso a depósito confirmado: ${retencion.numero_expediente} por ${user.userId}`);
 
       return {
@@ -305,6 +312,12 @@ class DepositoService {
       }, { transaction });
 
       await transaction.commit();
+      // Notificar a los usuarios del depósito sobre el egreso
+      await socketService.broadcastToRole('deposito', deposito.institucion_id, {
+        tipo: 'info',
+        mensaje: `Egreso: vehículo ${deposito.retencion.numero_expediente} salió del depósito`,
+        retencion_id: deposito.retencion.id
+      });
 
       const diffTime = Math.abs(deposito.fecha_hora_egreso - deposito.fecha_hora_ingreso);
 

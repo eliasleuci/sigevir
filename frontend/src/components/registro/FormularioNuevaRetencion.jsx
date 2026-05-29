@@ -44,32 +44,37 @@ const FormularioNuevaRetencion = ({ onSubmit, loading, initialData = {} }) => {
 
   const handleSearchAddress = async () => {
     const query = getValues('lugar_retencion');
+    console.log('Buscar dirección:', query);
     if (!query || query.trim().length < 3) {
-      alert("Por favor, ingrese al menos 3 caracteres para buscar la dirección.");
+      alert('Por favor, ingrese al menos 3 caracteres para buscar la dirección.');
       return;
     }
-    
+
     setIsSearching(true);
     try {
       const res = await fetch(
-        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=1&accept-language=es&countrycodes=ar&email=contacto@sigevir.com`
+        `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(query)}&key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}`
       );
-      if (!res.ok) throw new Error("Error en la respuesta del servidor");
+      if (!res.ok) {
+        const errText = await res.text();
+        console.error('Geocode request error', res.status, errText);
+        throw new Error('Geocode request failed');
+      }
       const data = await res.json();
-      if (data && data.length > 0) {
-        const { lat, lon, display_name } = data[0];
+      console.log('Geocode response', data);
+      if (data.status === 'OK' && data.results && data.results.length > 0) {
+        const result = data.results[0];
+        const { lat, lng } = result.geometry.location;
         const latNum = parseFloat(lat);
-        const lngNum = parseFloat(lon);
-        setCoords({ latitud: latNum, longitud: lngNum });
-        setValue('latitud', latNum, { shouldValidate: true });
-        setValue('longitud', lngNum, { shouldValidate: true });
-        setValue('lugar_retencion', display_name);
+        const lngNum = parseFloat(lng);
+        // actualizar mapa y dirección
+        handleLocationChange({ lat: latNum, lng: lngNum, direccion: result.formatted_address });
       } else {
-        alert("No se encontró la dirección exacta. Intente agregar la ciudad (ej: 'Juan Jose Casal 1127, Córdoba').");
+        alert('No se encontró la dirección exacta. Intente con más detalles.');
       }
     } catch (err) {
       console.error(err);
-      alert("No se pudo conectar con el servicio de mapas. Verifique su conexión.");
+      alert('Error al consultar la API de Google Maps. Verifique su conexión.');
     } finally {
       setIsSearching(false);
     }
@@ -241,6 +246,12 @@ const FormularioNuevaRetencion = ({ onSubmit, loading, initialData = {} }) => {
               coords.latitud ? { lat: coords.latitud, lng: coords.longitud } : null
             }
           />
+          {/* Dirección seleccionada */}
+          {watch('lugar_retencion') && (
+            <p className="mt-2 text-sm text-gray-700">
+              <span className="font-medium">Dirección seleccionada:</span> {watch('lugar_retencion')}
+            </p>
+          )}
 
           <div className="space-y-1">
             <label className="text-sm font-semibold text-gray-700">Motivo de Retención</label>
