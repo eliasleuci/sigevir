@@ -1,0 +1,8 @@
+{
+    "dominio": "ABC123",
+    "tipo_vehiculo": "auto",
+    "marca": "Toyota",
+    "modelo": "Corolla",
+    "motivo_retencion": "Falta de VTV y seguro",
+    "lugar_retencion": "Av. San Martín 1234"
+}

@@ -1,10 +1,11 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import FormularioNuevaRetencion from '../components/registro/FormularioNuevaRetencion';
 import CargaFotos from '../components/registro/CargaFotos';
 import PreviewActa from '../components/registro/PreviewActa';
 import MuestraQR from '../components/registro/MuestraQR';
 import apiClient from '../services/apiClient';
-import { toast } from 'react-toastify';
+import { CREATE_RETENCION_URL } from '../config/api';
+import { uploadFotos } from '../api/uploadFotos';
 import { HiOutlineCheckCircle, HiOutlineArrowRight, HiOutlineArrowLeft } from 'react-icons/hi';
 
 const NuevaRetencion = () => {
@@ -32,42 +33,58 @@ const NuevaRetencion = () => {
   };
 
   const handleSubmitFinal = async () => {
-    if (fotos.length < 4) {
-      toast.warning('Debes cargar al menos 4 fotos del vehículo');
-      return;
-    }
+  if (fotos.length !== 4) {
+    toast.warning('Debes cargar exactamente 4 fotos del vehículo');
+    return;
+  }
 
-    setLoading(true);
-    const data = new FormData();
-    
-    Object.keys(formData).forEach(key => {
-      if (formData[key] !== undefined && formData[key] !== null) {
-        data.append(key, formData[key]);
-      }
+  setLoading(true);
+  try {
+    // 1️⃣ Crear la retención (sin fotos) usando la Edge Function
+    const resp = await fetch(CREATE_RETENCION_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+      },
+      body: JSON.stringify({
+        dominio: formData.dominio,
+        tipo_vehiculo: formData.tipo_vehiculo,
+        marca: formData.marca,
+        modelo: formData.modelo,
+        motivo_retencion: formData.motivo_retencion,
+        lugar_retencion: formData.lugar_retencion,
+      }),
     });
 
-    fotos.forEach(foto => {
-      data.append('fotos', foto.file);
+    if (!resp.ok) {
+      const err = await resp.json();
+      throw new Error(err.error || 'Error al crear la retención');
+    }
+
+    const result = await resp.json();
+    const { retencion_id, nro_expediente, qr_url, pdf_url } = result;
+
+    // 2️⃣ Subir las 4 fotos al bucket y actualizar la fila
+    await uploadFotos(retencion_id, fotos.map(f => f.file));
+
+    setResult({
+      id: retencion_id,
+      nro_expediente,
+      pdfUrl: pdf_url,
+      qrUrl: qr_url,
     });
 
-    try {
-      const response = await apiClient.post('/retenciones', data, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
-      
-      const { id, nro_expediente, pdf_url, qr_url } = response.data.data;
-      setResult({ id, nro_expediente, pdfUrl: pdf_url, qrUrl: qr_url });
-      
-      localStorage.removeItem('sigevir_borrador_retencion');
-      setStep(3);
-      toast.success('¡Retención registrada exitosamente!');
-    } catch (error) {
-      console.error(error);
-      toast.error(error.response?.data?.message || 'Error al registrar la retención');
-    } finally {
-      setLoading(false);
-    }
-  };
+    localStorage.removeItem('sigevir_borrador_retencion');
+    setStep(3);
+    toast.success('¡Retención registrada exitosamente con fotos!');
+  } catch (error) {
+    console.error(error);
+    toast.error(error.message || 'Error al registrar la retención');
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="max-w-5xl mx-auto space-y-8">

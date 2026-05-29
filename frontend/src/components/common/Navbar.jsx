@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { HiOutlineUserCircle, HiOutlineChevronDown, HiOutlineSearch, HiOutlineMenu } from 'react-icons/hi';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import NotificationCenter from '../NotificationCenter';
 
 const Navbar = ({ onToggleSidebar }) => {
-  const { user, logout } = useAuth();
+  const { user, logout, perfil } = useAuth();
+  const navigate = useNavigate();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
 
   return (
@@ -35,9 +37,13 @@ const Navbar = ({ onToggleSidebar }) => {
             onClick={() => setShowProfileMenu(!showProfileMenu)}
             className="flex items-center gap-2 lg:gap-3 p-1.5 hover:bg-gray-50 rounded-xl transition-all"
           >
-            <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-lg bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-sm lg:text-lg">
-              {user?.name?.charAt(0) || 'U'}
-            </div>
+            {perfil?.avatar_url ? (
+              <img src={perfil.avatar_url} alt="avatar" className="w-8 h-8 lg:w-10 lg:h-10 rounded-full object-cover" />
+            ) : (
+              <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-lg bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-sm lg:text-lg">
+                {user?.name?.charAt(0) || 'U'}
+              </div>
+            )}
             <div className="hidden md:block text-left">
               <p className="text-sm font-bold text-gray-900 leading-none">{user?.name || 'Usuario'}</p>
               <p className="text-[11px] text-gray-500 mt-1 uppercase font-semibold tracking-wider">{user?.role?.replace('_', ' ')}</p>
@@ -51,7 +57,7 @@ const Navbar = ({ onToggleSidebar }) => {
                 <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1">Institución</p>
                 <p className="text-sm font-bold text-gray-700 truncate">{user?.Institucion?.nombre || 'Sede Central'}</p>
               </div>
-              <button className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-50 hover:text-blue-600 transition-colors text-left">
+              <button onClick={() => navigate('/perfil')} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-50 hover:text-blue-600 transition-colors text-left">
                 <HiOutlineUserCircle className="w-5 h-5" />
                 Mi Perfil
               </button>

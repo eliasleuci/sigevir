@@ -23,6 +23,7 @@ import Administracion from './pages/Administracion.jsx';
 import Reportes from './pages/Reportes.jsx';
 import Unauthorized from './pages/Unauthorized.jsx';
 import PendingPage from './pages/PendingPage.jsx';
+import Perfil from './pages/Perfil.jsx';
 
 const ROLES_ADMIN = ['admin'];
 const ROLES_RETENCION = ['admin', 'agente_campo'];
@@ -66,9 +67,8 @@ function App() {
                 <Route path="/admin" element={
                   <ProtectedRoute allowedRoles={ROLES_ADMIN}><Administracion /></ProtectedRoute>
                 } />
-                <Route path="/reportes" element={
-                  <ProtectedRoute allowedRoles={['admin']}><Reportes /></ProtectedRoute>
-                } />
+                <Route path="/reportes" element={<ProtectedRoute allowedRoles={['admin']}><Reportes /></ProtectedRoute>} />
+                <Route path="/perfil" element={<Perfil />} />
               </Route>
             </Route>
 
