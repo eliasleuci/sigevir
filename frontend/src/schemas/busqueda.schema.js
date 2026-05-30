@@ -1,4 +1,4 @@
-import { z } from 'zod';
+﻿import { z } from 'zod';
 
 export const busquedaRapidaSchema = z.object({
   q: z.string().min(2, 'Ingrese al menos 2 caracteres'),
@@ -11,7 +11,7 @@ export const busquedaAvanzadaSchema = z.object({
   marca: z.string().optional().or(z.literal('')),
   modelo: z.string().optional().or(z.literal('')),
   estado_actual: z.enum([
-    'RETENIDO', 'EN_DEPOSITO', 'RESOLUCION_PENDIENTE', 'LIBERADO', 'SUBASTADO', 'COMPACTADO',
+    'RETENIDO', 'EN_DEPOSITO', 'RESOLUCION_PENDIENTE', 'EN_TRAMITE', 'LIBERADO', 'SUBASTADO', 'COMPACTADO',
   ]).optional().or(z.literal('')),
   fecha_desde: z.string().optional().or(z.literal('')),
   fecha_hasta: z.string().optional().or(z.literal('')),
@@ -21,5 +21,6 @@ export const busquedaAvanzadaSchema = z.object({
 });
 
 export const busquedaCausaSchema = z.object({
-  numero_expediente: z.string().min(1, 'Ingrese un número de expediente'),
+  numero_expediente: z.string().min(1, 'Ingrese un nÃºmero de expediente'),
 });
+

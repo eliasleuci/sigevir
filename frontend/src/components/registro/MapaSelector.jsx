@@ -1,6 +1,18 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { GoogleMap, Marker, useLoadScript } from '@react-google-maps/api';
 import { HiOutlineLocationMarker } from 'react-icons/hi';
+// -----------------------------------------------------------------------------
+// Google Maps Integration
+// -----------------------------------------------------------------------------
+// This component uses @react-google-maps/api to load the Google Maps JavaScript API.
+// The API key is read from the environment variable VITE_GOOGLE_MAPS_API_KEY.
+// The library "places" is loaded to enable geocoding and place autocomplete.
+// The component provides:
+//   • Lazy‑loading of the Geocoder instance (see useEffect at line 39).
+//   • Reverse‑geocoding of clicked coordinates to obtain a human‑readable address.
+//   • A button to use the browser's geolocation API to center the map on the user.
+//   • Emission of the selected location (lat, lng, address) via the onLocationChange callback.
+// All UI elements are styled with Tailwind CSS, and toast notifications are shown on errors.
 
 // Debe estar fuera del componente para que la referencia no cambie entre renders
 const LIBRARIES = ['places'];

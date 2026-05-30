@@ -1,0 +1,230 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Constancia de Entrega - SIGEVIR</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #333;
+            line-height: 1.4;
+            margin: 0;
+            padding: 40px;
+            font-size: 12px;
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            border-bottom: 2px solid #2c3e50;
+            padding-bottom: 20px;
+            margin-bottom: 20px;
+        }
+        .logo {
+            width: 80px;
+            height: 80px;
+            margin-right: 20px;
+        }
+        .institution-info h1 {
+            margin: 0;
+            font-size: 18px;
+            color: #2c3e50;
+        }
+        .institution-info p {
+            margin: 2px 0;
+            color: #7f8c8d;
+        }
+        .title-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .title-section h2 {
+            margin: 0;
+            font-size: 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #2c3e50;
+        }
+        .expediente-info {
+            margin-top: 10px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        .section {
+            margin-bottom: 20px;
+            border: 1px solid #ecf0f1;
+            border-radius: 4px;
+        }
+        .section-header {
+            background-color: #f7f9fa;
+            padding: 8px 15px;
+            font-weight: bold;
+            border-bottom: 1px solid #ecf0f1;
+            text-transform: uppercase;
+            font-size: 10px;
+            color: #34495e;
+        }
+        .section-body {
+            padding: 15px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .section-body-list {
+            padding: 15px;
+        }
+        .field {
+            margin-bottom: 5px;
+        }
+        .label {
+            font-weight: bold;
+            color: #7f8c8d;
+            margin-right: 5px;
+        }
+        .full-width {
+            grid-column: span 2;
+        }
+        .checklist {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        .check-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 10px;
+            background: #f8fdf8;
+            border: 1px solid #d4edda;
+            border-radius: 4px;
+            font-size: 11px;
+        }
+        .check-item .check {
+            color: #28a745;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        .footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-top: 60px;
+            border-top: 1px solid #ecf0f1;
+            padding-top: 20px;
+        }
+        .signature-box {
+            text-align: center;
+            width: 250px;
+        }
+        .signature-line {
+            border-top: 1px solid #333;
+            margin-top: 80px;
+            padding-top: 5px;
+        }
+        .stamp {
+            text-align: center;
+            width: 200px;
+        }
+        .stamp-box {
+            border: 2px solid #333;
+            border-radius: 8px;
+            padding: 15px 10px;
+            font-size: 10px;
+            font-weight: bold;
+            text-transform: uppercase;
+            color: #555;
+        }
+        .disclaimer {
+            margin-top: 30px;
+            padding: 10px 15px;
+            background: #fff3cd;
+            border: 1px solid #ffeeba;
+            border-radius: 4px;
+            font-size: 9px;
+            color: #856404;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <img src="{{logo_url}}" alt="Logo" class="logo">
+        <div class="institution-info">
+            <h1>{{institucion_nombre}}</h1>
+            <p>{{institucion_tipo}} - {{institucion_jurisdiccion}}</p>
+        </div>
+    </div>
+
+    <div class="title-section">
+        <h2>Constancia de Entrega de Vehículo</h2>
+        <div class="expediente-info">Expediente: {{numero_expediente}}</div>
+        <p>Fecha y Hora de Entrega: {{fecha_egreso}}</p>
+    </div>
+
+    <div class="section">
+        <div class="section-header">Datos del Vehículo Entregado</div>
+        <div class="section-body">
+            <div class="field"><span class="label">Dominio:</span> {{vehiculo_dominio}}</div>
+            <div class="field"><span class="label">Tipo:</span> {{vehiculo_tipo}}</div>
+            <div class="field"><span class="label">Marca/Modelo:</span> {{vehiculo_marca}} {{vehiculo_modelo}}</div>
+            <div class="field"><span class="label">Año:</span> {{vehiculo_anio}}</div>
+            <div class="field"><span class="label">Color:</span> {{vehiculo_color}}</div>
+            <div class="field"><span class="label">Motor:</span> {{vehiculo_motor}}</div>
+            <div class="field"><span class="label">Cuadro:</span> {{vehiculo_cuadro}}</div>
+            <div class="field"><span class="label">Período en Depósito:</span> {{dias_deposito}} días</div>
+            <div class="field full-width"><span class="label">Razón de Egreso:</span> {{razon_egreso}}</div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">Datos de la Persona que Retira</div>
+        <div class="section-body">
+            <div class="field"><span class="label">Nombre:</span> {{quien_retira}}</div>
+            <div class="field"><span class="label">DNI:</span> {{dni_quien_retira}}</div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">Documentación Recibida</div>
+        <div class="section-body-list">
+            <div class="checklist">
+                <div class="check-item"><span class="check">&#10003;</span> Carnet de Identidad</div>
+                <div class="check-item"><span class="check">&#10003;</span> Seguro del Vehículo</div>
+                <div class="check-item"><span class="check">&#10003;</span> Título de Propiedad</div>
+                <div class="check-item"><span class="check">&#10003;</span> Tarjeta Verde</div>
+            </div>
+        </div>
+    </div>
+
+    {{observaciones}}
+    <div class="section">
+        <div class="section-header">Observaciones</div>
+        <div class="section-body-list">
+            <p style="margin:0; font-style:italic;">{{observaciones_texto}}</p>
+        </div>
+    </div>
+    {{/observaciones}}
+
+    <div class="footer">
+        <div class="signature-box">
+            <div class="signature-line">
+                Firma del Responsable del Depósito<br>
+                {{responsable_nombre}}<br>
+                <span style="font-size:10px;color:#7f8c8d;">DNI: {{responsable_dni}}</span>
+            </div>
+        </div>
+        <div class="stamp">
+            <div class="stamp-box">
+                SISTEMA SIGEVIR<br>
+                Entrega Registrada<br>
+                {{fecha_firma}}
+            </div>
+        </div>
+    </div>
+
+    <div class="disclaimer">
+        Esta constancia certifica que el vehículo arriba detallado ha sido entregado en la fecha indicada,
+        junto con la documentación recibida. El sistema SIGEVIR deja registro digital de esta entrega.
+        El presente documento no constituye título de propiedad ni exonera obligaciones pendientes.
+    </div>
+</body>
+</html>

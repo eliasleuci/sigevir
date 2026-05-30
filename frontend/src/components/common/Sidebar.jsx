@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { 
   HiOutlineHome, 
@@ -17,11 +17,13 @@ const Sidebar = ({ isOpen, onClose }) => {
 
   const menuItems = [
     { name: 'Dashboard', path: '/dashboard', icon: HiOutlineHome, roles: ['admin', 'agente_campo', 'fiscal_juez', 'deposito'] },
-    { name: 'Nueva Retención', path: '/retenciones/nueva', icon: HiOutlineClipboardList, roles: ['admin', 'agente_campo'] },
-    { name: 'Búsqueda', path: '/busqueda', icon: HiOutlineSearch, roles: ['admin', 'fiscal_juez', 'agente_campo', 'deposito'] },
-    { name: 'Ingreso Depósito', path: '/deposito/ingreso', icon: HiOutlineOfficeBuilding, roles: ['admin', 'deposito'] },
+    { name: 'Nueva Retencion', path: '/retenciones/nueva', icon: HiOutlineClipboardList, roles: ['admin', 'agente_campo'] },
+    { name: 'Busqueda', path: '/busqueda', icon: HiOutlineSearch, roles: ['admin', 'fiscal_juez', 'agente_campo', 'deposito'] },
+    { name: 'Ingreso Deposito', path: '/deposito/ingreso', icon: HiOutlineOfficeBuilding, roles: ['admin', 'deposito'] },
+    { name: 'Tramites Retiro', path: '/deposito/tramites-retiro', icon: HiOutlineDocumentText, roles: ['admin', 'deposito'] },
+    { name: 'Registrar Egreso', path: '/deposito/egreso', icon: HiOutlineOfficeBuilding, roles: ['admin', 'deposito'] },
     { name: 'Causas Judiciales', path: '/judicial/causas', icon: HiOutlineDocumentText, roles: ['admin', 'fiscal_juez'] },
-    { name: 'Administración', path: '/admin', icon: HiOutlineUsers, roles: ['admin'] },
+    { name: 'Administracion', path: '/admin', icon: HiOutlineUsers, roles: ['admin'] },
   ];
 
   const filteredMenu = menuItems.filter(item => !item.roles || item.roles.includes(rol));
@@ -69,7 +71,7 @@ const Sidebar = ({ isOpen, onClose }) => {
                   : 'text-slate-400 hover:bg-slate-800 hover:text-white'}
               `}
             >
-              <item.icon className={`w-6 h-6 transition-transform duration-200 group-hover:scale-110`} />
+              <item.icon className={'w-6 h-6 transition-transform duration-200 group-hover:scale-110'} />
               <span className="text-sm tracking-wide">{item.name}</span>
             </NavLink>
           ))}
@@ -81,7 +83,7 @@ const Sidebar = ({ isOpen, onClose }) => {
             className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-red-500/10 hover:text-red-500 transition-all duration-200 font-medium group"
           >
             <HiOutlineLogout className="w-6 h-6 group-hover:rotate-12 transition-transform" />
-            <span>Cerrar Sesión</span>
+            <span>Cerrar Sesion</span>
           </button>
         </div>
       </aside>

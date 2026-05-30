@@ -1,4 +1,4 @@
-import { DataTypes, Model } from 'sequelize';
+﻿import { DataTypes, Model } from 'sequelize';
 import sequelize from '../config/database.js';
 
 class Deposito extends Model {}
@@ -9,7 +9,7 @@ Deposito.init({
     defaultValue: DataTypes.UUIDV4,
     primaryKey: true
   },
-  // Relación 1:1 con Retencion — una retención tiene un único depósito activo
+  // RelaciÃ³n 1:1 con Retencion â€” una retenciÃ³n tiene un Ãºnico depÃ³sito activo
   retencion_id: {
     type: DataTypes.UUID,
     allowNull: false,
@@ -17,13 +17,13 @@ Deposito.init({
   },
   institucion_id: {
     type: DataTypes.UUID,
-    allowNull: false // Institución dueña del depósito físico
+    allowNull: false // InstituciÃ³n dueÃ±a del depÃ³sito fÃ­sico
   },
   responsable_id: {
     type: DataTypes.UUID,
-    allowNull: false // Usuario con rol DEPOSITO que realizó el ingreso
+    allowNull: false // Usuario con rol DEPOSITO que realizÃ³ el ingreso
   },
-  // Ubicación física dentro del depósito
+  // UbicaciÃ³n fÃ­sica dentro del depÃ³sito
   sector: {
     type: DataTypes.STRING,
     allowNull: true
@@ -38,9 +38,9 @@ Deposito.init({
   },
   foto_ingreso_url: {
     type: DataTypes.STRING,
-    allowNull: true // Foto tomada al ingresar el vehículo al depósito
+    allowNull: true // Foto tomada al ingresar el vehÃ­culo al depÃ³sito
   },
-  // JSON con inventario de objetos encontrados dentro del vehículo
+  // JSON con inventario de objetos encontrados dentro del vehÃ­culo
   inventario_objetos: {
     type: DataTypes.JSONB,
     allowNull: true,
@@ -53,11 +53,24 @@ Deposito.init({
   },
   fecha_hora_egreso: {
     type: DataTypes.DATE,
-    allowNull: true // Null mientras el vehículo esté en el depósito
+    allowNull: true // Null mientras el vehÃ­culo estÃ© en el depÃ³sito
+  },
+  documentos_egreso: {
+    type: DataTypes.JSONB,
+    allowNull: true,
+    defaultValue: {}
+  },
+  quien_retira: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  dni_quien_retira: {
+    type: DataTypes.STRING,
+    allowNull: true
   },
   razon_egreso: {
     type: DataTypes.TEXT,
-    allowNull: true // Motivo de salida: liberación, subasta, traslado, etc.
+    allowNull: true // Motivo de salida: liberaciÃ³n, subasta, traslado, etc.
   }
 }, {
   sequelize,
@@ -73,3 +86,4 @@ Deposito.init({
 });
 
 export default Deposito;
+

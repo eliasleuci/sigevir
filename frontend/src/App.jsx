@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+﻿import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 
 
@@ -17,6 +17,7 @@ import Dashboard from './pages/Dashboard.jsx';
 import NuevaRetencion from './pages/NuevaRetencion.jsx';
 import ConfirmarIngreso from './pages/deposito/ConfirmarIngreso.jsx';
 import RegistrarEgreso from './pages/deposito/RegistrarEgreso.jsx';
+import TramitesRetiro from './pages/deposito/TramitesRetiro.jsx';
 import GestionCausas from './pages/judicial/GestionCausas.jsx';
 import Busqueda from './pages/Busqueda.jsx';
 import Administracion from './pages/Administracion.jsx';
@@ -55,6 +56,9 @@ function App() {
                 <Route path="/deposito/ingreso" element={
                   <ProtectedRoute allowedRoles={ROLES_DEPOSITO}><ConfirmarIngreso /></ProtectedRoute>
                 } />
+                <Route path="/deposito/tramites-retiro" element={
+                  <ProtectedRoute allowedRoles={ROLES_DEPOSITO}><TramitesRetiro /></ProtectedRoute>
+                } />
                 <Route path="/deposito/egreso" element={
                   <ProtectedRoute allowedRoles={ROLES_DEPOSITO}><RegistrarEgreso /></ProtectedRoute>
                 } />
@@ -82,3 +86,4 @@ function App() {
 }
 
 export default App;
+

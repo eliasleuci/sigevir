@@ -1,4 +1,4 @@
-import { DataTypes, Model } from 'sequelize';
+﻿import { DataTypes, Model } from 'sequelize';
 import sequelize from '../config/database.js';
 
 class Retencion extends Model {}
@@ -100,7 +100,7 @@ Retencion.init({
     allowNull: false,
     defaultValue: 'RETENIDO',
     validate: {
-      isIn: [['RETENIDO', 'EN_DEPOSITO', 'RESOLUCION_PENDIENTE', 'LIBERADO', 'SUBASTADO', 'COMPACTADO']]
+      isIn: [['RETENIDO', 'EN_DEPOSITO', 'RESOLUCION_PENDIENTE', 'EN_TRAMITE', 'LIBERADO', 'SUBASTADO', 'COMPACTADO']]
     }
   }
 }, {
@@ -123,3 +123,4 @@ Retencion.init({
 });
 
 export default Retencion;
+

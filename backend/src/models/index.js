@@ -1,4 +1,4 @@
-import sequelize from '../config/database.js';
+﻿import sequelize from '../config/database.js';
 
 // Importar Modelos
 import Institucion from './Institucion.js';
@@ -27,7 +27,7 @@ Usuario.hasMany(Retencion, { foreignKey: 'agente_id', as: 'retenciones_generadas
 Retencion.belongsTo(Usuario, { foreignKey: 'agente_id', as: 'agente' });
 
 // 4. Vehiculo <-> Retencion (1:N)
-// Un vehículo puede ser retenido múltiples veces a lo largo del tiempo
+// Un vehÃ­culo puede ser retenido mÃºltiples veces a lo largo del tiempo
 Vehiculo.hasMany(Retencion, { foreignKey: 'vehiculo_id', as: 'retenciones' });
 Retencion.belongsTo(Vehiculo, { foreignKey: 'vehiculo_id', as: 'vehiculo' });
 
@@ -55,9 +55,13 @@ FotoRetencion.belongsTo(Retencion, { foreignKey: 'retencion_id', as: 'retencion'
 Retencion.hasOne(ResolucionJudicial, { foreignKey: 'retencion_id', as: 'resolucion_judicial' });
 ResolucionJudicial.belongsTo(Retencion, { foreignKey: 'retencion_id', as: 'retencion' });
 
-// 11. Deposito <-> Retencion (1:N)
+// 11. Deposito <-> Retencion (1:1 via retencion_id, 1:N via deposito_id)
+Deposito.belongsTo(Retencion, { foreignKey: 'retencion_id', as: 'retencion' });
+Retencion.hasOne(Deposito, { foreignKey: 'retencion_id', as: 'deposito_activo' });
+
+// 11b. Deposito <-> Retencion (1:N)
 Deposito.hasMany(Retencion, { foreignKey: 'deposito_id', as: 'retenciones_albergadas' });
-// Agregar deposito_id a Retencion si no estaba explícito (Sequelize lo maneja si se define aquí)
+// Agregar deposito_id a Retencion si no estaba explÃ­cito (Sequelize lo maneja si se define aquÃ­)
 Retencion.belongsTo(Deposito, { foreignKey: 'deposito_id', as: 'deposito' });
 
 // 12. Usuario <-> Notificacion (1:N)
@@ -79,3 +83,5 @@ const db = {
 };
 
 export default db;
+
+

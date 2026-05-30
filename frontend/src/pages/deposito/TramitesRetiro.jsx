@@ -1,23 +1,23 @@
 ﻿import React, { useState, useEffect } from 'react';
 import ListaPendientesEgreso from '../../components/deposito/ListaPendientesEgreso';
-import FormularioEgreso from '../../components/deposito/FormularioEgreso';
+import FormularioTramite from '../../components/deposito/FormularioTramite';
 import apiClient from '../../services/apiClient';
 import { toast } from 'react-toastify';
 import { HiOutlineCheckCircle, HiOutlineLibrary, HiOutlineDownload } from 'react-icons/hi';
 
-const RegistrarEgreso = () => {
+const TramitesRetiro = () => {
   const [loading, setLoading] = useState(false);
   const [vehiculos, setVehiculos] = useState([]);
   const [selectedVehiculo, setSelectedVehiculo] = useState(null);
   const [step, setStep] = useState(1);
-  const [egresoId, setEgresoId] = useState(null);
+  const [tramiteResult, setTramiteResult] = useState(null);
 
-  useEffect(() => { fetchVehiculosPendientes(); }, []);
+  useEffect(() => { fetchPendientes(); }, []);
 
-  const fetchVehiculosPendientes = async () => {
+  const fetchPendientes = async () => {
     setLoading(true);
     try {
-      const response = await apiClient.get('/depositos/pendientes-egreso');
+      const response = await apiClient.get('/depositos/pendientes-tramite');
       setVehiculos(response.data.data);
     } catch (error) {
       toast.error('Error al cargar vehículos pendientes.');
@@ -32,15 +32,15 @@ const RegistrarEgreso = () => {
     window.scrollTo(0, 0);
   };
 
-  const handleEgresoSubmit = async (data) => {
+  const handleIniciarTramite = async (data) => {
     setLoading(true);
     try {
-      const response = await apiClient.post('/depositos/' + selectedVehiculo.id + '/egreso', data);
-      setEgresoId(response.data.data?.id || selectedVehiculo.id);
+      const response = await apiClient.post('/depositos/' + selectedVehiculo.id + '/iniciar-tramite', data);
+      setTramiteResult(response.data.data);
       setStep(3);
-      toast.success('¡Egreso registrado exitosamente!');
+      toast.success('¡Trámite iniciado exitosamente!');
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Error al registrar el egreso.');
+      toast.error(error.response?.data?.message || 'Error al iniciar el trámite.');
     } finally {
       setLoading(false);
     }
@@ -48,13 +48,13 @@ const RegistrarEgreso = () => {
 
   const handleDownloadConstancia = async () => {
     try {
-      const response = await apiClient.get('/depositos/' + (egresoId || selectedVehiculo.id) + '/constancia-entrega', {
+      const response = await apiClient.get('/depositos/' + (tramiteResult?.id || selectedVehiculo.id) + '/constancia-entrega', {
         responseType: 'blob'
       });
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', 'constancia_entrega_' + (egresoId || selectedVehiculo.id) + '.pdf');
+      link.setAttribute('download', 'constancia_tramite_' + (tramiteResult?.id || selectedVehiculo.id) + '.pdf');
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -68,8 +68,8 @@ const RegistrarEgreso = () => {
     <div className="max-w-7xl mx-auto py-8 px-4">
       <div className="mb-10 flex items-center justify-between">
         <div>
-          <h1 className="text-4xl font-black text-gray-900 mb-2 tracking-tight">Registro de Egresos</h1>
-          <p className="text-gray-500 font-medium">Confirmación de egreso definitivo de vehículos con trámite completado.</p>
+          <h1 className="text-4xl font-black text-gray-900 mb-2 tracking-tight">Trámites de Retiro</h1>
+          <p className="text-gray-500 font-medium">Gestión de trámites administrativos previos al egreso del vehículo.</p>
         </div>
 
         {step === 1 && (
@@ -77,7 +77,7 @@ const RegistrarEgreso = () => {
             <div className="w-10 h-10 bg-blue-600 text-white rounded-lg flex items-center justify-center font-black shadow-lg shadow-blue-200">
               {vehiculos.length}
             </div>
-            <p className="text-xs font-bold text-blue-900 uppercase tracking-widest leading-none">Expedientes<br/>Listos</p>
+            <p className="text-xs font-bold text-blue-900 uppercase tracking-widest leading-none">Expedientes<br/>Pendientes</p>
           </div>
         )}
       </div>
@@ -90,11 +90,11 @@ const RegistrarEgreso = () => {
 
       {step === 2 && selectedVehiculo && (
         <div className="animate-in fade-in slide-in-from-right-4 duration-300">
-          <FormularioEgreso
+          <FormularioTramite
             vehiculo={selectedVehiculo}
-            onSubmit={handleEgresoSubmit}
+            onSubmit={handleIniciarTramite}
+            onBack={() => setStep(1)}
             loading={loading}
-            onCancel={() => setStep(1)}
           />
         </div>
       )}
@@ -107,18 +107,18 @@ const RegistrarEgreso = () => {
               <HiOutlineLibrary className="w-6 h-6 text-gray-400" />
             </div>
           </div>
-          <h2 className="text-3xl font-black text-gray-900 mb-4">Egreso Confirmado</h2>
+          <h2 className="text-3xl font-black text-gray-900 mb-4">Trámite Iniciado</h2>
           <p className="text-gray-500 mb-6 leading-relaxed italic">
-            El vehículo ha sido entregado correctamente. La documentación fue registrada durante el trámite previo.
+            El trámite de retiro ha sido iniciado. Ahora el vehículo está disponible para registrar el egreso definitivo.
           </p>
 
           <button onClick={handleDownloadConstancia}
             className="w-full py-4 bg-green-600 text-white rounded-2xl font-black text-lg shadow-xl shadow-green-200 hover:bg-green-700 transition-all flex items-center justify-center gap-3 mb-4">
             <HiOutlineDownload className="w-6 h-6" />
-            Descargar Constancia de Entrega
+            Descargar Constancia
           </button>
 
-          <button onClick={() => { setStep(1); setSelectedVehiculo(null); setEgresoId(null); fetchVehiculosPendientes(); }}
+          <button onClick={() => { setStep(1); setSelectedVehiculo(null); setTramiteResult(null); fetchPendientes(); }}
             className="w-full py-4 bg-blue-600 text-white rounded-2xl font-black text-lg shadow-xl shadow-blue-200 hover:bg-blue-700 transition-all">
             Volver a la Lista
           </button>
@@ -128,4 +128,4 @@ const RegistrarEgreso = () => {
   );
 };
 
-export default RegistrarEgreso;
+export default TramitesRetiro;

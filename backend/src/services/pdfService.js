@@ -1,4 +1,4 @@
-import puppeteer from 'puppeteer';
+﻿import puppeteer from 'puppeteer';
 import { S3Client, PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import fs from 'fs/promises';
@@ -22,22 +22,12 @@ class PDFService {
     });
   }
 
-  /**
-   * Genera el acta de retención en formato PDF
-   * @param {Object} data - Datos de la retención
-   * @returns {Promise<Buffer>} Buffer del PDF
-   */
   async generateActaRetencion(data) {
     let browser;
     try {
-      // 1. Obtener QR Data URL
       const qrDataUrl = await qrService.generateQRCode(data.qr_url);
-
-      // 2. Leer template
       const templatePath = path.join(__dirname, '../templates/acta.html');
       let html = await fs.readFile(templatePath, 'utf8');
-
-      // 3. Reemplazar placeholders básicos (Usamos un reemplazo simple)
       const replacements = {
         '{{logo_url}}': data.institucion?.logo_url || 'https://via.placeholder.com/150',
         '{{institucion_nombre}}': data.institucion?.nombre || 'Institución No Especificada',
@@ -68,42 +58,29 @@ class PDFService {
         '{{fecha_firma}}': new Date().toLocaleDateString('es-AR'),
         '{{qr_data_url}}': qrDataUrl
       };
-
       for (const [key, value] of Object.entries(replacements)) {
         html = html.split(key).join(value);
       }
-
-      // Manejar fotos (las primeras 4)
-      const fotosHtml = (data.fotos || [])
-        .slice(0, 4)
-        .map(url => `<img src="${url}" class="photo-item">`)
-        .join('');
+      const fotosHtml = (data.fotos || []).slice(0, 4).map(url => `<img src="${url}" class="photo-item">`).join('');
       html = html.replace('{{#each fotos}}', '').replace('{{/each}}', fotosHtml);
-      
-      // Limpiar bloque opcional versus si no existe
       if (!data.versus) {
         html = html.replace(/{{#if versus}}[\s\S]*?{{\/if}}/, '');
       } else {
         html = html.replace('{{#if versus}}', '').replace('{{/if}}', '');
       }
-
-      // 4. Iniciar Puppeteer y generar PDF
       browser = await puppeteer.launch({
         headless: 'new',
         args: ['--no-sandbox', '--disable-setuid-sandbox']
       });
       const page = await browser.newPage();
       await page.setContent(html, { waitUntil: 'networkidle0' });
-      
       const pdfBuffer = await page.pdf({
         format: 'A4',
         printBackground: true,
         margin: { top: '0px', right: '0px', bottom: '0px', left: '0px' }
       });
-
       await browser.close();
       return pdfBuffer;
-
     } catch (error) {
       if (browser) await browser.close();
       logger.error(`Error generando PDF: ${error.message}`);
@@ -111,47 +88,54 @@ class PDFService {
     }
   }
 
-  /**
-   * Sube un PDF a S3 y devuelve una URL firmada
-   * @param {Buffer} pdfBuffer - Contenido del PDF
-   * @param {string} fileName - Nombre del archivo
-   * @returns {Promise<string>} URL firmada
-   */
   async uploadPdfToS3(pdfBuffer, fileName) {
     const now = new Date();
     const year = now.getFullYear();
     const month = String(now.getMonth() + 1).padStart(2, '0');
     const key = `actas/${year}/${month}/${fileName}.pdf`;
-
     try {
       const command = new PutObjectCommand({
         Bucket: process.env.AWS_S3_DOCUMENTS_BUCKET || 'sigevir-documents',
         Key: key,
         Body: pdfBuffer,
         ContentType: 'application/pdf',
-        // ACL: 'private' // No soportado directamente en PutObject si el bucket tiene enforced ownership
       });
-
       await this.s3Client.send(command);
-
-      // Generar URL firmada por 7 días
       const getCommand = new GetObjectCommand({
         Bucket: process.env.AWS_S3_DOCUMENTS_BUCKET || 'sigevir-documents',
         Key: key
       });
-      
-      // Nota: getSignedUrl de v3 requiere el cliente y el comando
-      // Usamos un mock si no hay credenciales reales configuradas para no romper el flujo
       if (process.env.NODE_ENV !== 'production' && !process.env.AWS_ACCESS_KEY_ID) {
-          logger.warn('Simulando subida a S3 y URL firmada (entorno desarrollo)');
-          return `https://s3.amazonaws.com/sigevir-documents/${key}?signed=true`;
+        logger.warn('Simulando subida a S3 y URL firmada (entorno desarrollo)');
+        return `https://s3.amazonaws.com/sigevir-documents/${key}?signed=true`;
       }
-
       return await getSignedUrl(this.s3Client, getCommand, { expiresIn: 604800 });
-
     } catch (error) {
       logger.error(`Error subiendo a S3: ${error.message}`);
       throw new AppError('Error al guardar el acta digital', 500);
+    }
+  }
+
+  async generatePdfFromHtml(html) {
+    let browser;
+    try {
+      browser = await puppeteer.launch({
+        headless: 'new',
+        args: ['--no-sandbox', '--disable-setuid-sandbox']
+      });
+      const page = await browser.newPage();
+      await page.setContent(html, { waitUntil: 'networkidle0' });
+      const pdfBuffer = await page.pdf({
+        format: 'A4',
+        printBackground: true,
+        margin: { top: '20px', right: '20px', bottom: '20px', left: '20px' }
+      });
+      await browser.close();
+      return pdfBuffer;
+    } catch (error) {
+      if (browser) await browser.close();
+      logger.error('Error generando PDF desde HTML: ' + error.message);
+      throw new AppError('Error al generar el PDF', 500);
     }
   }
 }
