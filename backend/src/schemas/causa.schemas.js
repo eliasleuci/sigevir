@@ -10,10 +10,9 @@ export const buscarCausaSchema = Joi.object({
 
 export const emitirResolucionSchema = Joi.object({
   numero_expediente: Joi.string().required(),
-  tipo: Joi.string().valid('liberacion', 'subasta', 'compactacion').required(),
+  tipo: Joi.string().valid('liberacion', 'subasta', 'compactacion', 'traslado', 'otro').required(),
   observaciones: Joi.string().allow('', null),
-  documento_url: Joi.string().uri().required().messages({
-    'any.required': 'La URL del documento judicial es obligatoria',
+  documento_url: Joi.string().uri().optional().allow(null, '').messages({
     'string.uri': 'La URL del documento debe ser una URI válida'
   })
 });

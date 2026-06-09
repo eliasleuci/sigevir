@@ -43,7 +43,11 @@ if (process.env.DB_HOST === 'sqlite' || !process.env.DB_HOST) {
       dialectOptions: {
         useUTC: true,
         dateStrings: true,
-        typeCast: true
+        typeCast: true,
+        ssl: {
+          require: true,
+          rejectUnauthorized: false
+        }
       }
     }
   );
@@ -55,7 +59,11 @@ export const connectDB = async () => {
     logger.info(`✅ Conexión establecida correctamente (${sequelize.getDialect()}).`);
     
     if (isDevelopment) {
-      await sequelize.sync({ alter: true });
+      if (sequelize.getDialect() === 'sqlite') {
+        await sequelize.sync({ alter: true });
+      } else {
+        await sequelize.sync(); // No usar alter en Postgres
+      }
       logger.info('✅ Modelos sincronizados con la base de datos.');
       
       // Si estamos en SQLite (Modo Demo), sembrar datos iniciales

@@ -1,4 +1,4 @@
-﻿import { DataTypes, Model } from 'sequelize';
+import { DataTypes, Model } from 'sequelize';
 import sequelize from '../config/database.js';
 
 class Retencion extends Model {}
@@ -11,13 +11,57 @@ Retencion.init({
   },
   numero_expediente: {
     type: DataTypes.STRING,
+    allowNull: true,
+    unique: true,
+    field: 'nro_expediente'
+  },
+  dominio: {
+    type: DataTypes.STRING,
     allowNull: false,
     unique: true
   },
-  vehiculo_id: {
-    type: DataTypes.UUID,
+  tipo_vehiculo: {
+    type: DataTypes.STRING,
     allowNull: false
   },
+  marca: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  modelo: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  color: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  nro_motor: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  nro_cuadro: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  titular_nombre: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  titular_dni: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  titular_domicilio: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  // Remove vehiculo_id reference
+  // vehiculo_id: {
+  //   type: DataTypes.UUID,
+  //   allowNull: false
+  // },
+
   institucion_id: {
     type: DataTypes.UUID,
     allowNull: false
@@ -71,14 +115,7 @@ Retencion.init({
     type: DataTypes.STRING,
     allowNull: true
   },
-  titular_nombre: {
-    type: DataTypes.STRING,
-    allowNull: true
-  },
-  titular_dni: {
-    type: DataTypes.STRING,
-    allowNull: true
-  },
+
   titular_contacto: {
     type: DataTypes.STRING,
     allowNull: true
@@ -110,7 +147,7 @@ Retencion.init({
   paranoid: true,
   indexes: [
     { fields: ['numero_expediente'] },
-    { fields: ['vehiculo_id'] },
+
     { fields: ['institucion_id'] },
     { fields: ['fecha_hora'] },
     { fields: ['estado_actual'] }

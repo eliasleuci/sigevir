@@ -3,7 +3,7 @@ import db from '../models/index.js';
 import { AppError } from '../middleware/errorHandler.js';
 import logger from '../utils/logger.js';
 
-const { Retencion, Vehiculo, Institucion, Usuario, VehicleStatusLog, FotoRetencion, HistorialMovimiento } = db;
+const { Retencion, Vehiculo, Institucion, Usuario, VehicleStatusLog, FotoRetencion, HistorialMovimiento, ResolucionJudicial, Deposito } = db;
 
 const SIGEVIR_DOMAIN = process.env.SIGEVIR_PUBLIC_DOMAIN || 'https://sigevir.dominio.com';
 
@@ -175,15 +175,16 @@ class RetencionService {
   async obtenerRetencion(retencionId, user) {
     const retencion = await Retencion.findByPk(retencionId, {
       include: [
-        { model: Vehiculo, as: 'vehiculo' },
         { model: Institucion, as: 'institucion', attributes: ['id', 'nombre', 'tipo'] },
-        { model: Usuario, as: 'agente', attributes: ['id', 'nombre', 'apellido', 'email'] },
+        { model: Usuario, as: 'agente', attributes: ['id', 'nombre_completo', 'email'] },
         { model: FotoRetencion, as: 'fotos', attributes: ['id', 'url_s3', 'descripcion', 'orden'], order: [['orden', 'ASC']] },
+        { model: ResolucionJudicial, as: 'resolucion_judicial' },
+          { model: Deposito, as: 'deposito_activo' },
         {
           model: VehicleStatusLog,
           as: 'status_logs',
           attributes: ['id', 'estado', 'timestamp', 'observaciones'],
-          include: [{ model: Usuario, as: 'usuario', attributes: ['id', 'nombre', 'apellido'] }],
+          include: [{ model: Usuario, as: 'usuario', attributes: ['id', 'nombre_completo'] }],
           order: [['timestamp', 'DESC']]
         }
       ]
@@ -224,7 +225,6 @@ class RetencionService {
     const { count, rows } = await Retencion.findAndCountAll({
       where,
       include: [
-        { model: Vehiculo, as: 'vehiculo', attributes: ['dominio', 'marca', 'modelo', 'color'] },
         { model: Institucion, as: 'institucion', attributes: ['id', 'nombre'] }
       ],
       order: [['fecha_hora', 'DESC']],
@@ -236,9 +236,9 @@ class RetencionService {
       data: rows.map(r => ({
         id: r.id,
         numero_expediente: r.numero_expediente,
-        dominio: r.vehiculo?.dominio,
-        marca: r.vehiculo?.marca,
-        modelo: r.vehiculo?.modelo,
+        dominio: r.dominio,
+        marca: r.marca,
+        modelo: r.modelo,
         estado_actual: r.estado_actual,
         fecha_hora: r.fecha_hora,
         institucion: r.institucion?.nombre,

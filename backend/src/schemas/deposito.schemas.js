@@ -1,4 +1,4 @@
-﻿import Joi from 'joi';
+import Joi from 'joi';
 
 export const confirmarIngresoSchema = Joi.object({
   numero_expediente: Joi.string().required().messages({ 'any.required': 'El número de expediente es obligatorio' }),
@@ -43,6 +43,7 @@ export const registrarEgresoSchema = Joi.object({
   }),
   quien_retira: Joi.string().optional().allow('', null),
   dni_quien_retira: Joi.string().optional().allow('', null),
-  documentos_egreso: Joi.object().optional()
+  documentos_egreso: Joi.object().optional(),
+  observaciones_finales: Joi.string().optional().allow('', null)
 });
 

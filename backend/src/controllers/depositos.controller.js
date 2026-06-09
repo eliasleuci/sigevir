@@ -1,9 +1,10 @@
-﻿import depositoService from '../services/deposito.service.js';
+import depositoService from '../services/deposito.service.js';
 
 class DepositosController {
   confirmarIngreso = async (req, res, next) => {
     try {
-      const result = await depositoService.confirmarIngreso(req.body, req.user);
+      const { id } = req.params;
+      const result = await depositoService.confirmarIngreso(id, req.body, req.user);
       res.status(201).json({ success: true, data: result });
     } catch (error) { next(error); }
   };

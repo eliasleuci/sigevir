@@ -43,7 +43,7 @@ const GaleriaFotos = ({ fotos = [] }) => {
             className="relative aspect-square rounded-2xl overflow-hidden bg-gray-100 border border-gray-100 cursor-pointer group shadow-sm hover:shadow-xl transition-all duration-300"
           >
             <img 
-              src={foto.url} 
+              src={foto.url_s3 || foto.url} 
               alt={`Foto ${index + 1}`} 
               className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
             />
@@ -81,7 +81,7 @@ const GaleriaFotos = ({ fotos = [] }) => {
 
           <div className="max-w-5xl w-full flex flex-col items-center">
             <img 
-              src={selectedFoto.url} 
+              src={selectedFoto.url_s3 || selectedFoto.url} 
               alt="Foto ampliada" 
               className="max-h-[80vh] w-auto rounded-xl shadow-2xl object-contain animate-in zoom-in duration-300"
             />

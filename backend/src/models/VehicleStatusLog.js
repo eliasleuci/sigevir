@@ -32,7 +32,7 @@ VehicleStatusLog.init({
     allowNull: false,
     validate: {
       isIn: {
-        args: [['RETENIDO', 'EN_DEPOSITO', 'LIBERADO', 'SUBASTADO', 'COMPACTADO']],
+        args: [['RETENIDO', 'EN_DEPOSITO', 'RESOLUCION_PENDIENTE', 'EN_TRAMITE', 'LIBERADO', 'SUBASTADO', 'COMPACTADO']],
         msg: 'Estado de vehículo no válido'
       }
     }

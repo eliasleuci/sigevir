@@ -32,8 +32,8 @@ const ConfirmarIngreso = () => {
     
     setLoading(true);
     try {
-      const response = await apiClient.get(`/busqueda?dominio=${manualDominio}`);
-      const resultados = response.data.data.resultados;
+      const response = await apiClient.post(`/busqueda/avanzada`, { dominio: manualDominio });
+      const resultados = response.data?.resultados || response.data?.data?.resultados || [];
       if (resultados.length > 0) {
         setVehiculo(resultados[0]);
         setStep(2);

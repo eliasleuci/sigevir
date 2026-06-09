@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3001/api',
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:4001/api',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -47,7 +47,7 @@ apiClient.interceptors.request.use(
     if (demo) {
       config.headers['X-Demo-Mode'] = 'true';
       try {
-        const raw = localStorage.getItem('sigevir-auth');
+        const raw = localStorage.getItem('sigevir_session');
         if (raw) {
           const parsed = JSON.parse(raw);
           if (parsed.email) config.headers['X-Demo-User-Email'] = parsed.email;

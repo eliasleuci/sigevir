@@ -2,7 +2,7 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { HiOutlineUpload, HiOutlineDocumentDownload, HiOutlineExclamationCircle } from 'react-icons/hi';
+import { HiOutlineUpload, HiOutlineDocumentDownload, HiOutlineExclamationCircle, HiOutlineDocumentText } from 'react-icons/hi';
 import { FaGavel } from 'react-icons/fa';
 
 const resolucionSchema = z.object({

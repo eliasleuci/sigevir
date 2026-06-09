@@ -3,7 +3,7 @@ import db from '../models/index.js';
 import logger from '../utils/logger.js';
 import { AppError } from '../middleware/errorHandler.js';
 
-const { Retencion, Vehiculo, Institucion } = db;
+const { Retencion, Institucion } = db;
 
 class BusquedaController {
   /**
@@ -17,6 +17,7 @@ class BusquedaController {
         dominio,
         numero_motor,
         numero_cuadro,
+        nro_identificacion,
         dni_titular,
         numero_expediente,
         estado_actual,
@@ -46,7 +47,32 @@ class BusquedaController {
       }
 
       if (dni_titular) {
-        whereRetencion.titular_dni = { [Op.iLike]: `%${dni_titular}%` };
+        const cleanDni = dni_titular.replace(/\./g, '').trim();
+        whereRetencion[Op.and] = whereRetencion[Op.and] || [];
+        whereRetencion[Op.and].push(
+          db.sequelize.where(
+            db.sequelize.fn('REPLACE', db.sequelize.col('titular_dni'), '.', ''),
+            { [Op.iLike]: `%${cleanDni}%` }
+          )
+        );
+      }
+
+      if (dominio) {
+        whereRetencion.dominio = { [Op.iLike]: `%${dominio}%` };
+      }
+      
+      if (nro_identificacion) {
+        whereRetencion[Op.or] = [
+          { nro_motor: { [Op.iLike]: `%${nro_identificacion}%` } },
+          { nro_cuadro: { [Op.iLike]: `%${nro_identificacion}%` } }
+        ];
+      } else {
+        if (numero_motor) {
+          whereRetencion.nro_motor = { [Op.iLike]: `%${numero_motor}%` };
+        }
+        if (numero_cuadro) {
+          whereRetencion.nro_cuadro = { [Op.iLike]: `%${numero_cuadro}%` };
+        }
       }
 
       if (fecha_desde || fecha_hasta) {
@@ -55,22 +81,10 @@ class BusquedaController {
         if (fecha_hasta) whereRetencion.fecha_hora[Op.lte] = new Date(fecha_hasta);
       }
 
-      // Filtros para la tabla Vehiculo
-      const whereVehiculo = {};
-      if (dominio) whereVehiculo.dominio = { [Op.iLike]: `%${dominio}%` };
-      if (numero_motor) whereVehiculo.numero_motor = { [Op.iLike]: `%${numero_motor}%` };
-      if (numero_cuadro) whereVehiculo.numero_cuadro = { [Op.iLike]: `%${numero_cuadro}%` };
-
       // Ejecutar query con joins
       const { count, rows } = await Retencion.findAndCountAll({
         where: whereRetencion,
         include: [
-          {
-            model: Vehiculo,
-            as: 'vehiculo',
-            where: Object.keys(whereVehiculo).length > 0 ? whereVehiculo : undefined,
-            required: Object.keys(whereVehiculo).length > 0 // INNER JOIN si hay filtros de vehículo, LEFT JOIN si no
-          },
           {
             model: Institucion,
             as: 'institucion',
@@ -90,10 +104,10 @@ class BusquedaController {
         resultados: rows.map(r => ({
           id: r.id,
           numero_expediente: r.numero_expediente,
-          dominio: r.vehiculo?.dominio,
-          marca: r.vehiculo?.marca,
-          modelo: r.vehiculo?.modelo,
-          color: r.vehiculo?.color,
+          dominio: r.dominio,
+          marca: r.marca,
+          modelo: r.modelo,
+          color: r.color,
           provincia: r.provincia,
           localidad: r.localidad,
           fecha_retencion: r.fecha_hora,

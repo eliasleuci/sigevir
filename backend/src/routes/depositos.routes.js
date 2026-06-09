@@ -1,4 +1,4 @@
-﻿import { Router } from 'express';
+import { Router } from 'express';
 import depositosController from '../controllers/depositos.controller.js';
 import { validateRequest } from '../middleware/validateRequest.js';
 import { authenticate } from '../middleware/supabaseAuth.js';
@@ -15,7 +15,8 @@ const router = Router();
 
 router.use(authenticate);
 
-router.post('/confirmar-ingreso', validateRequest(confirmarIngresoSchema), depositosController.confirmarIngreso);
+// The frontend calls POST /api/depositos/:id/ingreso with multipart/form-data
+router.post('/:id/ingreso', uploadFotos.array('fotos'), depositosController.confirmarIngreso);
 
 router.post('/:id/foto-ingreso', uploadFotos.single('file'), depositosController.uploadFotoIngreso);
 

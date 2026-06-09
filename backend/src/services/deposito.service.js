@@ -1,4 +1,4 @@
-﻿import { Op } from 'sequelize';
+import { Op } from 'sequelize';
 import db from '../models/index.js';
 import { AppError } from '../middleware/errorHandler.js';
 import logger from '../utils/logger.js';
@@ -11,13 +11,13 @@ import fs from 'fs/promises';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const { Deposito, Retencion, Vehiculo, VehicleStatusLog, HistorialMovimiento, Usuario, ResolucionJudicial } = db;
+const { Deposito, Retencion, VehicleStatusLog, HistorialMovimiento, Usuario, ResolucionJudicial } = db;
 
 class DepositoService {
-  async confirmarIngreso(data, user) {
+  async confirmarIngreso(retencionId, data, user) {
     const transaction = await db.sequelize.transaction();
     try {
-      const retencion = await Retencion.findOne({ where: { numero_expediente: data.numero_expediente }, transaction });
+      const retencion = await Retencion.findByPk(retencionId, { transaction });
       if (!retencion) throw new AppError('Retención no encontrada', 404);
       const estadosValidos = ['RETENIDO', 'RETENIDO_EN_TRANSITO', 'RETENIDO_EN_TRASLADO'];
       const estadoNormalizado = retencion.estado_actual.toUpperCase();
@@ -33,7 +33,7 @@ class DepositoService {
         responsable_id: user.userId,
         sector: data.sector,
         fila: String(data.fila),
-        numero_espacio: String(data.numero_espacio),
+        numero_espacio: String(data.numero_espacio || data.espacio),
         inventario_objetos: data.inventario_objetos,
         fecha_hora_ingreso: new Date()
       }, { transaction });
@@ -45,7 +45,7 @@ class DepositoService {
       await HistorialMovimiento.create({
         retencion_id: retencion.id, usuario_id: user.userId, tipo_movimiento: 'INGRESO_DEPOSITO',
         origen: retencion.calle_direccion, destino: 'Depósito Sector ' + data.sector,
-        observaciones: data.observaciones || 'Ingreso físico al depósito'
+        observaciones: data.observaciones_ingreso || data.observaciones || 'Ingreso físico al depósito'
       }, { transaction });
       await transaction.commit();
       return { id: ingreso.id, numero_expediente: retencion.numero_expediente, estado_actual: 'EN_DEPOSITO', sector: ingreso.sector, fila: ingreso.fila, numero_espacio: ingreso.numero_espacio, fecha_hora_ingreso: ingreso.fecha_hora_ingreso };
@@ -79,11 +79,11 @@ class DepositoService {
     else if (institucion_id) whereRetencion.institucion_id = institucion_id;
     const { count, rows } = await Retencion.findAndCountAll({
       where: whereRetencion,
-      include: [{ model: Vehiculo, as: 'vehiculo', attributes: ['dominio', 'marca', 'modelo'] }],
+      // No se incluyen relaciones con Vehiculo, los datos están en la tabla Retencion
       order: [['fecha_hora', 'ASC']],
       limit: parseInt(limit, 10), offset: parseInt(offset, 10)
     });
-    return { data: rows.map(r => ({ numero_expediente: r.numero_expediente, vehiculo: r.vehiculo, provincia: r.provincia, localidad: r.localidad, fecha_hora: r.fecha_hora })), total: count, limit: parseInt(limit, 10), offset: parseInt(offset, 10) };
+    return { data: rows.map(r => ({ numero_expediente: r.numero_expediente, dominio: r.dominio, marca: r.marca, modelo: r.modelo, color: r.color, provincia: r.provincia, localidad: r.localidad, fecha_hora: r.fecha_hora })), total: count, limit: parseInt(limit, 10), offset: parseInt(offset, 10) };
   }
 
   async listPendientesEgreso(filtros, user) {
@@ -97,13 +97,13 @@ class DepositoService {
         model: Retencion, as: 'retencion', required: true,
         where: { estado_actual: { [Op.in]: ['EN_TRAMITE'] } },
         include: [
-          { model: Vehiculo, as: 'vehiculo' },
-          { model: ResolucionJudicial, as: 'resolucion_judicial', attributes: ['createdAt', 'observaciones'] }
+          // No se incluye Vehiculo, sus campos están en Retencion
+          { model: ResolucionJudicial, as: 'resolucion_judicial', attributes: ['fecha_emision', 'observaciones'] }
         ]
       }],
       order: [['fecha_hora_ingreso', 'DESC']]
     });
-    return { data: rows.map(d => { const ret = d.retencion; const v = ret?.vehiculo || {}; return { id: d.id, dominio: v.dominio, nro_expediente: ret?.numero_expediente, sector: d.sector, fila: d.fila, espacio: d.numero_espacio, estado: ret?.estado_actual, fecha_ingreso: d.fecha_hora_ingreso, tipo_vehiculo: v.tipo_vehiculo, marca: v.marca, modelo: v.modelo, resolucion_judicial: ret?.resolucion_judicial || null }; }) };
+    return { data: rows.map(d => { const ret = d.retencion; return { id: d.id, dominio: ret?.dominio, nro_expediente: ret?.numero_expediente, sector: d.sector, fila: d.fila, espacio: d.numero_espacio, estado: ret?.estado_actual, fecha_ingreso: d.fecha_hora_ingreso, tipo_vehiculo: ret?.tipo_vehiculo, marca: ret?.marca, modelo: ret?.modelo, resolucion_judicial: ret?.resolucion_judicial || null }; }) };
   }
 
   async listPendientesTramite(filtros, user) {
@@ -117,13 +117,13 @@ class DepositoService {
         model: Retencion, as: 'retencion', required: true,
         where: { estado_actual: { [Op.in]: ['RESOLUCION_PENDIENTE'] } },
         include: [
-          { model: Vehiculo, as: 'vehiculo' },
-          { model: ResolucionJudicial, as: 'resolucion_judicial', attributes: ['createdAt', 'observaciones'] }
+          // No Vehiculo, los datos están en Retencion
+          { model: ResolucionJudicial, as: 'resolucion_judicial', attributes: ['fecha_emision', 'observaciones'] }
         ]
       }],
       order: [['fecha_hora_ingreso', 'DESC']]
     });
-    return { data: rows.map(d => { const ret = d.retencion; const v = ret?.vehiculo || {}; return { id: d.id, dominio: v.dominio, nro_expediente: ret?.numero_expediente, sector: d.sector, fila: d.fila, espacio: d.numero_espacio, estado: ret?.estado_actual, fecha_ingreso: d.fecha_hora_ingreso, tipo_vehiculo: v.tipo_vehiculo, marca: v.marca, modelo: v.modelo, resolucion_judicial: ret?.resolucion_judicial || null }; }) };
+    return { data: rows.map(d => { const ret = d.retencion; return { id: d.id, dominio: ret?.dominio, nro_expediente: ret?.numero_expediente, sector: d.sector, fila: d.fila, espacio: d.numero_espacio, estado: ret?.estado_actual, fecha_ingreso: d.fecha_hora_ingreso, tipo_vehiculo: ret?.tipo_vehiculo, marca: ret?.marca, modelo: ret?.modelo, resolucion_judicial: ret?.resolucion_judicial || null }; }) };
   }
 
   async iniciarTramite(id, data, user) {
@@ -153,11 +153,11 @@ class DepositoService {
   }
 
   async getDeposito(id, user) {
-    const deposito = await Deposito.findByPk(id, { include: [{ model: Retencion, as: 'retencion', include: [{ model: Vehiculo, as: 'vehiculo' }] }] });
+    const deposito = await Deposito.findByPk(id, { include: [{ model: Retencion, as: 'retencion' }] });
     if (!deposito) throw new AppError('Registro de depósito no encontrado', 404);
     if (user.role !== 'admin' && user.role !== 'fiscal_juez' && deposito.institucion_id !== user.institucion_id) throw new AppError('Acceso denegado', 403);
     const diffTime = Math.abs((deposito.fecha_hora_egreso || new Date()) - deposito.fecha_hora_ingreso);
-    return { id: deposito.id, numero_expediente: deposito.retencion?.numero_expediente, vehiculo: deposito.retencion?.vehiculo, sector: deposito.sector, fila: deposito.fila, numero_espacio: deposito.numero_espacio, inventario_objetos: deposito.inventario_objetos, foto_ingreso_url: deposito.foto_ingreso_url, fecha_hora_ingreso: deposito.fecha_hora_ingreso, fecha_hora_egreso: deposito.fecha_hora_egreso, estado_actual: deposito.retencion?.estado_actual, tiempo_deposito_dias: Math.ceil(diffTime / (1000 * 60 * 60 * 24)), documentos_egreso: deposito.documentos_egreso };
+    return { id: deposito.id, numero_expediente: deposito.retencion?.numero_expediente, vehiculo: deposito.retencion, sector: deposito.sector, fila: deposito.fila, numero_espacio: deposito.numero_espacio, inventario_objetos: deposito.inventario_objetos, foto_ingreso_url: deposito.foto_ingreso_url, fecha_hora_ingreso: deposito.fecha_hora_ingreso, fecha_hora_egreso: deposito.fecha_hora_egreso, estado_actual: deposito.retencion?.estado_actual, tiempo_deposito_dias: Math.ceil(diffTime / (1000 * 60 * 60 * 24)), documentos_egreso: deposito.documentos_egreso };
   }
 
   async listDepositos(filtros, user) {
@@ -170,11 +170,13 @@ class DepositoService {
     else whereDeposito.fecha_hora_egreso = null;
     const { count, rows } = await Deposito.findAndCountAll({
       where: whereDeposito,
-      include: [{ model: Retencion, as: 'retencion', include: [{ model: Vehiculo, as: 'vehiculo', attributes: ['dominio'] }] }],
+      include: [{ model: Retencion, as: 'retencion', // Vehiculo fields están en Retencion
+        // No include de Vehiculo
+      }],
       order: [['fecha_hora_ingreso', 'DESC']],
       limit: parseInt(limit, 10), offset: parseInt(offset, 10)
     });
-    return { data: rows.map(d => { const diffTime = Math.abs((d.fecha_hora_egreso || new Date()) - d.fecha_hora_ingreso); return { id: d.id, numero_expediente: d.retencion?.numero_expediente, dominio: d.retencion?.vehiculo?.dominio, sector: d.sector, fila: d.fila, espacio: d.numero_espacio, fecha_ingreso: d.fecha_hora_ingreso, dias_deposito: Math.ceil(diffTime / (1000 * 60 * 60 * 24)), estado_actual: d.retencion?.estado_actual }; }), total: count, limit: parseInt(limit, 10), offset: parseInt(offset, 10) };
+    return { data: rows.map(d => { const diffTime = Math.abs((d.fecha_hora_egreso || new Date()) - d.fecha_hora_ingreso); return { id: d.id, numero_expediente: d.retencion?.numero_expediente, dominio: d.retencion?.dominio, sector: d.sector, fila: d.fila, espacio: d.numero_espacio, fecha_ingreso: d.fecha_hora_ingreso, dias_deposito: Math.ceil(diffTime / (1000 * 60 * 60 * 24)), estado_actual: d.retencion?.estado_actual }; }), total: count, limit: parseInt(limit, 10), offset: parseInt(offset, 10) };
   }
 
   async registrarEgreso(id, data, user) {
@@ -186,7 +188,7 @@ class DepositoService {
       if (data.razon_egreso) updateData.razon_egreso = data.razon_egreso;
       await deposito.update(updateData, { transaction });
       await deposito.retencion.update({ estado_actual: 'LIBERADO' }, { transaction });
-      await VehicleStatusLog.create({ retencion_id: deposito.retencion_id, estado: 'LIBERADO', usuario_id: user.userId, observaciones: 'Egreso del depósito registrado. Razón: ' + data.razon_egreso }, { transaction });
+      await VehicleStatusLog.create({ retencion_id: deposito.retencion_id, estado: 'LIBERADO', usuario_id: user.userId, observaciones: 'Egreso del depósito registrado. Razón: ' + data.razon_egreso + (data.observaciones_finales ? '. Observaciones: ' + data.observaciones_finales : '') }, { transaction });
       await transaction.commit();
       const diffTime = Math.abs(deposito.fecha_hora_egreso - deposito.fecha_hora_ingreso);
       return { id: deposito.id, numero_expediente: deposito.retencion.numero_expediente, estado_actual: 'LIBERADO', fecha_hora_ingreso: deposito.fecha_hora_ingreso, fecha_hora_egreso: deposito.fecha_hora_egreso, dias_deposito: Math.ceil(diffTime / (1000 * 60 * 60 * 24)), razon_egreso: deposito.razon_egreso, documentos_egreso: deposito.documentos_egreso };
@@ -200,12 +202,12 @@ class DepositoService {
 
   async generarConstanciaEntrega(depositoId, user) {
     const deposito = await Deposito.findByPk(depositoId, {
-      include: [{ model: Retencion, as: 'retencion', include: [{ model: Vehiculo, as: 'vehiculo' }] }]
+      include: [{ model: Retencion, as: 'retencion' }]
     });
     if (!deposito) throw new AppError('Registro de depósito no encontrado', 404);
     if (user.role !== 'admin' && user.role !== 'deposito') throw new AppError('Acceso denegado', 403);
     const ret = deposito.retencion;
-    const v = ret?.vehiculo || {};
+    const v = { dominio: ret?.dominio, tipo_vehiculo: ret?.tipo_vehiculo, marca: ret?.marca, modelo: ret?.modelo, anio: ret?.anio, color: ret?.color, numero_motor: ret?.nro_motor, numero_cuadro: ret?.nro_cuadro };
     const diffTime = Math.abs((deposito.fecha_hora_egreso || new Date()) - deposito.fecha_hora_ingreso);
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     let html = await fs.readFile(path.join(__dirname, '../templates/constancia_entrega.html'), 'utf8');

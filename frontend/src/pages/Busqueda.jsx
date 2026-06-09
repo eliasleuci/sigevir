@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import FormularioBusquedaAvanzada from '../components/busqueda/FormularioBusquedaAvanzada';
 import TablaResultados from '../components/busqueda/TablaResultados';
 import HistorialCompleto from '../components/judicial/HistorialCompleto';
@@ -7,6 +8,7 @@ import { toast } from 'react-toastify';
 import { HiOutlineArrowLeft, HiOutlineSearchCircle } from 'react-icons/hi';
 
 const Busqueda = () => {
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [resultados, setResultados] = useState([]);
   const [view, setView] = useState('form'); // 'form', 'results', 'detail'
@@ -15,13 +17,28 @@ const Busqueda = () => {
   const handleSearch = async (filters) => {
     setLoading(true);
     try {
-      const params = new URLSearchParams();
-      Object.keys(filters).forEach(key => {
-        if (filters[key]) params.append(key, filters[key]);
-      });
+      const payload = {};
+      if (filters.dominio) payload.dominio = filters.dominio;
+      if (filters.nro_identificacion) {
+        payload.nro_identificacion = filters.nro_identificacion;
+      }
+      if (filters.titular_dni) payload.dni_titular = filters.titular_dni;
+      if (filters.estado) payload.estado_actual = filters.estado === 'RETENIDO_EN_TRANSITO' ? 'RETENIDO' : filters.estado;
+      if (filters.fecha_desde) payload.fecha_desde = filters.fecha_desde;
+      if (filters.fecha_hasta) payload.fecha_hasta = filters.fecha_hasta;
 
-      const response = await apiClient.get(`/busqueda?${params.toString()}`);
-      setResultados(response.data.data.resultados);
+      if (Object.keys(payload).length === 0) {
+        toast.warning('Ingrese al menos un criterio de búsqueda.');
+        setLoading(false);
+        return;
+      }
+
+      const response = await apiClient.post(`/busqueda/avanzada`, payload);
+      if (response.data?.resultados) {
+        setResultados(response.data.resultados);
+      } else {
+        setResultados(response.data?.data?.resultados || []);
+      }
       setView('results');
     } catch (error) {
       toast.error('Error al ejecutar la búsqueda avanzada.');
@@ -30,10 +47,22 @@ const Busqueda = () => {
     }
   };
 
-  const handleSelectVehiculo = (vehiculo) => {
-    setSelectedVehiculo(vehiculo);
-    setView('detail');
-    window.scrollTo(0, 0);
+  const handleSelectVehiculo = async (vehiculo_summary) => {
+    setLoading(true);
+    try {
+      const response = await apiClient.get(`/retenciones/${vehiculo_summary.id}`);
+      setSelectedVehiculo(response.data.data);
+      setView('detail');
+      window.scrollTo(0, 0);
+    } catch (error) {
+      toast.error('Error al cargar los detalles completos del vehículo.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEmitirResolucion = () => {
+    navigate('/judicial/causas', { state: { preselectExpediente: selectedVehiculo.numero_expediente } });
   };
 
   return (
@@ -84,7 +113,7 @@ const Busqueda = () => {
             <HiOutlineArrowLeft className="w-5 h-5" />
             Volver a los resultados
           </button>
-          <HistorialCompleto vehiculo={selectedVehiculo} onEmitirResolucion={() => toast.info('Redirigiendo a módulo judicial...')} />
+          <HistorialCompleto vehiculo={selectedVehiculo} onEmitirResolucion={handleEmitirResolucion} />
         </div>
       )}
     </div>

@@ -77,25 +77,25 @@ const TablaResultados = ({ resultados = [], onSelect, onExport, loading }) => {
                     </div>
                   </td>
                   <td className="px-8 py-6">
-                    <p className="text-sm font-black text-blue-600 tracking-widest bg-blue-50 px-3 py-1 rounded-full inline-block">{v.nro_expediente}</p>
+                    <p className="text-sm font-black text-blue-600 tracking-widest bg-blue-50 px-3 py-1 rounded-full inline-block">{v.numero_expediente || 'S/N'}</p>
                   </td>
                   <td className="px-8 py-6">
-                    <p className="text-sm font-bold text-gray-700">{new Date(v.createdAt).toLocaleDateString()}</p>
-                    <p className="text-[10px] text-gray-400 font-medium">{new Date(v.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}hs</p>
+                    <p className="text-sm font-bold text-gray-700">{v.fecha_retencion ? new Date(v.fecha_retencion).toLocaleDateString() : 'S/D'}</p>
+                    <p className="text-[10px] text-gray-400 font-medium">{v.fecha_retencion ? new Date(v.fecha_retencion).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + 'hs' : ''}</p>
                   </td>
                   <td className="px-8 py-6">
                     <span className={`px-4 py-1.5 rounded-2xl text-[10px] font-black uppercase tracking-widest border shadow-sm ${
-                      v.estado === 'LIBERADO' ? 'bg-green-50 text-green-600 border-green-100' : 
-                      v.estado === 'RESOLUCION_PENDIENTE' ? 'bg-amber-50 text-amber-600 border-amber-100' :
+                      v.estado_actual === 'LIBERADO' ? 'bg-green-50 text-green-600 border-green-100' : 
+                      v.estado_actual === 'RESOLUCION_PENDIENTE' ? 'bg-amber-50 text-amber-600 border-amber-100' :
                       'bg-blue-50 text-blue-600 border-blue-100'
                     }`}>
-                      {v.estado?.replace('_', ' ')}
+                      {v.estado_actual?.replace(/_/g, ' ') || 'S/D'}
                     </span>
                   </td>
                   <td className="px-8 py-6">
                     <div className="flex flex-col">
-                      <span className="text-xs font-black text-gray-900">{v.sector || 'S/D'} - {v.fila}{v.espacio}</span>
-                      <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Sede Central</span>
+                      <span className="text-xs font-black text-gray-900">{v.localidad ? `${v.localidad}, ${v.provincia}` : 'Sin ubicación asignada'}</span>
+                      <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{v.institucion || 'Institución S/D'}</span>
                     </div>
                   </td>
                   <td className="px-8 py-6 text-right">

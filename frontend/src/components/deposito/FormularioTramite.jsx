@@ -1,4 +1,4 @@
-﻿import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -6,6 +6,7 @@ import { useDropzone } from 'react-dropzone';
 import { HiOutlineUpload, HiOutlineX, HiOutlinePhotograph, HiOutlineDocumentText, HiOutlineCheckCircle, HiOutlineExclamation, HiOutlineArrowLeft, HiOutlineCalendar } from 'react-icons/hi';
 import imageCompression from 'browser-image-compression';
 import { uploadDocumentoEgreso } from '../../api/uploadDocumentosEgreso';
+import { toast } from 'react-toastify';
 
 const MAX_SIZE = 5 * 1024 * 1024;
 const formatBytes = (b) => { if (!b) return '0 B'; if (b < 1024) return b + ' B'; if (b < 1048576) return (b / 1024).toFixed(1) + ' KB'; return (b / 1048576).toFixed(1) + ' MB'; };
@@ -41,7 +42,7 @@ const DropzoneDoc = ({ tipo, label, fileData, onFile, onRemove, uploading }) => 
   });
   return (
     <div className="space-y-1.5">
-      <label className="text-xs font-bold text-gray-700 uppercase tracking-wider">{label}</label>
+      <label className="text-xs font-bold text-gray-700 uppercase tracking-wider">{label} <span className="text-red-500">*</span></label>
       {fileData ? (
         <div className="relative p-3 bg-green-50 rounded-xl border border-green-200 flex items-center gap-3">
           {fileData.preview ? (
@@ -95,6 +96,12 @@ const FormularioTramite = ({ vehiculo, onSubmit, onBack, loading }) => {
   };
 
   const onFormSubmit = async (formData) => {
+    const missingDocs = TIPOS_DOC.filter(t => !documentos[t.key]);
+    if (missingDocs.length > 0) {
+      toast.error('Debe adjuntar todos los documentos requeridos (' + missingDocs.map(d => d.label).join(', ') + ').');
+      return;
+    }
+
     setSubmitting(true);
     const resultados = {};
     const docsToUpload = TIPOS_DOC.filter(t => documentos[t.key]);

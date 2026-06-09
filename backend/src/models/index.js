@@ -3,7 +3,6 @@
 // Importar Modelos
 import Institucion from './Institucion.js';
 import Usuario from './Usuario.js';
-import Vehiculo from './Vehiculo.js';
 import Retencion from './Retencion.js';
 import VehicleStatusLog from './VehicleStatusLog.js';
 import Deposito from './Deposito.js';
@@ -26,10 +25,6 @@ Retencion.belongsTo(Institucion, { foreignKey: 'institucion_id', as: 'institucio
 Usuario.hasMany(Retencion, { foreignKey: 'agente_id', as: 'retenciones_generadas' });
 Retencion.belongsTo(Usuario, { foreignKey: 'agente_id', as: 'agente' });
 
-// 4. Vehiculo <-> Retencion (1:N)
-// Un vehÃ­culo puede ser retenido mÃºltiples veces a lo largo del tiempo
-Vehiculo.hasMany(Retencion, { foreignKey: 'vehiculo_id', as: 'retenciones' });
-Retencion.belongsTo(Vehiculo, { foreignKey: 'vehiculo_id', as: 'vehiculo' });
 
 // 5. Retencion <-> VehicleStatusLog (1:N)
 Retencion.hasMany(VehicleStatusLog, { foreignKey: 'retencion_id', as: 'status_logs' });
@@ -72,7 +67,7 @@ const db = {
   sequelize,
   Institucion,
   Usuario,
-  Vehiculo,
+
   Retencion,
   VehicleStatusLog,
   Deposito,

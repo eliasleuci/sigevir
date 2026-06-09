@@ -7,8 +7,11 @@ import apiClient from '../services/apiClient';
 import { CREATE_RETENCION_URL } from '../config/api';
 import { uploadFotos } from '../api/uploadFotos';
 import { HiOutlineCheckCircle, HiOutlineArrowRight, HiOutlineArrowLeft } from 'react-icons/hi';
+import { toast } from 'react-toastify';
+import { useAuth } from '../hooks/useAuth';
 
 const NuevaRetencion = () => {
+  const { user, perfil } = useAuth();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState(null);
@@ -52,8 +55,18 @@ const NuevaRetencion = () => {
         tipo_vehiculo: formData.tipo_vehiculo,
         marca: formData.marca,
         modelo: formData.modelo,
+        color: formData.color || null,
+        nro_motor: formData.nro_motor || null,
+        nro_cuadro: formData.nro_cuadro || null,
         motivo_retencion: formData.motivo_retencion,
-        lugar_retencion: formData.lugar_retencion,
+        calle_direccion: formData.lugar_retencion || 'Sin dirección',
+        localidad: 'Córdoba', // Valor por defecto
+        provincia: 'Córdoba', // Valor por defecto
+        titular_nombre: formData.titular_nombre || null,
+        titular_dni: formData.titular_dni || null,
+        titular_domicilio: formData.titular_domicilio || null,
+        institucion_id: perfil?.institucion_id || user?.institucion_id || '3e23f6e0-eeeb-477a-99a5-ecb93e49a074', // Fallback si no está en perfil
+        agente_id: user?.id || '40e03d39-aa66-4c47-b421-4ae2639a7b5b', // Fallback Agent ID from test DB
       }),
     });
 

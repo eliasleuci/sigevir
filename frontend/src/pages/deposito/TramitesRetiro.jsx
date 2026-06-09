@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import ListaPendientesEgreso from '../../components/deposito/ListaPendientesEgreso';
 import FormularioTramite from '../../components/deposito/FormularioTramite';
 import apiClient from '../../services/apiClient';
@@ -49,9 +49,9 @@ const TramitesRetiro = () => {
   const handleDownloadConstancia = async () => {
     try {
       const response = await apiClient.get('/depositos/' + (tramiteResult?.id || selectedVehiculo.id) + '/constancia-entrega', {
-        responseType: 'blob'
+        responseType: 'arraybuffer'
       });
-      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
       const link = document.createElement('a');
       link.href = url;
       link.setAttribute('download', 'constancia_tramite_' + (tramiteResult?.id || selectedVehiculo.id) + '.pdf');

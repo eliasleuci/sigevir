@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import BuscadorCausas from '../../components/judicial/BuscadorCausas';
 import HistorialCompleto from '../../components/judicial/HistorialCompleto';
 import FormularioResolucion from '../../components/judicial/FormularioResolucion';
@@ -7,21 +8,47 @@ import { toast } from 'react-toastify';
 import { HiOutlineArrowLeft, HiOutlineChevronRight, HiOutlineDocumentSearch } from 'react-icons/hi';
 
 const GestionCausas = () => {
+  const location = useLocation();
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState([]);
   const [selectedVehiculo, setSelectedVehiculo] = useState(null);
   const [view, setView] = useState('search'); // 'search', 'detail', 'emit_resolution'
 
+  useEffect(() => {
+    if (location.state?.preselectExpediente) {
+      const autoSearch = async () => {
+        setLoading(true);
+        try {
+          const response = await apiClient.post(`/busqueda/avanzada`, { numero_expediente: location.state.preselectExpediente });
+          const items = response.data?.resultados || response.data?.data?.resultados || [];
+          if (items.length > 0) {
+            // Auto select the first vehicle found and jump to emit resolution!
+            const details = await apiClient.get(`/retenciones/${items[0].id}`);
+            setSelectedVehiculo(details.data.data);
+            setView('emit_resolution');
+          }
+        } catch (error) {
+          toast.error('Error al auto-cargar el expediente.');
+        } finally {
+          setLoading(false);
+          // Clear state to avoid infinite loops on refresh
+          window.history.replaceState({}, document.title);
+        }
+      };
+      autoSearch();
+    }
+  }, [location.state]);
+
   const handleSearch = async (filters) => {
     setLoading(true);
     try {
-      const params = new URLSearchParams();
-      if (filters.dominio) params.append('dominio', filters.dominio);
-      if (filters.nro_expediente) params.append('nro_expediente', filters.nro_expediente);
-      if (filters.titular_dni) params.append('titular_dni', filters.titular_dni);
+      const payload = {};
+      if (filters.dominio) payload.dominio = filters.dominio;
+      if (filters.nro_expediente) payload.numero_expediente = filters.nro_expediente;
+      if (filters.titular_dni) payload.dni_titular = filters.titular_dni;
 
-      const response = await apiClient.get(`/busqueda?${params.toString()}`);
-      setResults(response.data.data.resultados);
+      const response = await apiClient.post(`/busqueda/avanzada`, payload);
+      setResults(response.data?.resultados || response.data?.data?.resultados || []);
       setView('results');
     } catch (error) {
       toast.error('Error al realizar la búsqueda de causas.');
@@ -30,16 +57,30 @@ const GestionCausas = () => {
     }
   };
 
-  const handleSelectVehiculo = (vehiculo) => {
-    setSelectedVehiculo(vehiculo);
-    setView('detail');
-    window.scrollTo(0, 0);
+  const handleSelectVehiculo = async (vehiculo) => {
+    setLoading(true);
+    try {
+      const response = await apiClient.get(`/retenciones/${vehiculo.id}`);
+      setSelectedVehiculo(response.data.data);
+      setView('detail');
+      window.scrollTo(0, 0);
+    } catch (err) {
+      toast.error('Error al obtener los detalles del expediente.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleEmitirResolucion = async (resolucionData) => {
     setLoading(true);
     try {
-      await apiClient.post(`/causas/${selectedVehiculo.id}/resolucion`, resolucionData);
+      const payload = {
+        numero_expediente: selectedVehiculo.numero_expediente,
+        tipo: resolucionData.tipo.toLowerCase(),
+        observaciones: resolucionData.observaciones,
+        documento_url: resolucionData.documento_id || null
+      };
+      await apiClient.post(`/causas/resoluciones`, payload);
       toast.success('¡Resolución emitida correctamente!');
       
       // Refrescar datos

@@ -2,6 +2,7 @@ import Joi from 'joi';
 
 export const busquedaAvanzadaSchema = Joi.object({
   dominio: Joi.string().allow('', null),
+  nro_identificacion: Joi.string().allow('', null),
   numero_motor: Joi.string().allow('', null),
   numero_cuadro: Joi.string().allow('', null),
   dni_titular: Joi.string().allow('', null),

@@ -116,3 +116,10 @@ CREATE POLICY "lectura_resoluciones" ON public.resoluciones_judiciales FOR SELEC
 CREATE POLICY "insercion_resoluciones" ON public.resoluciones_judiciales FOR INSERT WITH CHECK (true);
 
 -- (Nota: Para un entorno de producción estricto, las políticas "USING (true)" deben reemplazarse por verificaciones de roles (es_admin(), es_fiscal(), etc.) según las necesidades exactas).
+
+-- ── 7. Storage RLS ────────────────────────────────────────────────────────────
+-- Políticas para permitir subir y leer archivos en el bucket 'retenciones-fotos'
+CREATE POLICY "Allow public insert to retenciones-fotos" ON storage.objects FOR INSERT WITH CHECK ( bucket_id = 'retenciones-fotos' );
+CREATE POLICY "Give public access to retenciones-fotos" ON storage.objects FOR SELECT USING ( bucket_id = 'retenciones-fotos' );
+CREATE POLICY "Allow public update to retenciones-fotos" ON storage.objects FOR UPDATE USING ( bucket_id = 'retenciones-fotos' );
+CREATE POLICY "Allow public delete to retenciones-fotos" ON storage.objects FOR DELETE USING ( bucket_id = 'retenciones-fotos' );

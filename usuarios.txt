@@ -3,3 +3,15 @@ admin@sigevir.demo          admin123       admin          Admin Demo
 campo@sigevir.demo          campo123       agente_campo   Oficial Pérez
 deposito@sigevir.demo       deposito123    deposito       Juan Depósito
 fiscal@sigevir.demo         fiscal123      fiscal_juez    Dra. Rodríguez
+
+--- Nuevos Usuarios Supabase (Google Auth) ---
+contacto@sigevir.com.ar     Google Auth    admin          Administrador Total SIGEVIR
+juez@sigevir.com.ar         Google Auth    fiscal_juez    Juez de Faltas
+agente@sigevir.com.ar       Google Auth    agente_campo   Agente de Tránsito
+deposito@sigevir.com.ar     Google Auth    deposito       Encargado de Depósito
+
+--- USUARIOS DE PRUEBA (TRADICIONALES) ---
+admin@prueba.com            prueba123      admin          Admin Prueba
+juez@prueba.com             prueba123      fiscal_juez    Juez Prueba
+agente@prueba.com           prueba123      agente_campo   Agente Prueba
+deposito@prueba.com         prueba123      deposito       Deposito Prueba
