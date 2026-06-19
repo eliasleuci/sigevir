@@ -1,7 +1,8 @@
-﻿import { supabaseAdmin, isSupabaseConfigured } from '../config/supabase.js';
+import { supabaseAdmin, isSupabaseConfigured } from '../config/supabase.js';
 import db from '../models/index.js';
 import { AppError } from '../middleware/errorHandler.js';
 import logger from '../utils/logger.js';
+import { notificarUsuarioPendiente } from '../services/notificacionService.js';
 
 const { Usuario } = db;
 
@@ -85,6 +86,46 @@ class AuthController {
       });
       if (!usuario) throw new AppError('Usuario no encontrado', 404);
       res.status(200).json({ success: true, data: usuario });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  register = async (req, res, next) => {
+    try {
+      if (!isSupabaseConfigured()) {
+        throw new AppError('Supabase no configurado', 503);
+      }
+      const { email, password, nombre_completo, institucion_id } = req.body;
+
+      const { data: { user: supabaseUser }, error } = await supabaseAdmin.auth.admin.createUser({
+        email,
+        password,
+        email_confirm: true,
+      });
+
+      if (error) throw new AppError('Error creando usuario en auth', 400);
+
+      const aprobado = false;
+
+      const usuario = await Usuario.create({
+        id: supabaseUser.id,
+        email,
+        nombre_completo: nombre_completo || email.split('@')[0],
+        institucion_id,
+        rol: 'agente_campo',
+        activo: false,
+        password_hash: 'NOPASSWORD_SUPABASE',
+      });
+
+      if (!aprobado) {
+        notificarUsuarioPendiente(
+          email,
+          nombre_completo || email
+        ).catch(err => logger.error(`Error notificando usuario pendiente: ${err.message}`));
+      }
+
+      res.status(201).json({ success: true, data: usuario });
     } catch (error) {
       next(error);
     }

@@ -7,6 +7,7 @@ import {
   emitirResolucionSchema, 
   cambioExtraordinarioSchema 
 } from '../schemas/causa.schemas.js';
+import { auditLog } from '../middleware/auditLog.js';
 
 const router = Router();
 
@@ -31,6 +32,7 @@ router.get(
 router.post(
   '/resoluciones',
   authorize('fiscal_juez', 'admin', 'ADMIN_INSTITUCION'),
+  auditLog('CREAR', 'CAUSA'),
   validateRequest(emitirResolucionSchema),
   causasController.emitirResolucion
 );
@@ -38,6 +40,7 @@ router.post(
 router.put(
   '/resoluciones/:id/cambio-extraordinario',
   authorize('fiscal_juez', 'admin', 'ADMIN_INSTITUCION'),
+  auditLog('MODIFICAR', 'CAUSA'),
   validateRequest(cambioExtraordinarioSchema),
   causasController.cambioExtraordinario
 );

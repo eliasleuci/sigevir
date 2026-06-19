@@ -80,17 +80,6 @@ export default function Dashboard() {
           </div>
           
           <div className="flex items-center gap-6">
-            {/* Notificaciones */}
-            <div className="relative">
-              <button className="p-2 text-gray-400 hover:text-blue-600 transition-colors relative">
-                <HiOutlineBell className="w-6 h-6" />
-                {unreadCount > 0 && (
-                  <span className="absolute top-1.5 right-1.5 bg-red-500 text-white text-[10px] font-black rounded-full w-4 h-4 flex items-center justify-center ring-2 ring-white">
-                    {unreadCount}
-                  </span>
-                )}
-              </button>
-            </div>
 
             {/* Perfil Usuario */}
             <div className="flex items-center gap-3 border-l border-gray-100 pl-6">

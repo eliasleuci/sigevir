@@ -7,10 +7,18 @@ import logger from '../utils/logger.js';
 export const setupSocketIO = (httpServer) => {
   const io = new Server(httpServer, {
     cors: {
-      origin: process.env.FRONTEND_URL || 'http://localhost:5173',
-      methods: ['GET', 'POST', 'PUT', 'DELETE'],
-      credentials: true
-    }
+      // Aceptar el puerto real del frontend
+      origin: [
+        process.env.FRONTEND_URL || 'http://localhost:4001',
+        'http://localhost:4001',
+        'http://localhost:5173',  // fallback por si cambia
+      ],
+      methods: ['GET', 'POST'],
+      credentials: true,
+    },
+    // Reconexión automática
+    pingTimeout: 60000,
+    pingInterval: 25000,
   });
 
   // Inicializar el servicio de sockets para que pueda ser llamado desde controladores

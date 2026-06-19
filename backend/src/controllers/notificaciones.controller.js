@@ -27,7 +27,7 @@ export const getNotificaciones = async (req, res, next) => {
         {
           model: Retencion,
           as: 'retencion',
-          attributes: ['id', 'dominio', 'estado']
+          attributes: ['id', 'dominio', 'estado_actual']
         }
       ]
     });

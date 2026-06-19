@@ -2,6 +2,7 @@ import { Op } from 'sequelize';
 import db from '../models/index.js';
 import { AppError } from '../middleware/errorHandler.js';
 import logger from '../utils/logger.js';
+import { notificarResolucionJudicial } from './notificacionService.js';
 
 const { Retencion, Vehiculo, Institucion, Usuario, FotoRetencion, Deposito, ResolucionJudicial, VehicleStatusLog, HistorialMovimiento } = db;
 
@@ -212,6 +213,14 @@ class CausaService {
 
       await transaction.commit();
       logger.info(`Resolución judicial emitida para ${data.numero_expediente} por ${user.userId}`);
+
+      // ── Notificación: resolución emitida ──────────────────────────────────────
+      notificarResolucionJudicial(
+        retencion,
+        resolucion,
+        user?.nombre_completo || user?.email || 'Autoridad judicial'
+      ).catch(err => logger.error(`Error notificando resolución: ${err.message}`));
+      // ─────────────────────────────────────────────────────────────────────────
 
       return {
         id: resolucion.id,

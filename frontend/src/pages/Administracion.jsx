@@ -17,8 +17,8 @@ const Administracion = () => {
 
   return (
     <div className="max-w-7xl mx-auto py-8 px-4 space-y-12">
-      <div className="flex items-center gap-5 mb-4">
-        <div className="w-16 h-16 bg-blue-600 text-white rounded-[24px] flex items-center justify-center shadow-2xl shadow-blue-200">
+      <div className="flex flex-col md:flex-row items-start md:items-center gap-5 mb-4">
+        <div className="shrink-0 w-16 h-16 bg-blue-600 text-white rounded-[24px] flex items-center justify-center shadow-2xl shadow-blue-200">
           <HiOutlineCog className="w-10 h-10" />
         </div>
         <div>
@@ -27,7 +27,7 @@ const Administracion = () => {
         </div>
       </div>
 
-      <div className="flex gap-2 bg-white p-2 rounded-3xl border border-gray-100 shadow-xl overflow-x-auto no-scrollbar">
+      <div className="w-full flex gap-2 bg-white p-2 rounded-3xl border border-gray-100 shadow-xl overflow-x-auto no-scrollbar">
         {tabs.map((tab) => (
           <button
             key={tab.id}

@@ -5,38 +5,35 @@ import logger from '../utils/logger.js';
  * Captura todos los errores, loguea en auditoría y retorna respuesta consistente
  */
 export const errorHandler = (err, req, res, next) => {
-  const statusCode = err.statusCode || 500;
-  
-  // Estructura de respuesta consistente
-  const errorResponse = {
-    success: false,
-    error: {
-      message: err.message || 'Error interno del servidor',
-      code: err.code || 'INTERNAL_ERROR',
-      timestamp: new Date().toISOString()
-    }
-  };
+  const isDev = process.env.NODE_ENV === 'development';
 
-  // Log de auditoría detallado
+  // Log siempre completo internamente
   logger.error({
     message: err.message,
-    stack: err.stack,
-    path: req.path,
-    method: req.method,
-    ip: req.ip,
-    userId: req.user?.id || 'anonymous',
-    institutionId: req.user?.institucion_id || null,
-    body: req.method !== 'GET' ? req.body : undefined,
-    params: req.params,
-    query: req.query
+    stack:   err.stack,
+    code:    err.code,
+    url:     req.originalUrl,
+    method:  req.method,
+    user:    req.user?.email || 'anónimo',
   });
 
-  // En desarrollo, incluir stack trace
-  if (process.env.NODE_ENV === 'development') {
-    errorResponse.error.stack = err.stack;
-  }
+  // Respuesta al cliente: en producción, mensajes genéricos
+  const status  = err.statusCode || err.status || 500;
+  const message = isDev
+    ? err.message
+    : status === 500
+      ? 'Error interno del servidor. Por favor, intentá de nuevo.'
+      : err.message;
 
-  res.status(statusCode).json(errorResponse);
+  res.status(status).json({
+    success: false,
+    error: {
+      message,
+      code:  err.code || 'INTERNAL_ERROR',
+      // Solo en desarrollo: stack trace
+      ...(isDev && { stack: err.stack }),
+    },
+  });
 };
 
 // Clase base para errores personalizados

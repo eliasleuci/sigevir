@@ -10,7 +10,7 @@ const Navbar = ({ onToggleSidebar }) => {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
 
   return (
-    <header className="h-16 lg:h-20 bg-white border-b border-gray-100 flex items-center justify-between px-4 sm:px-6 lg:px-8 sticky top-0 z-30">
+    <header className="h-16 lg:h-20 bg-white border-b border-gray-100 flex items-center justify-between px-4 sm:px-6 lg:px-8 sticky top-0 z-50">
       <div className="flex items-center gap-3 flex-1 min-w-0">
         <button
           onClick={onToggleSidebar}

@@ -1,4 +1,4 @@
-﻿import sequelize from '../config/database.js';
+import sequelize from '../config/database.js';
 
 // Importar Modelos
 import Institucion from './Institucion.js';
@@ -56,18 +56,21 @@ Retencion.hasOne(Deposito, { foreignKey: 'retencion_id', as: 'deposito_activo' }
 
 // 11b. Deposito <-> Retencion (1:N)
 Deposito.hasMany(Retencion, { foreignKey: 'deposito_id', as: 'retenciones_albergadas' });
-// Agregar deposito_id a Retencion si no estaba explÃ­cito (Sequelize lo maneja si se define aquÃ­)
+// Agregar deposito_id a Retencion si no estaba explicito (Sequelize lo maneja si se define aqui)
 Retencion.belongsTo(Deposito, { foreignKey: 'deposito_id', as: 'deposito' });
 
 // 12. Usuario <-> Notificacion (1:N)
-Usuario.hasMany(Notificacion, { foreignKey: 'usuario_id', as: 'notificaciones' });
-Notificacion.belongsTo(Usuario, { foreignKey: 'usuario_id', as: 'usuario' });
+Usuario.hasMany(Notificacion, { foreignKey: 'destinatario_id', as: 'notificaciones_recibidas' });
+Notificacion.belongsTo(Usuario, { foreignKey: 'destinatario_id', as: 'destinatario' });
+
+// 13. Retencion <-> Notificacion (1:N)
+Retencion.hasMany(Notificacion, { foreignKey: 'retencion_id', as: 'notificaciones_generadas' });
+Notificacion.belongsTo(Retencion, { foreignKey: 'retencion_id', as: 'retencion' });
 
 const db = {
   sequelize,
   Institucion,
   Usuario,
-
   Retencion,
   VehicleStatusLog,
   Deposito,
@@ -78,5 +81,3 @@ const db = {
 };
 
 export default db;
-
-

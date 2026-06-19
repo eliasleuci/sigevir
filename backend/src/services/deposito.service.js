@@ -7,6 +7,10 @@ import pdfService from './pdfService.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs/promises';
+import { 
+  notificarIngresoDeposito,
+  notificarEgresoVehiculo 
+} from './notificacionService.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -48,6 +52,14 @@ class DepositoService {
         observaciones: data.observaciones_ingreso || data.observaciones || 'Ingreso físico al depósito'
       }, { transaction });
       await transaction.commit();
+
+      // ── Notificación: ingreso confirmado ──────────────────────────────────────
+      notificarIngresoDeposito(
+        retencion,
+        user?.nombre_completo || user?.email || 'Depósito'
+      ).catch(err => logger.error(`Error notificando ingreso: ${err.message}`));
+      // ─────────────────────────────────────────────────────────────────────────
+
       return { id: ingreso.id, numero_expediente: retencion.numero_expediente, estado_actual: 'EN_DEPOSITO', sector: ingreso.sector, fila: ingreso.fila, numero_espacio: ingreso.numero_espacio, fecha_hora_ingreso: ingreso.fecha_hora_ingreso };
     } catch (error) {
       await transaction.rollback();
@@ -190,6 +202,14 @@ class DepositoService {
       await deposito.retencion.update({ estado_actual: 'LIBERADO' }, { transaction });
       await VehicleStatusLog.create({ retencion_id: deposito.retencion_id, estado: 'LIBERADO', usuario_id: user.userId, observaciones: 'Egreso del depósito registrado. Razón: ' + data.razon_egreso + (data.observaciones_finales ? '. Observaciones: ' + data.observaciones_finales : '') }, { transaction });
       await transaction.commit();
+
+      // ── Notificación: vehículo egresado ───────────────────────────────────────
+      notificarEgresoVehiculo(
+        deposito.retencion,
+        user?.nombre_completo || user?.email || 'Depósito'
+      ).catch(err => logger.error(`Error notificando egreso: ${err.message}`));
+      // ─────────────────────────────────────────────────────────────────────────
+
       const diffTime = Math.abs(deposito.fecha_hora_egreso - deposito.fecha_hora_ingreso);
       return { id: deposito.id, numero_expediente: deposito.retencion.numero_expediente, estado_actual: 'LIBERADO', fecha_hora_ingreso: deposito.fecha_hora_ingreso, fecha_hora_egreso: deposito.fecha_hora_egreso, dias_deposito: Math.ceil(diffTime / (1000 * 60 * 60 * 24)), razon_egreso: deposito.razon_egreso, documentos_egreso: deposito.documentos_egreso };
     } catch (error) {

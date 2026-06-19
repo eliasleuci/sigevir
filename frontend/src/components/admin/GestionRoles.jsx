@@ -67,7 +67,10 @@ const GestionRoles = () => {
       if (editingTipo) {
         const { error } = await supabase
           .from('tipos_personal')
-          .update({ descripcion: formData.descripcion })
+          .update({ 
+            nombre: formData.nombre,
+            descripcion: formData.descripcion 
+          })
           .eq('id', editingTipo.id);
         if (error) throw error;
         toast.success('Tipo actualizado');
@@ -251,7 +254,6 @@ const GestionRoles = () => {
                   <input
                     value={formData.nombre}
                     onChange={(e) => setFormData(p => ({ ...p, nombre: e.target.value }))}
-                    disabled={!!editingTipo}
                     className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-100 disabled:bg-gray-50 disabled:text-gray-400"
                     placeholder="Ej: Defensor público"
                   />

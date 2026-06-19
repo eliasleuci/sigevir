@@ -21,17 +21,19 @@ Notificacion.init({
   },
   tipo: {
     type: DataTypes.ENUM(
-      'NUEVA_RETENCION',      // Un agente registró una nueva retención
-      'CAMBIO_ESTADO',        // El vehículo cambió de estado
-      'INGRESO_DEPOSITO',     // El vehículo ingresó al depósito
-      'RESOLUCION_JUDICIAL',  // Se emitió una resolución judicial
-      'ALERTA_TIEMPO',        // El vehículo lleva más de X días retenido
-      'DOC_DISPONIBLE'        // Documento generado listo para descargar
+      'NUEVA_RETENCION',      // Agente registró una retención → avisa a Depósito
+      'CAMBIO_ESTADO',        // Vehículo egresado/entregado → avisa a todos
+      'INGRESO_DEPOSITO',     // Depósito confirmó ingreso → avisa a Judicial + Admin
+      'RESOLUCION_JUDICIAL',  // Juez emitió resolución → avisa a Depósito + Agente
+      'ALERTA_TIEMPO',        // Permanencia prolongada → avisa a Admin + Judicial
+      'DOC_DISPONIBLE',       // Documento listo → avisa al solicitante
+      'USUARIO_PENDIENTE',    // ← NUEVO: usuario espera aprobación → avisa a Admin
+      'EGRESO_VEHICULO'       // ← NUEVO: vehículo egresado → avisa a Agente + Admin
     ),
     allowNull: false,
     validate: {
       isIn: {
-        args: [['NUEVA_RETENCION', 'CAMBIO_ESTADO', 'INGRESO_DEPOSITO', 'RESOLUCION_JUDICIAL', 'ALERTA_TIEMPO', 'DOC_DISPONIBLE']],
+        args: [['NUEVA_RETENCION', 'CAMBIO_ESTADO', 'INGRESO_DEPOSITO', 'RESOLUCION_JUDICIAL', 'ALERTA_TIEMPO', 'DOC_DISPONIBLE', 'USUARIO_PENDIENTE', 'EGRESO_VEHICULO']],
         msg: 'Tipo de notificación no válido'
       }
     }

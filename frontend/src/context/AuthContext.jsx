@@ -34,6 +34,7 @@ const clearSession = () => {
 
 export const AuthProvider = ({ children }) => {
   const [user,    setUser]    = useState(null)
+  const [token,   setToken]   = useState(null)
   const [perfil,  setPerfil]  = useState(null)
   const [loading, setLoading] = useState(true)
 
@@ -56,6 +57,7 @@ export const AuthProvider = ({ children }) => {
         const { data: { session } } = await supabase.auth.getSession()
         if (session?.user) {
           setUser(session.user)
+          setToken(session.access_token)
           await cargarPerfil(session.user.id)
         }
       } catch (e) {
@@ -73,9 +75,11 @@ export const AuthProvider = ({ children }) => {
         async (event, session) => {
           if (session?.user) {
             setUser(session.user)
+            setToken(session.access_token)
             await cargarPerfil(session.user.id)
           } else {
             setUser(null)
+            setToken(null)
             setPerfil(null)
           }
         }
@@ -86,21 +90,26 @@ export const AuthProvider = ({ children }) => {
 
   const cargarPerfil = useCallback(async (userId) => {
     if (!SUPABASE_READY) return
+    let timeoutId;
     try {
-      const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('Timeout cargando perfil')), 5000)
-      );
+      const timeoutPromise = new Promise((_, reject) => {
+        timeoutId = setTimeout(() => reject(new Error('Timeout cargando perfil')), 5000)
+      });
+      
       const queryPromise = supabase
         .from('perfiles')
         .select('*, tipos_personal(*)')
         .eq('id', userId)
-        .single();
+        .single()
+        .then(res => res); // Force it to be a real promise
 
       const { data, error } = await Promise.race([queryPromise, timeoutPromise]);
       if (error) throw error
       setPerfil(data)
     } catch (e) {
       console.error('Error cargando perfil:', e)
+    } finally {
+      if (timeoutId) clearTimeout(timeoutId);
     }
   }, [])
 
@@ -286,6 +295,7 @@ export const AuthProvider = ({ children }) => {
   // ── Context value ──────────────────────────────────────────────────────────
   const value = {
     user,
+    token,
     perfil,
     loading,
     isAuthenticated:  !!(user),

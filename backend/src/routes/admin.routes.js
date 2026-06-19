@@ -3,6 +3,7 @@ import { authenticate, authorize } from '../middleware/supabaseAuth.js';
 import checkPermanenciaProlongada from '../jobs/checkPermanenciaProlongada.js';
 import db from '../models/index.js';
 import logger from '../utils/logger.js';
+import { auditLog } from '../middleware/auditLog.js';
 
 const { Usuario, HistorialMovimiento } = db;
 const router = Router();
@@ -10,7 +11,7 @@ const router = Router();
 router.use(authenticate);
 router.use(authorize('admin', 'ADMIN_INSTITUCION'));
 
-router.get('/check-permanencias', async (req, res, next) => {
+router.get('/check-permanencias', auditLog('MODIFICAR', 'ADMIN'), async (req, res, next) => {
   try {
     const resultado = await checkPermanenciaProlongada.execute();
     res.status(200).json({ success: true, data: resultado });

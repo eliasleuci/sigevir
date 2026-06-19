@@ -18,8 +18,11 @@ const setReqUser = (req, usuario) => {
 
 export const authenticate = async (req, res, next) => {
   try {
-    // --- Modo Demo ---
-    if (req.headers['x-demo-mode'] === 'true') {
+    // MODO DEMO: Solo disponible en desarrollo
+    if (
+      process.env.NODE_ENV !== 'production' &&
+      req.headers['x-demo-mode'] === 'true'
+    ) {
       const email = req.headers['x-demo-user-email'];
       if (!email) {
         return next(new AppError('Header X-Demo-User-Email requerido', 401, 'DEMO_MISSING_EMAIL'));
@@ -36,6 +39,18 @@ export const authenticate = async (req, res, next) => {
       }
       setReqUser(req, usuario);
       return next();
+    }
+
+    // Bloquear intento de usar modo demo en producción
+    if (
+      process.env.NODE_ENV === 'production' &&
+      req.headers['x-demo-mode']
+    ) {
+      return next(new AppError(
+        'Acceso denegado',
+        403,
+        'FORBIDDEN'
+      ));
     }
 
     // --- Supabase Auth ---

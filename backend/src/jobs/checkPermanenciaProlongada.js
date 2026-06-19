@@ -1,5 +1,6 @@
 import logger from '../utils/logger.js';
 import alertaService from '../services/alertaService.js';
+import { notificarPermanenciaProlongada } from '../services/notificacionService.js';
 
 const PLAZO_AMARILLO = parseInt(process.env.ALERTA_DIAS_AMARILLO, 10) || 30;
 const PLAZO_NARANJA = parseInt(process.env.ALERTA_DIAS_NARANJA, 10) || 60;
@@ -32,6 +33,9 @@ async function execute() {
         if (resultado.success) {
           totalAlertas++;
           detalles[nivel] = (detalles[nivel] || 0) + 1;
+
+          await notificarPermanenciaProlongada(deposito.retencion || deposito, diasIngresado)
+            .catch(err => logger.error(`Error notificando permanencia: ${err.message}`));
         }
       } catch (itemError) {
         logger.error(`Error procesando depósito ${deposito.id}: ${itemError.message}`);

@@ -66,7 +66,7 @@ const RegistrarEgreso = () => {
 
   return (
     <div className="max-w-7xl mx-auto py-8 px-4">
-      <div className="mb-10 flex items-center justify-between">
+      <div className="mb-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
         <div>
           <h1 className="text-4xl font-black text-gray-900 mb-2 tracking-tight">Registro de Egresos</h1>
           <p className="text-gray-500 font-medium">Confirmación de egreso definitivo de vehículos con trámite completado.</p>

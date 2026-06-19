@@ -63,3 +63,61 @@ coverage/
 .prettierignore
 client_secret_976587888436-l1faj6hti01uums4j6m22eksj4doknqg.apps.googleusercontent.com.json
 backend/.env
+
+# %% Seguridad: NUNCA commitear %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+client_secret*.json
+*.credentials.json
+service-account*.json
+*-service-account.json
+google-credentials.json
+firebase-adminsdk*.json
+
+# Variables de entorno reales
+.env
+.env.local
+.env.production
+.env.staging
+backend/.env
+frontend/.env
+
+# Logs (pueden contener info sensible)
+logs/
+*.log
+npm-debug.log*
+
+# Builds (contienen el c�digo compilado)
+dist/
+build/
+.next/
+
+# Dependencias
+node_modules/
+
+# ── Seguridad: NUNCA commitear ────────────────────────────────────────────
+client_secret*.json
+*.credentials.json
+service-account*.json
+*-service-account.json
+google-credentials.json
+firebase-adminsdk*.json
+
+# Variables de entorno reales
+.env
+.env.local
+.env.production
+.env.staging
+backend/.env
+frontend/.env
+
+# Logs (pueden contener info sensible)
+logs/
+*.log
+npm-debug.log*
+
+# Builds (contienen el código compilado)
+dist/
+build/
+.next/
+
+# Dependencias
+node_modules/

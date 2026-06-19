@@ -216,18 +216,18 @@ const FormularioNuevaRetencion = ({ onSubmit, loading, initialData = {} }) => {
         <div className="space-y-6">
           <div className="space-y-1">
             <label className="text-sm font-semibold text-gray-700">Lugar de Retención</label>
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2">
               <input 
                 {...register('lugar_retencion')}
                 placeholder="Calle, intersección o coordenadas"
-                className="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all"
+                className="flex-1 w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all"
                 onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleSearchAddress(); } }}
               />
               <button
                 type="button"
                 onClick={handleSearchAddress}
                 disabled={isSearching}
-                className="flex items-center gap-1.5 px-5 py-2.5 bg-blue-600 text-white rounded-xl font-semibold text-sm hover:bg-blue-700 transition-colors shadow-sm disabled:opacity-70 disabled:cursor-not-allowed"
+                className="flex items-center justify-center gap-1.5 w-full sm:w-auto px-5 py-2.5 bg-blue-600 text-white rounded-xl font-semibold text-sm hover:bg-blue-700 transition-colors shadow-sm disabled:opacity-70 disabled:cursor-not-allowed"
               >
                 {isSearching ? (
                   <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />

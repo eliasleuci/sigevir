@@ -1,6 +1,7 @@
 import React, { createContext, useState, useEffect, useContext, useCallback } from 'react';
 import { io } from 'socket.io-client';
 import { AuthContext } from './AuthContext.jsx';
+import apiClient from '../services/apiClient.js';
 // Se mantiene react-hot-toast para los toasts personalizados
 import Toast from '../components/notifications/Toast';
 export const NotificationContext = createContext();
@@ -11,19 +12,36 @@ const DEMO_NOTIFICATIONS = [
 ];
 
 export const NotificationProvider = ({ children }) => {
-  const { token, isAuthenticated, isDemo } = useContext(AuthContext);
+  const { token, isAuthenticated, isMock } = useContext(AuthContext);
   const [socket, setSocket] = useState(null);
   const [notifications, setNotifications] = useState([]);
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
-    if (isDemo) {
+    if (!isAuthenticated || isMock || !token) return;
+    
+    const cargarNotificacionesIniciales = async () => {
+      try {
+        const { data } = await apiClient.get('/notificaciones?limit=20');
+        if (data?.data?.notificaciones) {
+          setNotifications(data.data.notificaciones);
+        }
+      } catch (error) {
+        console.error('Error cargando notificaciones iniciales:', error);
+      }
+    };
+    
+    cargarNotificacionesIniciales();
+  }, [isAuthenticated, isMock, token]);
+
+  useEffect(() => {
+    if (isMock) {
       setNotifications(DEMO_NOTIFICATIONS);
       setIsConnected(true);
       return;
     }
     if (isAuthenticated && token) {
-      const socketUrl = import.meta.env.VITE_SOCKET_URL || 'http://localhost:4000';
+      const socketUrl = import.meta.env.VITE_SOCKET_URL || 'http://localhost:3001';
       const socketNamespace = '/notifications';
       const newSocket = io(`${socketUrl}${socketNamespace}`, {
         auth: { token }
@@ -35,6 +53,10 @@ export const NotificationProvider = ({ children }) => {
 
       newSocket.on('disconnect', () => {
         setIsConnected(false);
+      });
+
+      newSocket.on('notificaciones_pendientes', (notificaciones) => {
+        setNotifications(notificaciones);
       });
 
       newSocket.on('nueva_notificacion', (notification) => {
@@ -53,16 +75,16 @@ export const NotificationProvider = ({ children }) => {
         setIsConnected(false);
       };
     }
-  }, [isAuthenticated, token, isDemo]);
+  }, [isAuthenticated, token, isMock]);
 
   const confirmNotification = useCallback((id) => {
-    if (socket && !isDemo) {
+    if (socket && !isMock) {
       socket.emit('confirmar_notificacion', { notificacion_id: id });
     }
     setNotifications(prev => 
       prev.map(n => n.id === id ? { ...n, confirmada_at: new Date().toISOString() } : n)
     );
-  }, [socket, isDemo]);
+  }, [socket, isMock]);
 
   const markAsRead = useCallback((id) => {
     setNotifications(prev => 
