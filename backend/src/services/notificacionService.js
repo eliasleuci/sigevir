@@ -14,7 +14,7 @@ const { Usuario, Notificacion } = db;
 const getUsuariosPorRol = async (rol) => {
   try {
     const usuarios = await Usuario.findAll({
-      where: { role: rol, is_active: true },
+      where: { rol: rol, activo: true },
       attributes: ['id'],
       raw: true,
     });
