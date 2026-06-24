@@ -38,6 +38,33 @@ export const AuthProvider = ({ children }) => {
   const [perfil,  setPerfil]  = useState(null)
   const [loading, setLoading] = useState(true)
 
+  // ── 2FA: estados de verificación (persistidos en sessionStorage) ─────────
+  const [pendingVerification, setPendingVerificationState] = useState(
+    () => sessionStorage.getItem('sigevir_2fa_pending') === 'true'
+  )
+  const [pendingEmail, setPendingEmailState] = useState(
+    () => sessionStorage.getItem('sigevir_2fa_email') || null
+  )
+
+  // Wrappers que sincronizan React state + sessionStorage
+  const setPendingVerification = useCallback((value) => {
+    setPendingVerificationState(value)
+    if (value) {
+      sessionStorage.setItem('sigevir_2fa_pending', 'true')
+    } else {
+      sessionStorage.removeItem('sigevir_2fa_pending')
+    }
+  }, [])
+
+  const setPendingEmail = useCallback((value) => {
+    setPendingEmailState(value)
+    if (value) {
+      sessionStorage.setItem('sigevir_2fa_email', value)
+    } else {
+      sessionStorage.removeItem('sigevir_2fa_email')
+    }
+  }, [])
+
   // ── Inicializar: recuperar sesión guardada ─────────────────────────────────
   useEffect(() => {
     const initAuth = async () => {
@@ -54,6 +81,15 @@ export const AuthProvider = ({ children }) => {
 
       // Modo Supabase: verificar sesión activa
       try {
+        // 2FA: si hay verificación pendiente, NO restaurar sesión
+        const pending2FA = sessionStorage.getItem('sigevir_2fa_pending') === 'true'
+        if (pending2FA) {
+          // Destruir cualquier sesión existente para seguridad
+          await supabase.auth.signOut()
+          setLoading(false)
+          return
+        }
+
         const { data: { session } } = await supabase.auth.getSession()
         if (session?.user) {
           setUser(session.user)
@@ -73,6 +109,10 @@ export const AuthProvider = ({ children }) => {
     if (SUPABASE_READY) {
       const { data: { subscription } } = supabase.auth.onAuthStateChange(
         async (event, session) => {
+          // 2FA: ignorar cambios de sesión si hay verificación pendiente
+          const pending2FA = sessionStorage.getItem('sigevir_2fa_pending') === 'true'
+          if (pending2FA) return
+
           if (session?.user) {
             setUser(session.user)
             setToken(session.access_token)
@@ -112,6 +152,28 @@ export const AuthProvider = ({ children }) => {
       if (timeoutId) clearTimeout(timeoutId);
     }
   }, [])
+
+  // ── ACTUALIZAR PERFIL ──────────────────────────────────────────────────────
+  const actualizarPerfil = useCallback(async (datosActualizados) => {
+    if (!SUPABASE_READY || !user) return { success: false, error: 'No conectado' }
+    try {
+      const { data, error } = await supabase
+        .from('perfiles')
+        .update(datosActualizados)
+        .eq('id', user.id)
+        .select('*, tipos_personal(*)')
+        .single()
+
+      if (error) throw error
+
+      // Actualizamos el estado global para que se refleje instantáneamente en Navbar/etc
+      setPerfil(data)
+      return { success: true }
+    } catch (err) {
+      console.error('Error actualizando perfil:', err)
+      return { success: false, error: err.message }
+    }
+  }, [user])
 
   // ── LOGIN ──────────────────────────────────────────────────────────────────
   const login = useCallback(async (email, password) => {
@@ -169,7 +231,19 @@ export const AuthProvider = ({ children }) => {
 
       const pendingApproval = !profileData?.activo
 
-      return { success: true, user: data.user, pendingApproval }
+      // 2FA: SEGURIDAD - destruir la sesión inmediatamente
+      // Solo validamos que las credenciales son correctas.
+      // La sesión real se crea recién al verificar el OTP.
+      await supabase.auth.signOut()
+      setUser(null)
+      setToken(null)
+      setPerfil(null)
+
+      // Marcar como pendiente de verificación (persistido en sessionStorage)
+      setPendingVerification(true)
+      setPendingEmail(email.trim())
+
+      return { success: true, user: data.user, pendingApproval, needs2FA: true }
     } catch (err) {
       let msg = 'Error al iniciar sesión'
       if (err.message.includes('Invalid login')) msg = 'Email o contraseña incorrectos'
@@ -212,6 +286,8 @@ export const AuthProvider = ({ children }) => {
     clearSession()
     setUser(null)
     setPerfil(null)
+    setPendingVerification(false)
+    setPendingEmail(null)
 
     if (SUPABASE_READY) {
       try {
@@ -221,6 +297,62 @@ export const AuthProvider = ({ children }) => {
       }
     }
   }, [])
+
+  // ── 2FA: ENVIAR CÓDIGO DE VERIFICACIÓN ─────────────────────────────────────
+  const sendVerificationCode = useCallback(async (email) => {
+    if (!SUPABASE_READY || !supabase) {
+      return { success: false, error: 'Supabase no configurado' }
+    }
+    try {
+      const { error } = await supabase.auth.signInWithOtp({
+        email: email.trim(),
+        options: {
+          shouldCreateUser: false, // No crear usuario, solo enviar OTP
+        },
+      })
+      if (error) throw error
+      return { success: true }
+    } catch (err) {
+      console.error('Error enviando OTP:', err)
+      let msg = 'Error al enviar el código de verificación'
+      if (err.message?.includes('rate')) msg = 'Demasiados intentos. Esperá un momento.'
+      return { success: false, error: msg }
+    }
+  }, [])
+
+  // ── 2FA: VERIFICAR CÓDIGO ──────────────────────────────────────────────────
+  const verifyCode = useCallback(async (email, code) => {
+    if (!SUPABASE_READY || !supabase) {
+      return { success: false, error: 'Supabase no configurado' }
+    }
+    try {
+      const { data, error } = await supabase.auth.verifyOtp({
+        email: email.trim(),
+        token: code,
+        type: 'email',
+      })
+      if (error) throw error
+
+      // Verificación exitosa: actualizar estados
+      setPendingVerification(false)
+      setPendingEmail(null)
+
+      // La sesión ya fue actualizada por verifyOtp
+      if (data?.session) {
+        setUser(data.session.user)
+        setToken(data.session.access_token)
+        await cargarPerfil(data.session.user.id)
+      }
+
+      return { success: true }
+    } catch (err) {
+      console.error('Error verificando OTP:', err)
+      let msg = 'Código inválido o expirado'
+      if (err.message?.includes('expired')) msg = 'El código expiró. Pedí uno nuevo.'
+      if (err.message?.includes('invalid')) msg = 'Código incorrecto. Intentá de nuevo.'
+      return { success: false, error: msg }
+    }
+  }, [cargarPerfil])
 
   // ── REGISTRAR USUARIO ──────────────────────────────────────────────────────
   const register = useCallback(async ({
@@ -286,6 +418,19 @@ export const AuthProvider = ({ children }) => {
     }
   }, [])
 
+  // ── 2FA: iniciar verificación (para flujo Google OAuth) ────────────────────
+  const startVerification = useCallback(async (email) => {
+    // SEGURIDAD: destruir la sesión de Google antes de pedir OTP
+    if (SUPABASE_READY && supabase) {
+      await supabase.auth.signOut()
+    }
+    setUser(null)
+    setToken(null)
+    setPerfil(null)
+    setPendingVerification(true)
+    setPendingEmail(email)
+  }, [setPendingVerification, setPendingEmail])
+
   // ── Verificar si el usuario tiene cierto rol ───────────────────────────────
   const hasRole = useCallback((...roles) => {
     const currentRol = perfil?.rol || user?.rol
@@ -298,6 +443,8 @@ export const AuthProvider = ({ children }) => {
     token,
     perfil,
     loading,
+    pendingVerification,
+    pendingEmail,
     isAuthenticated:  !!(user),
     rol:              perfil?.rol || user?.rol || null,
     supabaseReady:    SUPABASE_READY,
@@ -313,6 +460,10 @@ export const AuthProvider = ({ children }) => {
     logout,
     register,
     cargarPerfil,
+    actualizarPerfil,
+    sendVerificationCode,
+    verifyCode,
+    startVerification,
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

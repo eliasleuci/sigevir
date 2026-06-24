@@ -28,6 +28,9 @@ const Login = () => {
         if (result.pendingApproval) {
           toast.info('Tu cuenta está pendiente de aprobación por el administrador.');
           navigate('/pending');
+        } else if (result.needs2FA) {
+          // 2FA: redirigir a verificación OTP
+          navigate('/verify-otp', { state: { email: data.email } });
         } else {
           toast.success('Sesion iniciada correctamente');
           navigate('/dashboard');

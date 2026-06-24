@@ -121,3 +121,6 @@ build/
 
 # Dependencias
 node_modules/
+
+# Backup codes
+Backup-codes-*.txt

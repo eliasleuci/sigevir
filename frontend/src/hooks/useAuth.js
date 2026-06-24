@@ -6,7 +6,9 @@ import { AuthContext } from '../context/AuthContext'
  * Expone: user, perfil, loading, isAuthenticated, rol,
  *         isMock, supabaseReady, isAdmin, isAgenteCampo,
  *         isDeposito, isFiscalJuez, hasRole,
- *         login, loginWithGoogle, logout, register
+ *         login, loginWithGoogle, logout, register,
+ *         pendingVerification, pendingEmail,
+ *         sendVerificationCode, verifyCode
  */
 export const useAuth = () => {
   const context = useContext(AuthContext)

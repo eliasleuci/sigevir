@@ -1,11 +1,25 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase, SUPABASE_READY } from '../config/supabase';
+import { useAuth } from '../hooks/useAuth';
 
 const AuthCallbackPage = () => {
   const navigate = useNavigate();
   const [status, setStatus] = useState('Procesando autenticación...');
   const handled = useRef(false);
+  const { startVerification } = useAuth();
+
+  // ── Helper: redirect to 2FA verification or dashboard ─────────────────
+  const redirectAfterAuth = (userEmail) => {
+    if (SUPABASE_READY && userEmail) {
+      startVerification(userEmail);
+      setStatus('Redirigiendo a verificación de seguridad...');
+      navigate('/verify-otp', { replace: true, state: { email: userEmail } });
+    } else {
+      setStatus('Autenticación exitosa. Redirigiendo...');
+      navigate('/dashboard', { replace: true });
+    }
+  };
 
   useEffect(() => {
     if (handled.current) return;
@@ -39,8 +53,7 @@ const AuthCallbackPage = () => {
           const { data: { session }, error } = await supabase.auth.exchangeCodeForSession(code);
           if (error) throw error;
           if (session?.user) {
-            setStatus('Autenticación exitosa. Redirigiendo...');
-            navigate('/dashboard', { replace: true });
+            redirectAfterAuth(session.user.email);
             return;
           }
         }
@@ -57,8 +70,7 @@ const AuthCallbackPage = () => {
           });
           if (error) throw error;
           if (session?.user) {
-            setStatus('Autenticación exitosa. Redirigiendo...');
-            navigate('/dashboard', { replace: true });
+            redirectAfterAuth(session.user.email);
             return;
           }
         }
@@ -75,8 +87,7 @@ const AuthCallbackPage = () => {
         const poll = async () => {
           const { data: { session } } = await supabase.auth.getSession();
           if (session?.user) {
-            setStatus('Autenticación exitosa. Redirigiendo...');
-            navigate('/dashboard', { replace: true });
+            redirectAfterAuth(session.user.email);
             return;
           }
           elapsed += pollInterval;

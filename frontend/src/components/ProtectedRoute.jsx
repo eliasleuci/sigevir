@@ -2,7 +2,7 @@ import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 
 const ProtectedRoute = ({ allowedRoles, children }) => {
-  const { isAuthenticated, loading, rol, perfil, supabaseReady } = useAuth();
+  const { isAuthenticated, loading, rol, perfil, supabaseReady, pendingVerification, pendingEmail } = useAuth();
   const location = useLocation();
 
   if (loading) {
@@ -11,6 +11,11 @@ const ProtectedRoute = ({ allowedRoles, children }) => {
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
       </div>
     );
+  }
+
+  // 2FA: redirigir a verificación si está pendiente
+  if (pendingVerification && pendingEmail) {
+    return <Navigate to="/verify-otp" state={{ email: pendingEmail }} replace />;
   }
 
   if (!isAuthenticated) {

@@ -1,4 +1,4 @@
-﻿import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 
 
@@ -25,6 +25,7 @@ import Reportes from './pages/Reportes.jsx';
 import Unauthorized from './pages/Unauthorized.jsx';
 import PendingPage from './pages/PendingPage.jsx';
 import Perfil from './pages/Perfil.jsx';
+import VerifyOTP from './pages/VerifyOTP.jsx';
 
 const ROLES_ADMIN = ['admin'];
 const ROLES_RETENCION = ['admin', 'agente_campo'];
@@ -45,6 +46,7 @@ function App() {
             <Route path="/reset-password/:token" element={<ResetPassword />} />
             <Route path="/unauthorized" element={<Unauthorized />} />
             <Route path="/pending" element={<PendingPage />} />
+            <Route path="/verify-otp" element={<VerifyOTP />} />
 
             <Route element={<ProtectedRoute />}>
               <Route element={<MainLayout />}>
