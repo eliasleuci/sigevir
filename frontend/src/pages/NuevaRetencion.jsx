@@ -36,10 +36,10 @@ const NuevaRetencion = () => {
   };
 
   const handleSubmitFinal = async () => {
-  if (fotos.length !== 4) {
-    toast.warning('Debes cargar exactamente 4 fotos del vehículo');
-    return;
-  }
+    if (fotos.length < 4 || fotos.length > 20) {
+      toast.warning('Debes cargar entre 4 y 20 fotos del vehículo');
+      return;
+    }
 
   setLoading(true);
   try {
