@@ -6,7 +6,7 @@ const FormularioBusquedaAvanzada = ({ onSearch, onClear, loading }) => {
   const { register, handleSubmit, reset } = useForm();
 
   return (
-    <div className="bg-white p-4 sm:p-8 rounded-2xl sm:rounded-[40px] border border-gray-100 shadow-xl space-y-6 sm:space-y-8 animate-in slide-in-from-top-8 duration-500">
+    <div className="bg-white p-4 sm:p-8 rounded-2xl sm:rounded-[40px] border border-gray-100 shadow-xl space-y-6 sm:space-y-8 animate-in slide-in-from-top-8 duration-500 overflow-hidden max-w-full">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center">
@@ -76,8 +76,8 @@ const FormularioBusquedaAvanzada = ({ onSearch, onClear, loading }) => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-gray-50">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-gray-50 min-w-0">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 min-w-0">
               <div className="space-y-1">
                 <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Fecha Desde</label>
               <div className="relative">
