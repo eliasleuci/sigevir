@@ -158,6 +158,37 @@ class RetencionesController {
       next(error);
     }
   };
+
+  /**
+   * GET /api/retenciones/:id/comprobante-ciudadano
+   * Genera y descarga el comprobante PDF para el ciudadano (sin datos policiales sensibles).
+   */
+  descargarComprobanteCiudadano = async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      const retencion = await db.Retencion.findByPk(id, {
+        include: [
+          { model: db.Vehiculo, as: 'vehiculo' },
+          { model: db.DepositoInstitucion, as: 'deposito_institucion' }
+        ],
+      });
+
+      if (!retencion) {
+        return res.status(404).json({ success: false, message: 'Retención no encontrada' });
+      }
+
+      const pdfBuffer = await pdfService.generarComprobanteCiudadano(retencion);
+      const dominio = retencion.vehiculo?.dominio || retencion.dominio || 'vehiculo';
+
+      res.set({
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': `attachment; filename="comprobante-${dominio}.pdf"`,
+      });
+      res.send(pdfBuffer);
+    } catch (error) {
+      next(error);
+    }
+  };
 }
 
 export default new RetencionesController();

@@ -8,11 +8,16 @@ import notificacionesRoutes from './notificaciones.routes.js';
 import adminRoutes from './admin.routes.js';
 import tiposPersonalRoutes from './tiposPersonal.routes.js';
 import reportesRoutes from './reportes.routes.js';
+import depositosDisponiblesRoutes from './depositosDisponibles.routes.js';
+import internalRoutes from './internal.routes.js';
 
 const router = Router();
 
 // Rutas de autenticación
 router.use('/auth', authRoutes);
+
+// Rutas internas
+router.use('/internal', internalRoutes);
 
 // Rutas de tipos de personal (catálogo de roles)
 router.use('/tipos-personal', tiposPersonalRoutes);
@@ -25,6 +30,7 @@ router.use('/retenciones', retencionesRoutes);
 
 // Rutas del módulo de gestión de depósitos
 router.use('/depositos', depositosRoutes);
+router.use('/depositos-disponibles', depositosDisponiblesRoutes);
 
 // Rutas del módulo de búsqueda avanzada
 router.use('/busqueda', busquedaRoutes);
@@ -39,4 +45,3 @@ router.use('/notificaciones', notificacionesRoutes);
 router.use('/admin', adminRoutes);
 
 export default router;
-

@@ -34,6 +34,11 @@ router.get(
   retencionesController.getRetencion
 );
 
+router.get(
+  '/:id/comprobante-ciudadano',
+  retencionesController.descargarComprobanteCiudadano
+);
+
 router.put(
   '/:id',
   auditLog('MODIFICAR', 'RETENCION'),

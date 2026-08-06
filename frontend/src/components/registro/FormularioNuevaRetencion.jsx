@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { retencionSchema } from '../../schemas/retencion.schema';
 import { HiOutlineInformationCircle, HiOutlineUser, HiOutlineTruck, HiOutlineLocationMarker, HiOutlineSearch } from 'react-icons/hi';
 import MapaSelector from './MapaSelector';
+import CargaFotos from './CargaFotos';
+import SelectorDeposito from './SelectorDeposito';
 
 const FormularioNuevaRetencion = ({ onSubmit, loading, initialData = {} }) => {
   const { 
@@ -13,10 +15,16 @@ const FormularioNuevaRetencion = ({ onSubmit, loading, initialData = {} }) => {
     watch,
     setValue,
     reset,
-    getValues
+    getValues,
+    control
   } = useForm({
     resolver: zodResolver(retencionSchema),
     defaultValues: initialData || {}
+  });
+
+  const { fields: personas, append: agregarPersona, remove: quitarPersona } = useFieldArray({
+    control,
+    name: 'personas_involucradas',
   });
 
   const [coords, setCoords] = useState({
@@ -25,6 +33,10 @@ const FormularioNuevaRetencion = ({ onSubmit, loading, initialData = {} }) => {
   });
 
   const [isSearching, setIsSearching] = useState(false);
+
+  // Estados para croquis y acta (usando CargaFotos con su API real)
+  const [croquisFotos, setCroquisFotos] = useState([]);
+  const [actaFotos, setActaFotos] = useState([]);
 
   const formValues = watch();
   useEffect(() => {
@@ -44,9 +56,9 @@ const FormularioNuevaRetencion = ({ onSubmit, loading, initialData = {} }) => {
 
   const handleSearchAddress = async () => {
     const query = getValues('lugar_retencion');
-    console.log('Buscar dirección:', query);
+    console.log('Buscar direccion:', query);
     if (!query || query.trim().length < 3) {
-      alert('Por favor, ingrese al menos 3 caracteres para buscar la dirección.');
+      alert('Por favor, ingrese al menos 3 caracteres para buscar la direccion.');
       return;
     }
 
@@ -67,14 +79,14 @@ const FormularioNuevaRetencion = ({ onSubmit, loading, initialData = {} }) => {
         const { lat, lng } = result.geometry.location;
         const latNum = parseFloat(lat);
         const lngNum = parseFloat(lng);
-        // actualizar mapa y dirección
+        // actualizar mapa y direccion
         handleLocationChange({ lat: latNum, lng: lngNum, direccion: result.formatted_address });
       } else {
-        alert('No se encontró la dirección exacta. Intente con más detalles.');
+        alert('No se encontro la direccion exacta. Intente con mas detalles.');
       }
     } catch (err) {
       console.error(err);
-      alert('Error al consultar la API de Google Maps. Verifique su conexión.');
+      alert('Error al consultar la API de Google Maps. Verifique su conexion.');
     } finally {
       setIsSearching(false);
     }
@@ -84,16 +96,26 @@ const FormularioNuevaRetencion = ({ onSubmit, loading, initialData = {} }) => {
     onSubmit({
       ...data,
       latitud: coords.latitud ?? null,
-      longitud: coords.longitud ?? null
+      longitud: coords.longitud ?? null,
+      // Pasar archivos de croquis y acta para que la pagina padre los maneje
+      _croquisFotos: croquisFotos,
+      _actaFotos: actaFotos,
     });
   };
 
+  // Clases CSS reutilizadas del formulario existente
+  const inputClass = "w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all";
+  const inputErrorClass = "w-full px-4 py-2.5 rounded-xl border border-red-300 ring-1 ring-red-100 focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all";
+
   return (
     <form id="form-retencion" onSubmit={handleSubmit(customSubmit)} className="space-y-8 pb-20">
+      {/* ═══════════════════════════════════════════════════════════════════
+          SECCION 1: Datos del Vehiculo (existente, sin cambios)
+         ═══════════════════════════════════════════════════════════════════ */}
       <section className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-6">
         <div className="flex items-center gap-2 text-blue-600 mb-4">
           <HiOutlineTruck className="w-6 h-6" />
-          <h3 className="font-bold text-lg">Datos del Vehículo</h3>
+          <h3 className="font-bold text-lg">Datos del Vehiculo</h3>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -102,20 +124,20 @@ const FormularioNuevaRetencion = ({ onSubmit, loading, initialData = {} }) => {
             <input 
               {...register('dominio')}
               placeholder="Ej: ABC 123"
-              className={`w-full px-4 py-2.5 rounded-xl border ${errors.dominio ? 'border-red-300 ring-1 ring-red-100' : 'border-gray-200'} focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all uppercase`}
+              className={`${errors.dominio ? inputErrorClass : inputClass} uppercase`}
             />
             {errors.dominio && <p className="text-xs text-red-500 font-medium">{errors.dominio.message}</p>}
           </div>
 
           <div className="space-y-1">
-            <label className="text-sm font-semibold text-gray-700">Tipo de Vehículo</label>
+            <label className="text-sm font-semibold text-gray-700">Tipo de Vehiculo</label>
             <select 
               {...register('tipo_vehiculo')}
-              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all bg-white"
+              className={`${inputClass} bg-white`}
             >
-              <option value="AUTO">Automóvil</option>
+              <option value="AUTO">Automovil</option>
               <option value="MOTO">Motocicleta</option>
-              <option value="CAMION">Camión</option>
+              <option value="CAMION">Camion</option>
               <option value="PICKUP">Camioneta / Pick-up</option>
               <option value="OTRO">Otro</option>
             </select>
@@ -125,7 +147,7 @@ const FormularioNuevaRetencion = ({ onSubmit, loading, initialData = {} }) => {
             <label className="text-sm font-semibold text-gray-700">Marca</label>
             <input 
               {...register('marca')}
-              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all"
+              className={inputClass}
             />
             {errors.marca && <p className="text-xs text-red-500 font-medium">{errors.marca.message}</p>}
           </div>
@@ -134,7 +156,7 @@ const FormularioNuevaRetencion = ({ onSubmit, loading, initialData = {} }) => {
             <label className="text-sm font-semibold text-gray-700">Modelo</label>
             <input 
               {...register('modelo')}
-              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all"
+              className={inputClass}
             />
             {errors.modelo && <p className="text-xs text-red-500 font-medium">{errors.modelo.message}</p>}
           </div>
@@ -143,7 +165,7 @@ const FormularioNuevaRetencion = ({ onSubmit, loading, initialData = {} }) => {
             <label className="text-sm font-semibold text-gray-700">Color</label>
             <input 
               {...register('color')}
-              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all"
+              className={inputClass}
             />
             {errors.color && <p className="text-xs text-red-500 font-medium">{errors.color.message}</p>}
           </div>
@@ -154,7 +176,7 @@ const FormularioNuevaRetencion = ({ onSubmit, loading, initialData = {} }) => {
             <label className="text-sm font-semibold text-gray-700">Nro. de Motor</label>
             <input 
               {...register('nro_motor')}
-              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all"
+              className={inputClass}
             />
             {errors.nro_motor && <p className="text-xs text-red-500 font-medium">{errors.nro_motor.message}</p>}
           </div>
@@ -162,13 +184,16 @@ const FormularioNuevaRetencion = ({ onSubmit, loading, initialData = {} }) => {
             <label className="text-sm font-semibold text-gray-700">Nro. de Cuadro / Chasis</label>
             <input 
               {...register('nro_cuadro')}
-              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all"
+              className={inputClass}
             />
             {errors.nro_cuadro && <p className="text-xs text-red-500 font-medium">{errors.nro_cuadro.message}</p>}
           </div>
         </div>
       </section>
 
+      {/* ═══════════════════════════════════════════════════════════════════
+          SECCION 2: Datos del Titular / Infractor (existente, sin cambios)
+         ═══════════════════════════════════════════════════════════════════ */}
       <section className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-6">
         <div className="flex items-center gap-2 text-blue-600 mb-4">
           <HiOutlineUser className="w-6 h-6" />
@@ -180,7 +205,7 @@ const FormularioNuevaRetencion = ({ onSubmit, loading, initialData = {} }) => {
             <label className="text-sm font-semibold text-gray-700">Nombre Completo</label>
             <input 
               {...register('titular_nombre')}
-              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all"
+              className={inputClass}
             />
             {errors.titular_nombre && <p className="text-xs text-red-500 font-medium">{errors.titular_nombre.message}</p>}
           </div>
@@ -191,7 +216,7 @@ const FormularioNuevaRetencion = ({ onSubmit, loading, initialData = {} }) => {
               <input 
                 {...register('titular_dni')}
                 placeholder="Sin puntos"
-                className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all"
+                className={inputClass}
               />
               {errors.titular_dni && <p className="text-xs text-red-500 font-medium">{errors.titular_dni.message}</p>}
             </div>
@@ -199,7 +224,7 @@ const FormularioNuevaRetencion = ({ onSubmit, loading, initialData = {} }) => {
               <label className="text-sm font-semibold text-gray-700">Domicilio</label>
               <input 
                 {...register('titular_domicilio')}
-                className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all"
+                className={inputClass}
               />
               {errors.titular_domicilio && <p className="text-xs text-red-500 font-medium">{errors.titular_domicilio.message}</p>}
             </div>
@@ -207,20 +232,23 @@ const FormularioNuevaRetencion = ({ onSubmit, loading, initialData = {} }) => {
         </div>
       </section>
 
+      {/* ═══════════════════════════════════════════════════════════════════
+          SECCION 3: Informacion de la Retencion (existente, sin cambios)
+         ═══════════════════════════════════════════════════════════════════ */}
       <section className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-6">
         <div className="flex items-center gap-2 text-blue-600 mb-4">
           <HiOutlineLocationMarker className="w-6 h-6" />
-          <h3 className="font-bold text-lg">Información de la Retención</h3>
+          <h3 className="font-bold text-lg">Informacion de la Retencion</h3>
         </div>
 
         <div className="space-y-6">
           <div className="space-y-1">
-            <label className="text-sm font-semibold text-gray-700">Lugar de Retención</label>
+            <label className="text-sm font-semibold text-gray-700">Lugar de Retencion</label>
             <div className="flex flex-col sm:flex-row gap-2">
               <input 
                 {...register('lugar_retencion')}
-                placeholder="Calle, intersección o coordenadas"
-                className="flex-1 w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all"
+                placeholder="Calle, interseccion o coordenadas"
+                className={`flex-1 ${inputClass}`}
                 onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleSearchAddress(); } }}
               />
               <button
@@ -246,20 +274,20 @@ const FormularioNuevaRetencion = ({ onSubmit, loading, initialData = {} }) => {
               coords.latitud ? { lat: coords.latitud, lng: coords.longitud } : null
             }
           />
-          {/* Dirección seleccionada */}
+          {/* Direccion seleccionada */}
           {watch('lugar_retencion') && (
             <p className="mt-2 text-sm text-gray-700">
-              <span className="font-medium">Dirección seleccionada:</span> {watch('lugar_retencion')}
+              <span className="font-medium">Direccion seleccionada:</span> {watch('lugar_retencion')}
             </p>
           )}
 
           <div className="space-y-1">
-            <label className="text-sm font-semibold text-gray-700">Motivo de Retención</label>
+            <label className="text-sm font-semibold text-gray-700">Motivo de Retencion</label>
             <textarea 
               {...register('motivo_retencion')}
               rows={3}
               placeholder="Ej: Falta de seguro, licencia vencida, alcoholemia positiva..."
-              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all"
+              className={inputClass}
             />
             {errors.motivo_retencion && <p className="text-xs text-red-500 font-medium">{errors.motivo_retencion.message}</p>}
           </div>
@@ -269,17 +297,328 @@ const FormularioNuevaRetencion = ({ onSubmit, loading, initialData = {} }) => {
             <textarea 
               {...register('observaciones')}
               rows={2}
-              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all"
+              className={inputClass}
             />
           </div>
         </div>
       </section>
 
+      {/* ═══════════════════════════════════════════════════════════════════
+          SECCION 4: Datos del procedimiento (NUEVA)
+         ═══════════════════════════════════════════════════════════════════ */}
+      <section className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-6">
+        <div className="flex items-center gap-2 text-blue-600 mb-4">
+          <HiOutlineInformationCircle className="w-6 h-6" />
+          <h3 className="font-bold text-lg">Datos del Procedimiento</h3>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-1">
+            <label className="text-sm font-semibold text-gray-700">N° de comision</label>
+            <input {...register('numero_comision')} className={inputClass} />
+          </div>
+          <div className="space-y-1">
+            <label className="text-sm font-semibold text-gray-700">N° de movil policial</label>
+            <input {...register('numero_movil')} className={inputClass} />
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-sm font-semibold text-gray-700">Colaboracion especial recibida</label>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+            {['BOMBEROS', 'DIV_CANES', 'INFANTERIA', 'SEOM', 'CABALLERIA', 'DEFENSA_CIVIL', 'OTRO'].map(op => (
+              <label key={op} className="flex items-center gap-2 text-sm bg-gray-50 px-3 py-2 rounded-lg border border-gray-100 hover:bg-gray-100 transition-colors cursor-pointer">
+                <input
+                  type="checkbox"
+                  value={op}
+                  checked={(watch('colaboracion_especial') || []).includes(op)}
+                  onChange={(e) => {
+                    const actual = getValues('colaboracion_especial') || [];
+                    const nuevo = e.target.checked
+                      ? [...actual, op]
+                      : actual.filter(x => x !== op);
+                    setValue('colaboracion_especial', nuevo);
+                  }}
+                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                />
+                {op.replace(/_/g, ' ')}
+              </label>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex items-center gap-4">
+          <label className="text-sm font-semibold text-gray-700">Coopera Policia Judicial?</label>
+          <label className="flex items-center gap-1.5 text-sm">
+            <input type="radio" value="true" {...register('coopera_policia_judicial')} className="text-blue-600 focus:ring-blue-500" /> Si
+          </label>
+          <label className="flex items-center gap-1.5 text-sm">
+            <input type="radio" value="false" {...register('coopera_policia_judicial')} className="text-blue-600 focus:ring-blue-500" /> No
+          </label>
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════════════════
+          SECCION 5: Personas involucradas (NUEVA - repeater dinamico)
+         ═══════════════════════════════════════════════════════════════════ */}
+      <section className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 text-blue-600">
+            <HiOutlineUser className="w-6 h-6" />
+            <h3 className="font-bold text-lg">Personas Involucradas</h3>
+          </div>
+          <button
+            type="button"
+            onClick={() => agregarPersona({ rol: 'CONDUCTOR', nombre_completo: '', es_lesionado: false })}
+            className="flex items-center gap-1.5 px-4 py-2 text-sm font-semibold text-blue-600 bg-blue-50 rounded-xl hover:bg-blue-100 transition-colors border border-blue-100"
+          >
+            + Agregar persona
+          </button>
+        </div>
+
+        {personas.length === 0 && (
+          <div className="py-8 flex flex-col items-center justify-center text-gray-400 bg-gray-50 rounded-xl border border-dashed border-gray-200">
+            <HiOutlineUser className="w-10 h-10 mb-2 opacity-20" />
+            <p className="text-sm font-medium">Sin personas cargadas todavia.</p>
+            <p className="text-xs text-gray-300 mt-1">Presiona "Agregar persona" para empezar.</p>
+          </div>
+        )}
+
+        {personas.map((persona, index) => (
+          <div key={persona.id} className="border border-gray-200 rounded-2xl p-5 space-y-4 relative bg-gray-50/50">
+            <button
+              type="button"
+              onClick={() => quitarPersona(index)}
+              className="absolute top-4 right-4 text-red-500 text-sm font-semibold hover:text-red-700 hover:bg-red-50 px-2 py-1 rounded-lg transition-colors"
+            >
+              Quitar
+            </button>
+
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Persona {index + 1}</p>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-gray-600">Rol</label>
+                <select {...register(`personas_involucradas.${index}.rol`)} className={`${inputClass} bg-white`}>
+                  <option value="CONDUCTOR">Conductor</option>
+                  <option value="ACOMPANANTE">Acompanante</option>
+                  <option value="PEATON">Peaton</option>
+                  <option value="TESTIGO">Testigo</option>
+                  <option value="OTRO">Otro</option>
+                </select>
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-gray-600">Nombre completo</label>
+                <input {...register(`personas_involucradas.${index}.nombre_completo`)} className={inputClass} />
+                {errors.personas_involucradas?.[index]?.nombre_completo && (
+                  <p className="text-xs text-red-500 font-medium">{errors.personas_involucradas[index].nombre_completo.message}</p>
+                )}
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-gray-600">Edad</label>
+                <input type="number" {...register(`personas_involucradas.${index}.edad`, { valueAsNumber: true })} className={inputClass} />
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-gray-600">DNI</label>
+                <input {...register(`personas_involucradas.${index}.dni`)} className={inputClass} />
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-gray-600">Domicilio</label>
+                <input {...register(`personas_involucradas.${index}.domicilio`)} className={inputClass} />
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-gray-600">Telefono</label>
+                <input {...register(`personas_involucradas.${index}.telefono`)} className={inputClass} />
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 pt-2">
+              <input type="checkbox" {...register(`personas_involucradas.${index}.es_lesionado`)} className="rounded border-gray-300 text-amber-600 focus:ring-amber-500" />
+              <label className="text-sm font-semibold text-gray-700">Es lesionado</label>
+            </div>
+
+            {watch(`personas_involucradas.${index}.es_lesionado`) && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pl-6 border-l-2 border-amber-200 bg-amber-50/50 rounded-r-xl p-4">
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-gray-600">Tipo de lesion</label>
+                  <input {...register(`personas_involucradas.${index}.tipo_lesion`)} className={inputClass} />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-gray-600">Nosocomio de traslado</label>
+                  <input {...register(`personas_involucradas.${index}.nosocomio_traslado`)} className={inputClass} />
+                </div>
+              </div>
+            )}
+          </div>
+        ))}
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════════════════
+          SECCION 6: Consigna en el lugar (NUEVA)
+         ═══════════════════════════════════════════════════════════════════ */}
+      <section className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-6">
+        <h3 className="font-bold text-lg text-blue-600">Consigna en el Lugar</h3>
+        <div className="flex items-center gap-2">
+          <input type="checkbox" {...register('queda_consigna')} className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+          <label className="text-sm font-semibold text-gray-700">Queda personal de consigna en el lugar</label>
+        </div>
+
+        {watch('queda_consigna') && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pl-6 border-l-2 border-blue-200 bg-blue-50/50 rounded-r-xl p-4">
+            <div className="space-y-1">
+              <label className="text-xs font-semibold text-gray-600">Nombre</label>
+              <input {...register('consigna_nombre')} className={inputClass} />
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs font-semibold text-gray-600">Cargo/Jerarquia</label>
+              <input {...register('consigna_cargo')} className={inputClass} />
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs font-semibold text-gray-600">Dependencia</label>
+              <input {...register('consigna_dependencia')} className={inputClass} />
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs font-semibold text-gray-600">Telefono</label>
+              <input {...register('consigna_telefono')} className={inputClass} />
+            </div>
+          </div>
+        )}
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════════════════
+          SECCION 7: Traslado del vehiculo (NUEVA)
+         ═══════════════════════════════════════════════════════════════════ */}
+      <section className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-6">
+        <h3 className="font-bold text-lg text-blue-600">Traslado del Vehiculo</h3>
+        <div className="flex flex-col sm:flex-row gap-4">
+          <label className="flex items-center gap-2 text-sm bg-gray-50 px-4 py-3 rounded-xl border border-gray-100 hover:bg-gray-100 transition-colors cursor-pointer">
+            <input type="radio" value="PROPIOS_MEDIOS" {...register('tipo_traslado')} className="text-blue-600 focus:ring-blue-500" />
+            Se traslada por sus propios medios
+          </label>
+          <label className="flex items-center gap-2 text-sm bg-gray-50 px-4 py-3 rounded-xl border border-gray-100 hover:bg-gray-100 transition-colors cursor-pointer">
+            <input type="radio" value="GRUA" {...register('tipo_traslado')} className="text-blue-600 focus:ring-blue-500" />
+            Se traslada en grua al deposito
+          </label>
+        </div>
+
+        {watch('tipo_traslado') === 'GRUA' && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pl-6 border-l-2 border-blue-200 bg-blue-50/50 rounded-r-xl p-4">
+            <div className="space-y-1">
+              <label className="text-xs font-semibold text-gray-600">Dominio de la grua</label>
+              <input {...register('grua_dominio')} className={inputClass} />
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs font-semibold text-gray-600">Empresa</label>
+              <input {...register('grua_empresa')} className={inputClass} />
+            </div>
+          </div>
+        )}
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════════════════
+          SECCION 8: Declaracion en unidad judicial (NUEVA)
+         ═══════════════════════════════════════════════════════════════════ */}
+      <section className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-6">
+        <h3 className="font-bold text-lg text-blue-600">Declaracion en Unidad Judicial</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-1">
+            <label className="text-sm font-semibold text-gray-700">Hora del hecho</label>
+            <input type="datetime-local" {...register('hora_hecho')} className={inputClass} />
+          </div>
+          <div className="space-y-1">
+            <label className="text-sm font-semibold text-gray-700">N° de hecho</label>
+            <input {...register('numero_hecho')} className={inputClass} />
+          </div>
+        </div>
+        <div className="space-y-1">
+          <label className="text-sm font-semibold text-gray-700">Mecanica del hecho</label>
+          <textarea
+            {...register('mecanica_hecho')}
+            rows={3}
+            placeholder="Descripcion aproximada de lo ocurrido segun dichos de testigos o involucrados"
+            className={inputClass}
+          />
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════════════════
+          SECCION 9: Entorno del lugar (NUEVA)
+         ═══════════════════════════════════════════════════════════════════ */}
+      <section className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-6">
+        <h3 className="font-bold text-lg text-blue-600">Entorno del Lugar</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+          <label className="flex items-center gap-2 text-sm bg-gray-50 px-3 py-2.5 rounded-lg border border-gray-100 hover:bg-gray-100 transition-colors cursor-pointer">
+            <input type="checkbox" {...register('tiene_camaras_privadas')} className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+            Camaras/domos privados cerca
+          </label>
+          <label className="flex items-center gap-2 text-sm bg-gray-50 px-3 py-2.5 rounded-lg border border-gray-100 hover:bg-gray-100 transition-colors cursor-pointer">
+            <input type="checkbox" {...register('tiene_carteles_nomenclatura')} className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+            Carteles y nomenclatura visibles
+          </label>
+          <label className="flex items-center gap-2 text-sm bg-gray-50 px-3 py-2.5 rounded-lg border border-gray-100 hover:bg-gray-100 transition-colors cursor-pointer">
+            <input type="checkbox" {...register('tiene_reductores_velocidad')} className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+            Reductores de velocidad
+          </label>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-1">
+            <label className="text-sm font-semibold text-gray-700">Iluminacion</label>
+            <select {...register('estado_iluminacion')} className={`${inputClass} bg-white`}>
+              <option value="">-- Seleccionar --</option>
+              <option value="BUENA">Buena</option>
+              <option value="REGULAR">Regular</option>
+              <option value="MALA">Mala</option>
+              <option value="SIN_ILUMINACION">Sin iluminacion</option>
+            </select>
+          </div>
+          <div className="space-y-1">
+            <label className="text-sm font-semibold text-gray-700">Estado de la calzada</label>
+            <select {...register('estado_calzada')} className={`${inputClass} bg-white`}>
+              <option value="">-- Seleccionar --</option>
+              <option value="SECA">Seca</option>
+              <option value="MOJADA">Mojada</option>
+              <option value="DETERIORADA">Deteriorada</option>
+              <option value="EN_OBRA">En obra</option>
+            </select>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════════════════
+          SECCION 10: Documentacion adicional (NUEVA)
+         ═══════════════════════════════════════════════════════════════════ */}
+      <section className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-6">
+        <h3 className="font-bold text-lg text-blue-600">Documentacion Adicional</h3>
+        
+        <div className="space-y-3">
+          <label className="text-sm font-semibold text-gray-700">Croquis del hecho (foto)</label>
+          <CargaFotos
+            fotos={croquisFotos}
+            setFotos={setCroquisFotos}
+            maxFotos={1}
+            minFotos={0}
+          />
+        </div>
+
+        <div className="space-y-3 pt-4 border-t border-gray-100">
+          <label className="text-sm font-semibold text-gray-700">Acta de inspeccion ocular</label>
+          <CargaFotos
+            fotos={actaFotos}
+            setFotos={setActaFotos}
+            maxFotos={1}
+            minFotos={0}
+          />
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════════════════
+          NOTA de borrador (existente, sin cambios)
+         ═══════════════════════════════════════════════════════════════════ */}
       <div className="bg-blue-50 p-4 rounded-xl border border-blue-100 flex items-start gap-3">
         <HiOutlineInformationCircle className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
         <p className="text-xs text-blue-800 leading-relaxed">
-          Los datos ingresados están siendo guardados automáticamente como borrador localmente. 
-          Podrás recuperar el formulario si cierras la ventana antes de finalizar.
+          Los datos ingresados estan siendo guardados automaticamente como borrador localmente. 
+          Podras recuperar el formulario si cierras la ventana antes de finalizar.
         </p>
       </div>
     </form>

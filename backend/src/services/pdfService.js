@@ -1,4 +1,4 @@
-﻿import puppeteer from 'puppeteer';
+import puppeteer from 'puppeteer';
 import { S3Client, PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import fs from 'fs/promises';
@@ -136,6 +136,95 @@ class PDFService {
       if (browser) await browser.close();
       logger.error('Error generando PDF desde HTML: ' + error.message);
       throw new AppError('Error al generar el PDF', 500);
+    }
+  }
+
+  /**
+   * Genera el comprobante formal para el ciudadano.
+   * A diferencia del acta interna, NO incluye datos del agente policial.
+   */
+  async generarComprobanteCiudadano(retencion) {
+    try {
+      const SIGEVIR_DOMAIN = process.env.SIGEVIR_PUBLIC_DOMAIN || 'https://sigevir.dominio.com';
+      const targetUrl = retencion.qr_url || `${SIGEVIR_DOMAIN}/r/${retencion.numero_expediente || retencion.nro_expediente || retencion.id}`;
+      const qrDataUrl = await qrService.generateQRCode(targetUrl);
+
+      const template = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <style>
+            body { font-family: Arial, sans-serif; padding: 40px; color: #1a1a1a; }
+            .header { text-align: center; margin-bottom: 30px; border-bottom: 3px solid #2563eb; padding-bottom: 20px; }
+            .header h1 { color: #2563eb; margin: 0; font-size: 24px; }
+            .header p { color: #666; margin: 5px 0 0; font-size: 12px; }
+            .seccion { margin-bottom: 20px; }
+            .seccion h2 { font-size: 14px; color: #374151; border-bottom: 1px solid #e5e7eb; padding-bottom: 6px; }
+            .dato { display: flex; justify-content: space-between; padding: 6px 0; font-size: 13px; }
+            .dato .label { color: #6b7280; }
+            .dato .valor { font-weight: 600; color: #111827; }
+            .qr-box { text-align: center; margin-top: 30px; padding: 20px; border: 2px dashed #2563eb; border-radius: 12px; }
+            .footer { margin-top: 40px; text-align: center; font-size: 11px; color: #9ca3af; }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>SIGEVIR</h1>
+            <p>Sistema Integral de Gestión de Vehículos Retenidos</p>
+          </div>
+
+          <div class="seccion">
+            <h2>Datos del hecho</h2>
+            <div class="dato"><span class="label">Fecha y hora</span><span class="valor">{{fecha_hora}}</span></div>
+            <div class="dato"><span class="label">Lugar</span><span class="valor">{{lugar_retencion}}</span></div>
+            <div class="dato"><span class="label">N° de seguimiento</span><span class="valor">{{numero_expediente}}</span></div>
+          </div>
+
+          <div class="seccion">
+            <h2>Datos del vehículo</h2>
+            <div class="dato"><span class="label">Dominio</span><span class="valor">{{dominio}}</span></div>
+            <div class="dato"><span class="label">Marca / Modelo</span><span class="valor">{{marca}} {{modelo}}</span></div>
+            <div class="dato"><span class="label">Color</span><span class="valor">{{color}}</span></div>
+          </div>
+
+          <div class="seccion">
+            <h2>Lugar de traslado</h2>
+            <div class="dato"><span class="label">Depósito de resguardo</span><span class="valor">{{deposito_nombre}}</span></div>
+            <div class="dato"><span class="label">Dirección</span><span class="valor">{{deposito_direccion}}</span></div>
+          </div>
+
+          <div class="qr-box">
+            <p style="font-size:12px; color:#2563eb; font-weight:600; margin-bottom:12px;">
+              Escaneá este código para hacer seguimiento
+            </p>
+            <img src="{{qr_data_url}}" width="180" height="180" />
+          </div>
+
+          <div class="footer">
+            Documento generado automáticamente por SIGEVIR — no requiere firma.<br/>
+            Conservá este comprobante para el seguimiento de tu vehículo.
+          </div>
+        </body>
+        </html>
+      `;
+
+      const html = template
+        .replace('{{fecha_hora}}', retencion.fecha_hora ? new Date(retencion.fecha_hora).toLocaleString('es-AR') : new Date().toLocaleString('es-AR'))
+        .replace('{{lugar_retencion}}', retencion.calle_direccion || 'N/A')
+        .replace('{{numero_expediente}}', retencion.numero_expediente || retencion.nro_expediente || String(retencion.id).slice(0, 8).toUpperCase())
+        .replace('{{dominio}}', retencion.vehiculo?.dominio || retencion.dominio || 'N/A')
+        .replace('{{marca}}', retencion.vehiculo?.marca || retencion.marca || '')
+        .replace('{{modelo}}', retencion.vehiculo?.modelo || retencion.modelo || '')
+        .replace('{{color}}', retencion.vehiculo?.color || retencion.color || 'N/A')
+        .replace('{{deposito_nombre}}', retencion.deposito_institucion?.nombre || 'A confirmar')
+        .replace('{{deposito_direccion}}', retencion.deposito_institucion?.direccion || 'A confirmar')
+        .replace('{{qr_data_url}}', qrDataUrl);
+
+      return await this.generatePdfFromHtml(html);
+    } catch (error) {
+      logger.error(`Error generando comprobante ciudadano: ${error.message}`);
+      throw new AppError('Error al generar el comprobante', 500);
     }
   }
 }

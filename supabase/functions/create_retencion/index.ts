@@ -39,6 +39,9 @@ Deno.serve(async (req) => {
   try {
     const body = await req.json();
 
+    // Separar personas_involucradas del body principal
+    const { personas_involucradas, ...retencionBody } = body;
+
     const nroExpediente = await generarNroExpediente();
     const qrUrl = await generarQRDataUrl(nroExpediente);
 
@@ -46,7 +49,7 @@ Deno.serve(async (req) => {
       .from('retenciones')
       .insert({
         nro_expediente: nroExpediente,
-        ...body,
+        ...retencionBody,
         qr_url: null,
         pdf_url: null,
       })
@@ -54,6 +57,21 @@ Deno.serve(async (req) => {
       .single();
     
     if (errInsert) throw errInsert;
+
+    // Insertar personas involucradas si existen
+    if (Array.isArray(personas_involucradas) && personas_involucradas.length > 0) {
+      const personasConRetencion = personas_involucradas.map((p: any) => ({
+        ...p,
+        retencion_id: retencion.id,
+      }));
+      const { error: errPersonas } = await supabase
+        .from('personas_involucradas')
+        .insert(personasConRetencion);
+      if (errPersonas) {
+        console.error('Error insertando personas_involucradas:', errPersonas);
+        // No tiramos error para no romper la retención ya creada
+      }
+    }
 
     const qrBase64 = qrUrl.split(",")[1];
     
@@ -99,6 +117,31 @@ Deno.serve(async (req) => {
         dominio: body.dominio
       }
     });
+
+    // Disparar notificacion interna si hay deposito elegido
+    if (retencionBody.deposito_institucion_id) {
+      const expressApiUrl = Deno.env.get("EXPRESS_INTERNAL_API_URL") || 'http://host.docker.internal:3001/api/internal';
+      const internalSecret = Deno.env.get("INTERNAL_API_SECRET");
+      
+      if (internalSecret) {
+        try {
+          await fetch(`${expressApiUrl}/notificar-vehiculo-en-camino`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${internalSecret}`
+            },
+            body: JSON.stringify({
+              retencion_id: retencion.id,
+              deposito_institucion_id: retencionBody.deposito_institucion_id,
+              agente_nombre: body.agente_nombre || 'Agente de Campo'
+            })
+          });
+        } catch (e) {
+          console.error("Error disparando notificacion al Express Backend", e);
+        }
+      }
+    }
 
     return new Response(
       JSON.stringify({

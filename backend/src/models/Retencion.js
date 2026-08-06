@@ -143,7 +143,59 @@ Retencion.init({
     validate: {
       isIn: [['RETENIDO', 'EN_DEPOSITO', 'RESOLUCION_PENDIENTE', 'EN_TRAMITE', 'LIBERADO', 'SUBASTADO', 'COMPACTADO']]
     }
-  }
+  },
+
+  // ── Datos del procedimiento policial ──────────────────────────────────
+  numero_comision: { type: DataTypes.STRING, allowNull: true },
+  numero_movil: { type: DataTypes.STRING, allowNull: true },
+  colaboracion_especial: {
+    // Array de strings: ['BOMBEROS', 'DIV_CANES', 'INFANTERIA', 'SEOM', 'CABALLERIA', 'DEFENSA_CIVIL', 'OTRO']
+    type: DataTypes.JSONB,
+    allowNull: true,
+    defaultValue: [],
+  },
+  coopera_policia_judicial: { type: DataTypes.BOOLEAN, allowNull: true },
+
+  // ── Consigna (policía que queda en el lugar) ──────────────────────────
+  queda_consigna: { type: DataTypes.BOOLEAN, allowNull: true, defaultValue: false },
+  consigna_nombre: { type: DataTypes.STRING, allowNull: true },
+  consigna_cargo: { type: DataTypes.STRING, allowNull: true },
+  consigna_dependencia: { type: DataTypes.STRING, allowNull: true },
+  consigna_telefono: { type: DataTypes.STRING, allowNull: true },
+
+  // ── Traslado del vehículo ──────────────────────────────────────────────
+  tipo_traslado: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    validate: { isIn: [['PROPIOS_MEDIOS', 'GRUA', null]] }
+  },
+  grua_dominio: { type: DataTypes.STRING, allowNull: true },
+  grua_empresa: { type: DataTypes.STRING, allowNull: true },
+
+  // ── Declaración en unidad judicial ─────────────────────────────────────
+  hora_hecho: { type: DataTypes.DATE, allowNull: true },
+  numero_hecho: { type: DataTypes.STRING, allowNull: true },
+  mecanica_hecho: { type: DataTypes.TEXT, allowNull: true },
+
+  // ── Entorno del lugar ───────────────────────────────────────────────────
+  tiene_camaras_privadas: { type: DataTypes.BOOLEAN, allowNull: true },
+  tiene_carteles_nomenclatura: { type: DataTypes.BOOLEAN, allowNull: true },
+  tiene_reductores_velocidad: { type: DataTypes.BOOLEAN, allowNull: true },
+  estado_iluminacion: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    validate: { isIn: [['BUENA', 'REGULAR', 'MALA', 'SIN_ILUMINACION', null]] }
+  },
+  estado_calzada: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    validate: { isIn: [['SECA', 'MOJADA', 'DETERIORADA', 'EN_OBRA', null]] }
+  },
+
+  // ── Documentos adicionales ──────────────────────────────────────────────
+  croquis_url: { type: DataTypes.STRING, allowNull: true },
+  acta_inspeccion_url: { type: DataTypes.STRING, allowNull: true },
+  deposito_institucion_id: { type: DataTypes.UUID, allowNull: true },
 }, {
   sequelize,
   modelName: 'Retencion',

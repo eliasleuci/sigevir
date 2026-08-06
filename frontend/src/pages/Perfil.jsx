@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { AvatarPicker } from '../components/common/AvatarPicker';
 import { toast } from 'react-hot-toast';
+import FotoPerfilUploader from '../components/common/FotoPerfilUploader';
+import DocumentoIdentidadUploader from '../components/common/DocumentoIdentidadUploader';
 
 export const Perfil = () => {
   const { perfil, actualizarPerfil, cambiarPassword, hasPassword } = useAuth();
@@ -153,47 +155,50 @@ export const Perfil = () => {
       </div>
 
       <div className="flex flex-col lg:flex-row gap-8">
-        {/* Panel Lateral: Avatar y Resumen */}
-        <div className="lg:w-1/3">
+        {/* Panel Lateral: Foto, Documento y Resumen */}
+        <div className="lg:w-1/3 space-y-4">
+          {/* Foto de perfil: foto real + AvatarPicker conviven */}
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col items-center text-center sticky top-6">
-            <div className="relative mb-4 group">
-              {perfil?.avatar_url ? (
-                <img
-                  src={perfil.avatar_url}
-                  alt="avatar"
-                  className="w-32 h-32 rounded-full object-cover border-4 border-white shadow-lg transition-transform duration-300 group-hover:scale-105"
-                />
-              ) : (
-                <div className="w-32 h-32 rounded-full bg-gradient-to-tr from-blue-500 to-indigo-600 flex items-center justify-center text-4xl text-white font-bold border-4 border-white shadow-lg transition-transform duration-300 group-hover:scale-105">
-                  {(perfil?.nombre_completo?.charAt(0) || 'U').toUpperCase()}
-                </div>
-              )}
-              <button
-                onClick={() => setShowPicker(true)}
-                className="absolute bottom-0 right-0 bg-blue-600 p-2 rounded-full text-white shadow-lg hover:bg-blue-700 transition-colors"
-                title="Cambiar avatar"
-              >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-              </button>
-            </div>
-            
-            <h2 className="text-xl font-bold text-gray-900">{perfil?.nombre_completo || 'Usuario'}</h2>
+            {/* Subida de foto REAL */}
+            <FotoPerfilUploader />
+
+            {/* Opción clásica de avatar de galería — no se elimina */}
+            <button
+              type="button"
+              onClick={() => setShowPicker(true)}
+              className="mt-2 text-xs text-gray-400 hover:text-blue-600 transition-colors underline underline-offset-2"
+            >
+              O elegir avatar de galería
+            </button>
+
+            <h2 className="text-xl font-bold text-gray-900 mt-4">{perfil?.nombre_completo || 'Usuario'}</h2>
             <p className="text-sm text-gray-500 font-medium">{perfil?.rol ? perfil.rol.replace('_', ' ').toUpperCase() : 'AGENTE'}</p>
-            
+
             <div className="w-full mt-6 pt-6 border-t border-gray-100">
               <div className="flex items-center justify-between text-sm mb-3">
                 <span className="text-gray-500">Email</span>
-                <span className="text-gray-900 font-medium">{perfil?.email}</span>
+                <span className="text-gray-900 font-medium truncate max-w-[160px]" title={perfil?.email}>{perfil?.email}</span>
               </div>
               <div className="flex items-center justify-between text-sm mb-3">
                 <span className="text-gray-500">Estado</span>
                 <span className="px-2 py-1 bg-green-100 text-green-700 rounded-md text-xs font-bold">Activo</span>
               </div>
+              {/* Badge de verificación de documentos */}
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-gray-500">Documentos</span>
+                {perfil?.documentos_verificados ? (
+                  <span className="px-2 py-1 bg-emerald-100 text-emerald-700 rounded-md text-xs font-bold">✓ Verificados</span>
+                ) : perfil?.documento_identidad_url ? (
+                  <span className="px-2 py-1 bg-amber-100 text-amber-700 rounded-md text-xs font-bold">⏳ Pendiente</span>
+                ) : (
+                  <span className="px-2 py-1 bg-gray-100 text-gray-400 rounded-md text-xs font-bold">Sin cargar</span>
+                )}
+              </div>
             </div>
           </div>
+
+          {/* Carga de documento de identidad */}
+          <DocumentoIdentidadUploader />
         </div>
 
         {/* Panel Principal: Formulario */}

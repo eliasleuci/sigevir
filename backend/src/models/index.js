@@ -10,12 +10,18 @@ import ResolucionJudicial from './ResolucionJudicial.js';
 import FotoRetencion from './FotoRetencion.js';
 import Notificacion from './Notificacion.js';
 import HistorialMovimiento from './HistorialMovimiento.js';
+import PersonaInvolucrada from './PersonaInvolucrada.js';
+import DepositoInstitucion from './DepositoInstitucion.js';
 
 // Definir Asociaciones
 
 // 1. Institucion <-> Usuario (1:N)
 Institucion.hasMany(Usuario, { foreignKey: 'institucion_id', as: 'usuarios' });
 Usuario.belongsTo(Institucion, { foreignKey: 'institucion_id', as: 'institucion' });
+
+// 1.b Institucion <-> DepositoInstitucion (1:N)
+Institucion.hasMany(DepositoInstitucion, { foreignKey: 'institucion_id', as: 'depositos_fisicos' });
+DepositoInstitucion.belongsTo(Institucion, { foreignKey: 'institucion_id', as: 'institucion' });
 
 // 2. Institucion <-> Retencion (1:N)
 Institucion.hasMany(Retencion, { foreignKey: 'institucion_id', as: 'retenciones' });
@@ -59,6 +65,10 @@ Deposito.hasMany(Retencion, { foreignKey: 'deposito_id', as: 'retenciones_alberg
 // Agregar deposito_id a Retencion si no estaba explicito (Sequelize lo maneja si se define aqui)
 Retencion.belongsTo(Deposito, { foreignKey: 'deposito_id', as: 'deposito' });
 
+// 11c. DepositoInstitucion <-> Retencion (1:N)
+DepositoInstitucion.hasMany(Retencion, { foreignKey: 'deposito_institucion_id', as: 'retenciones_en_camino' });
+Retencion.belongsTo(DepositoInstitucion, { foreignKey: 'deposito_institucion_id', as: 'deposito_institucion' });
+
 // 12. Usuario <-> Notificacion (1:N)
 Usuario.hasMany(Notificacion, { foreignKey: 'destinatario_id', as: 'notificaciones_recibidas' });
 Notificacion.belongsTo(Usuario, { foreignKey: 'destinatario_id', as: 'destinatario' });
@@ -66,6 +76,10 @@ Notificacion.belongsTo(Usuario, { foreignKey: 'destinatario_id', as: 'destinatar
 // 13. Retencion <-> Notificacion (1:N)
 Retencion.hasMany(Notificacion, { foreignKey: 'retencion_id', as: 'notificaciones_generadas' });
 Notificacion.belongsTo(Retencion, { foreignKey: 'retencion_id', as: 'retencion' });
+
+// 14. Retencion <-> PersonaInvolucrada (1:N)
+Retencion.hasMany(PersonaInvolucrada, { foreignKey: 'retencion_id', as: 'personas_involucradas' });
+PersonaInvolucrada.belongsTo(Retencion, { foreignKey: 'retencion_id', as: 'retencion' });
 
 const db = {
   sequelize,
@@ -77,7 +91,9 @@ const db = {
   ResolucionJudicial,
   FotoRetencion,
   Notificacion,
-  HistorialMovimiento
+  HistorialMovimiento,
+  PersonaInvolucrada,
+  DepositoInstitucion
 };
 
 export default db;

@@ -27,13 +27,14 @@ Notificacion.init({
       'RESOLUCION_JUDICIAL',  // Juez emitió resolución → avisa a Depósito + Agente
       'ALERTA_TIEMPO',        // Permanencia prolongada → avisa a Admin + Judicial
       'DOC_DISPONIBLE',       // Documento listo → avisa al solicitante
-      'USUARIO_PENDIENTE',    // ← NUEVO: usuario espera aprobación → avisa a Admin
-      'EGRESO_VEHICULO'       // ← NUEVO: vehículo egresado → avisa a Agente + Admin
+      'USUARIO_PENDIENTE',    // usuario espera aprobación → avisa a Admin
+      'EGRESO_VEHICULO',      // vehículo egresado → avisa a Agente + Admin
+      'VEHICULO_EN_CAMINO'    // agente eligió depósito, avisa que va en camino
     ),
     allowNull: false,
     validate: {
       isIn: {
-        args: [['NUEVA_RETENCION', 'CAMBIO_ESTADO', 'INGRESO_DEPOSITO', 'RESOLUCION_JUDICIAL', 'ALERTA_TIEMPO', 'DOC_DISPONIBLE', 'USUARIO_PENDIENTE', 'EGRESO_VEHICULO']],
+        args: [['NUEVA_RETENCION', 'CAMBIO_ESTADO', 'INGRESO_DEPOSITO', 'RESOLUCION_JUDICIAL', 'ALERTA_TIEMPO', 'DOC_DISPONIBLE', 'USUARIO_PENDIENTE', 'EGRESO_VEHICULO', 'VEHICULO_EN_CAMINO']],
         msg: 'Tipo de notificación no válido'
       }
     }

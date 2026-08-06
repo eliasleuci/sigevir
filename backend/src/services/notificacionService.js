@@ -182,3 +182,35 @@ export const notificarPermanenciaProlongada = async (retencion, diasRetenido) =>
     logger.error(`[NOTIF] Error en notificarPermanenciaProlongada: ${error.message}`);
   }
 };
+
+/**
+ * EVENTO 7: Vehículo en camino al depósito
+ * Trigger: Agente confirma la retención habiendo elegido un depósito
+ * Destinatarios: Personal de ESE depósito específico
+ */
+export const notificarVehiculoEnCamino = async (retencion, depositoInstitucion, agenteNombre) => {
+  try {
+    // Solo notificar al personal de depósito vinculado a esa institución
+    const destinatarios = await Usuario.findAll({
+      where: {
+        rol: 'deposito',
+        activo: true,
+        institucion_id: depositoInstitucion.institucion_id,
+      },
+      attributes: ['id'],
+      raw: true,
+    }).then(usuarios => usuarios.map(u => u.id));
+
+    if (!destinatarios.length) return;
+
+    await notificarUsuarios(destinatarios, {
+      tipo: 'VEHICULO_EN_CAMINO',
+      retencion_id: retencion.id,
+      mensaje: `🚨 Vehículo ${retencion.dominio || 'sin dominio'} en camino a ${depositoInstitucion.nombre} — registrado por ${agenteNombre}.`,
+    });
+
+    logger.info(`[NOTIF] VEHICULO_EN_CAMINO → ${destinatarios.length} usuarios de ${depositoInstitucion.nombre}`);
+  } catch (error) {
+    logger.error(`[NOTIF] Error en notificarVehiculoEnCamino: ${error.message}`);
+  }
+};

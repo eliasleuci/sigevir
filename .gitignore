@@ -124,3 +124,7 @@ node_modules/
 
 # Backup codes
 Backup-codes-*.txt
+
+# Supabase local temp files & test scripts
+supabase/.temp/
+test_protocolo.js

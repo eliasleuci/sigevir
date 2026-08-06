@@ -59,14 +59,38 @@ const NuevaRetencion = () => {
         nro_motor: formData.nro_motor || null,
         nro_cuadro: formData.nro_cuadro || null,
         motivo_retencion: formData.motivo_retencion,
-        calle_direccion: formData.lugar_retencion || 'Sin dirección',
-        localidad: 'Córdoba', // Valor por defecto
-        provincia: 'Córdoba', // Valor por defecto
+        calle_direccion: formData.lugar_retencion || 'Sin direccion',
+        localidad: 'Cordoba',
+        provincia: 'Cordoba',
         titular_nombre: formData.titular_nombre || null,
         titular_dni: formData.titular_dni || null,
         titular_domicilio: formData.titular_domicilio || null,
-        institucion_id: perfil?.institucion_id || user?.institucion_id || '3e23f6e0-eeeb-477a-99a5-ecb93e49a074', // Fallback si no está en perfil
-        agente_id: user?.id || '40e03d39-aa66-4c47-b421-4ae2639a7b5b', // Fallback Agent ID from test DB
+        institucion_id: perfil?.institucion_id || user?.institucion_id || '3e23f6e0-eeeb-477a-99a5-ecb93e49a074',
+        agente_id: user?.id || '40e03d39-aa66-4c47-b421-4ae2639a7b5b',
+        deposito_institucion_id: formData.deposito_institucion_id || null,
+        // Campos del protocolo policial
+        numero_comision: formData.numero_comision || null,
+        numero_movil: formData.numero_movil || null,
+        colaboracion_especial: formData.colaboracion_especial || [],
+        coopera_policia_judicial: formData.coopera_policia_judicial === 'true' ? true : formData.coopera_policia_judicial === 'false' ? false : null,
+        queda_consigna: formData.queda_consigna || false,
+        consigna_nombre: formData.consigna_nombre || null,
+        consigna_cargo: formData.consigna_cargo || null,
+        consigna_dependencia: formData.consigna_dependencia || null,
+        consigna_telefono: formData.consigna_telefono || null,
+        tipo_traslado: formData.tipo_traslado || null,
+        grua_dominio: formData.grua_dominio || null,
+        grua_empresa: formData.grua_empresa || null,
+        hora_hecho: formData.hora_hecho || null,
+        numero_hecho: formData.numero_hecho || null,
+        mecanica_hecho: formData.mecanica_hecho || null,
+        tiene_camaras_privadas: formData.tiene_camaras_privadas || false,
+        tiene_carteles_nomenclatura: formData.tiene_carteles_nomenclatura || false,
+        tiene_reductores_velocidad: formData.tiene_reductores_velocidad || false,
+        estado_iluminacion: formData.estado_iluminacion || null,
+        estado_calzada: formData.estado_calzada || null,
+        // Personas involucradas
+        personas_involucradas: formData.personas_involucradas || [],
       }),
     });
 
@@ -203,7 +227,12 @@ const NuevaRetencion = () => {
 
               {/* QR + Próximos Pasos */}
               <div className={`space-y-6 ${result.pdfUrl ? 'lg:col-span-1' : ''}`}>
-                <MuestraQR qrUrl={result.qrUrl} nroExpediente={result.nro_expediente} />
+                <MuestraQR 
+                  qrUrl={result.qrUrl} 
+                  nroExpediente={result.nro_expediente} 
+                  retencionId={result.id}
+                  dominio={formData?.dominio}
+                />
 
                 <div className="bg-blue-600 p-8 rounded-3xl text-white shadow-2xl shadow-blue-200 relative overflow-hidden">
                   <div className="relative z-10">
@@ -211,7 +240,7 @@ const NuevaRetencion = () => {
                     <ul className="space-y-4 text-sm font-medium text-blue-50 opacity-90">
                       <li className="flex gap-3 items-start">
                         <span className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center shrink-0">1</span>
-                        Imprime el acta y entrégala al ciudadano.
+                        Muestra el código QR al ciudadano o descárgale su comprobante.
                       </li>
                       <li className="flex gap-3 items-start">
                         <span className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center shrink-0">2</span>
