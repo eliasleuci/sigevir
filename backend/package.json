@@ -5,7 +5,7 @@
   "main": "src/app.js",
   "type": "module",
   "engines": {
-    "node": "20.x"
+    "node": "22.x"
   },
   "scripts": {
     "dev": "nodemon src/app.js",
@@ -44,7 +44,6 @@
     "qrcode": "^1.5.4",
     "sequelize": "^6.37.3",
     "socket.io": "^4.8.3",
-    "sqlite3": "^6.0.1",
     "uuid": "^9.0.1",
     "winston": "^3.13.0",
     "xss": "^1.0.15"

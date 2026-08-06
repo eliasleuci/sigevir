@@ -1,4 +1,4 @@
-﻿import { createClient } from '@supabase/supabase-js';
+import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -25,6 +25,9 @@ if (isSupabaseConfigured()) {
     auth: {
       autoRefreshToken: false,
       persistSession: false,
+    },
+    realtime: {
+      transport: null,
     },
   });
 }
