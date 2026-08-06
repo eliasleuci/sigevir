@@ -268,16 +268,14 @@ export const AuthProvider = ({ children }) => {
     }
     try {
       const hostedDomain = getPrimaryHostedDomain()
-      const queryParams = hostedDomain ? { hd: hostedDomain } : {}
       const redirectTo = `${window.location.origin}/auth/callback`
 
-      console.log('loginWithGoogle: redirectTo =', redirectTo, 'hd =', hostedDomain)
+      console.log('loginWithGoogle: redirectTo =', redirectTo)
 
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo,
-          queryParams,
           skipBrowserRedirect: false,
         },
       })
