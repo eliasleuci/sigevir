@@ -9,10 +9,6 @@ const VARS_REQUERIDAS_PROD = [
   'SUPABASE_SERVICE_ROLE_KEY',
   'JWT_SECRET',
   'FRONTEND_URL',
-  'DB_HOST',
-  'DB_USER',
-  'DB_PASSWORD',
-  'DB_NAME',
 ];
 
 const VARS_REQUERIDAS_DEV = [
@@ -26,6 +22,12 @@ export const validateEnv = () => {
     : VARS_REQUERIDAS_DEV;
 
   const faltantes = vars.filter(v => !process.env[v]);
+
+  if (process.env.NODE_ENV === 'production') {
+    if (!process.env.DATABASE_URL && (!process.env.DB_HOST || !process.env.DB_USER || !process.env.DB_PASSWORD || !process.env.DB_NAME)) {
+      faltantes.push('DATABASE_URL (o en su defecto DB_HOST, DB_USER, DB_PASSWORD y DB_NAME)');
+    }
+  }
 
   if (faltantes.length > 0) {
     console.error('❌ Variables de entorno faltantes:');
