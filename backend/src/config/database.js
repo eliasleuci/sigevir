@@ -53,22 +53,6 @@ if (process.env.DB_HOST === 'sqlite' || !process.env.DB_HOST) {
     }
   );
 
-  try {
-    // Intentar autenticarse de forma síncrona (bloqueando el export) para ver si la DB está disponible
-    await sequelize.authenticate();
-  } catch (error) {
-    logger.error(`❌ Error al conectar a PostgreSQL: ${error.message}. Intentando fallback a SQLite en memoria...`);
-    // Fallback a SQLite
-    sequelize = new Sequelize('sqlite::memory:', {
-      logging: (msg) => logger.debug(msg),
-      define: {
-        timestamps: true,
-        underscored: true,
-        freezeTableName: true
-      }
-    });
-    isFallback = true;
-  }
 }
 
 export const connectDB = async () => {
