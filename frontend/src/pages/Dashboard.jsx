@@ -103,9 +103,9 @@ export default function Dashboard() {
       </header>
 
       {/* Hero Section */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <div className="bg-blue-600 rounded-[40px] p-8 md:p-12 text-white shadow-2xl shadow-blue-500/20 flex flex-col md:flex-row justify-between items-center gap-8 overflow-hidden relative">
-          <div className="relative z-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
+        <div className="bg-blue-600 rounded-3xl sm:rounded-[40px] p-6 sm:p-8 md:p-12 text-white shadow-2xl shadow-blue-500/20 flex flex-col md:flex-row justify-between items-center gap-6 sm:gap-8 overflow-hidden relative isolate [transform:translateZ(0)]">
+          <div className="relative z-10 w-full text-center md:text-left">
             <h2 className="text-3xl md:text-5xl font-black tracking-tighter mb-4">
               Bienvenido, {user?.nombre_completo?.split(' ')[0] || 'Hola'}!
             </h2>

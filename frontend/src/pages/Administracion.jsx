@@ -32,9 +32,9 @@ const Administracion = () => {
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`flex items-center gap-3 px-4 md:px-8 py-4 rounded-2xl text-sm font-black uppercase tracking-widest transition-all whitespace-nowrap ${
+            className={`shrink-0 flex items-center gap-2 sm:gap-3 px-4 md:px-8 py-3 sm:py-4 rounded-2xl text-xs sm:text-sm font-black uppercase tracking-widest transition-all whitespace-nowrap ${
               activeTab === tab.id
-              ? 'bg-blue-600 text-white shadow-xl shadow-blue-200 translate-y-[-2px]'
+              ? 'bg-blue-600 text-white shadow-xl shadow-blue-200 sm:translate-y-[-2px]'
               : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50'
             }`}
           >
