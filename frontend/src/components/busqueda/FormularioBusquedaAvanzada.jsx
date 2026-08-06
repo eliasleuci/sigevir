@@ -102,18 +102,18 @@ const FormularioBusquedaAvanzada = ({ onSearch, onClear, loading }) => {
             </div>
           </div>
 
-          <div className="flex items-end">
+          <div className="flex items-end w-full min-w-0">
             <button 
               type="submit"
               disabled={loading}
-              className="w-full py-3 sm:py-4 bg-blue-600 text-white rounded-xl sm:rounded-[24px] font-black text-base sm:text-xl shadow-2xl shadow-blue-200 hover:bg-blue-700 transition-all transform active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2 sm:gap-3"
+              className="w-full py-3 sm:py-4 bg-blue-600 text-white rounded-xl sm:rounded-[24px] font-black text-sm sm:text-xl shadow-2xl shadow-blue-200 hover:bg-blue-700 transition-all transform active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2 sm:gap-3 px-2"
             >
               {loading ? (
-                <div className="w-6 h-6 border-4 border-white/30 border-t-white rounded-full animate-spin"></div>
+                <div className="w-6 h-6 border-4 border-white/30 border-t-white rounded-full animate-spin shrink-0"></div>
               ) : (
                 <>
                   <HiOutlineSearch className="w-5 h-5 sm:w-7 sm:h-7 shrink-0" />
-                  <span className="text-center leading-tight">Ejecutar Búsqueda<br className="sm:hidden" /> Avanzada</span>
+                  <span className="text-center leading-tight whitespace-normal break-words">Ejecutar Búsqueda<br className="sm:hidden" /> Avanzada</span>
                 </>
               )}
             </button>

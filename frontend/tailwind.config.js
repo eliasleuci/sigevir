@@ -10,7 +10,7 @@ export default {
         sigevir: {
           navy: "#1B2A3B",
           blue: "#2E75B6",
-          light: "#F4F7FA",
+          light: "#F8FAFC",
           dark: "#101820",
           accent: "#3B82F6",
           danger: "#EF4444",

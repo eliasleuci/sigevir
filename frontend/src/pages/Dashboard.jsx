@@ -117,8 +117,8 @@ export default function Dashboard() {
           <div className="hidden md:block opacity-20 transform rotate-12">
             <HiOutlineChartBar className="w-64 h-64" />
           </div>
-          <div className="absolute -top-24 -right-24 w-64 h-64 bg-blue-500 rounded-full blur-3xl opacity-50"></div>
-          <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-indigo-500 rounded-full blur-3xl opacity-50"></div>
+          <div className="hidden md:block absolute -top-24 -right-24 w-64 h-64 bg-blue-500 rounded-full blur-3xl opacity-50"></div>
+          <div className="hidden md:block absolute -bottom-24 -left-24 w-64 h-64 bg-indigo-500 rounded-full blur-3xl opacity-50"></div>
         </div>
 
         {/* Grid de Modulos Interactivos */}
