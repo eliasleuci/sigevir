@@ -7,12 +7,7 @@ import logger from '../utils/logger.js';
 export const setupSocketIO = (httpServer) => {
   const io = new Server(httpServer, {
     cors: {
-      // Aceptar el puerto real del frontend
-      origin: [
-        process.env.FRONTEND_URL || 'http://localhost:4001',
-        'http://localhost:4001',
-        'http://localhost:5173',  // fallback por si cambia
-      ],
+      origin: true,
       methods: ['GET', 'POST'],
       credentials: true,
     },

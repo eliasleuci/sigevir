@@ -1,4 +1,4 @@
-﻿import { supabaseAdmin, isSupabaseConfigured } from '../config/supabase.js';
+import { supabaseAdmin, isSupabaseConfigured } from '../config/supabase.js';
 import db from '../models/index.js';
 import logger from '../utils/logger.js';
 
@@ -23,17 +23,21 @@ export const socketAuth = async (socket, next) => {
       return next(new Error('Authentication error: Invalid token'));
     }
 
-    const usuario = await Usuario.findByPk(user.id);
-    if (!usuario || !usuario.activo) {
-      return next(new Error('Authentication error: User not found or inactive'));
+    let usuario = await Usuario.findByPk(user.id);
+    if (!usuario && user.email) {
+      usuario = await Usuario.findOne({ where: { email: user.email } });
     }
 
+    const userId = usuario?.id || user.id;
+    const role = usuario?.rol || user.user_metadata?.rol || 'agente_campo';
+    const institucionId = usuario?.institucion_id || user.user_metadata?.institucion_id || null;
+
     socket.user = {
-      userId: usuario.id,
-      id: usuario.id,
-      email: usuario.email,
-      role: usuario.rol,
-      institucion_id: usuario.institucion_id,
+      userId,
+      id: userId,
+      email: user.email,
+      role,
+      institucion_id: institucionId,
     };
 
     next();

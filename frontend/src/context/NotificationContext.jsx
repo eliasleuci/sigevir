@@ -50,11 +50,20 @@ export const NotificationProvider = ({ children }) => {
       }
       const socketNamespace = '/notifications';
       const newSocket = io(`${socketUrl}${socketNamespace}`, {
-        auth: { token }
+        auth: { token },
+        transports: ['websocket', 'polling'],
+        reconnection: true,
+        reconnectionAttempts: 10,
+        reconnectionDelay: 2000,
       });
 
       newSocket.on('connect', () => {
         setIsConnected(true);
+      });
+
+      newSocket.on('connect_error', (err) => {
+        console.warn('WebSocket connect_error:', err.message);
+        setIsConnected(false);
       });
 
       newSocket.on('disconnect', () => {
