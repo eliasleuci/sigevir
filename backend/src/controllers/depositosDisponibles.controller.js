@@ -1,5 +1,5 @@
 import db from '../models/index.js';
-import { AppError, asyncHandler } from '../middleware/errorHandler.js';
+import { AppError } from '../middleware/errorHandler.js';
 import logger from '../utils/logger.js';
 
 const { DepositoInstitucion, Retencion } = db;
@@ -22,49 +22,53 @@ const calcularDistanciaKm = (lat1, lon1, lat2, lon2) => {
  * GET /api/depositos-disponibles/cercanos?lat=&lng=
  * Devuelve depósitos activos ordenados por distancia, con espacios disponibles calculados
  */
-export const getDepositosCercanos = asyncHandler(async (req, res) => {
-  const { lat, lng } = req.query;
+export const getDepositosCercanos = async (req, res, next) => {
+  try {
+    const { lat, lng } = req.query;
 
-  if (!lat || !lng) {
-    throw new AppError('Se requieren coordenadas lat y lng', 400, 'MISSING_COORDS');
+    if (!lat || !lng) {
+      throw new AppError('Se requieren coordenadas lat y lng', 400, 'MISSING_COORDS');
+    }
+
+    const depositos = await DepositoInstitucion.findAll({
+      where: { activo: true },
+      raw: true,
+    });
+
+    // Calcular ocupación actual de cada depósito
+    const depositosConDisponibilidad = await Promise.all(
+      depositos.map(async (dep) => {
+        const ocupados = await Retencion.count({
+          where: {
+            deposito_institucion_id: dep.id,
+            estado_actual: ['EN_DEPOSITO', 'RETENIDO'], // vehículos actualmente ahí o en camino
+          },
+        });
+
+        const disponibles = Math.max(0, dep.capacidad_maxima - ocupados);
+        const distanciaKm = calcularDistanciaKm(
+          parseFloat(lat), parseFloat(lng),
+          parseFloat(dep.latitud), parseFloat(dep.longitud)
+        );
+
+        return {
+          ...dep,
+          espacios_ocupados: ocupados,
+          espacios_disponibles: disponibles,
+          distancia_km: Math.round(distanciaKm * 10) / 10,
+          tiene_lugar: disponibles > 0,
+        };
+      })
+    );
+
+    // Ordenar por distancia
+    depositosConDisponibilidad.sort((a, b) => a.distancia_km - b.distancia_km);
+
+    res.json({
+      success: true,
+      data: depositosConDisponibilidad,
+    });
+  } catch (error) {
+    next(error);
   }
-
-  const depositos = await DepositoInstitucion.findAll({
-    where: { activo: true },
-    raw: true,
-  });
-
-  // Calcular ocupación actual de cada depósito
-  const depositosConDisponibilidad = await Promise.all(
-    depositos.map(async (dep) => {
-      const ocupados = await Retencion.count({
-        where: {
-          deposito_institucion_id: dep.id,
-          estado_actual: ['EN_DEPOSITO', 'RETENIDO'], // vehículos actualmente ahí o en camino
-        },
-      });
-
-      const disponibles = Math.max(0, dep.capacidad_maxima - ocupados);
-      const distanciaKm = calcularDistanciaKm(
-        parseFloat(lat), parseFloat(lng),
-        parseFloat(dep.latitud), parseFloat(dep.longitud)
-      );
-
-      return {
-        ...dep,
-        espacios_ocupados: ocupados,
-        espacios_disponibles: disponibles,
-        distancia_km: Math.round(distanciaKm * 10) / 10,
-        tiene_lugar: disponibles > 0,
-      };
-    })
-  );
-
-  // Ordenar por distancia
-  depositosConDisponibilidad.sort((a, b) => a.distancia_km - b.distancia_km);
-
-  res.json({
-    success: true,
-    data: depositosConDisponibilidad,
-  });
-});
+};
