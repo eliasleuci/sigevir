@@ -13,7 +13,25 @@ const isDevelopment = process.env.NODE_ENV === 'development';
 let sequelize;
 let isFallback = false;
 
-if (process.env.DB_HOST === 'sqlite' || !process.env.DB_HOST) {
+if (process.env.DATABASE_URL) {
+  logger.info('🔌 Usando DATABASE_URL para la conexión a la base de datos');
+  sequelize = new Sequelize(process.env.DATABASE_URL, {
+    dialect: 'postgres',
+    timezone: '+00:00',
+    logging: process.env.NODE_ENV === 'production' ? false : (msg) => logger.debug(msg),
+    pool: {
+      max: 10,
+      min: 2,
+      acquire: 30000,
+      idle: 10000
+    },
+    define: {
+      timestamps: true,
+      underscored: true,
+      freezeTableName: true
+    }
+  });
+} else if (process.env.DB_HOST === 'sqlite' || !process.env.DB_HOST) {
   logger.info('⚠️ DB_HOST no configurado o configurado como sqlite. Usando SQLite en memoria.');
   sequelize = new Sequelize('sqlite::memory:', {
     logging: (msg) => logger.debug(msg),
