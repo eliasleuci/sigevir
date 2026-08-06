@@ -41,7 +41,13 @@ export const NotificationProvider = ({ children }) => {
       return;
     }
     if (isAuthenticated && token) {
-      const socketUrl = import.meta.env.VITE_SOCKET_URL || 'http://localhost:3001';
+      let socketUrl = import.meta.env.VITE_SOCKET_URL;
+      if (!socketUrl && import.meta.env.VITE_API_URL) {
+        socketUrl = import.meta.env.VITE_API_URL.replace(/\/api\/?$/, '');
+      }
+      if (!socketUrl) {
+        socketUrl = 'http://localhost:3001';
+      }
       const socketNamespace = '/notifications';
       const newSocket = io(`${socketUrl}${socketNamespace}`, {
         auth: { token }

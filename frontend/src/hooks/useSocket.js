@@ -2,7 +2,13 @@ import { useState, useEffect, useRef, useContext } from 'react';
 import { io } from 'socket.io-client';
 import { AuthContext } from '../context/AuthContext';
 
-const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:3002';
+let SOCKET_URL = import.meta.env.VITE_SOCKET_URL;
+if (!SOCKET_URL && import.meta.env.VITE_API_URL) {
+  SOCKET_URL = import.meta.env.VITE_API_URL.replace(/\/api\/?$/, '');
+}
+if (!SOCKET_URL) {
+  SOCKET_URL = 'http://localhost:3002';
+}
 const RECONNECT_DELAYS = [1000, 2000, 4000, 8000, 16000, 30000];
 
 export function useSocket(namespace = '/notifications') {
