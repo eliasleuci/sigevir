@@ -1,13 +1,35 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { HiOutlineUserCircle, HiOutlineChevronDown, HiOutlineSearch, HiOutlineMenu } from 'react-icons/hi';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import NotificationCenter from '../NotificationCenter';
 
 const Navbar = ({ onToggleSidebar }) => {
   const { user, logout, perfil } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const menuRef = useRef(null);
+
+  // Cerrar menú si cambia la ruta
+  useEffect(() => {
+    setShowProfileMenu(false);
+  }, [location.pathname]);
+
+  // Cerrar menú al hacer clic fuera
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setShowProfileMenu(false);
+      }
+    };
+    if (showProfileMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showProfileMenu]);
 
   return (
     <header className="h-16 lg:h-20 bg-white border-b border-gray-100 flex items-center justify-between px-4 sm:px-6 lg:px-8 sticky top-0 z-50">
@@ -32,7 +54,7 @@ const Navbar = ({ onToggleSidebar }) => {
       <div className="flex items-center gap-4 lg:gap-6">
         <NotificationCenter />
 
-        <div className="relative">
+        <div className="relative" ref={menuRef}>
           <button 
             onClick={() => setShowProfileMenu(!showProfileMenu)}
             className="flex items-center gap-2 lg:gap-3 p-1.5 hover:bg-gray-50 rounded-xl transition-all"
@@ -52,18 +74,27 @@ const Navbar = ({ onToggleSidebar }) => {
           </button>
 
           {showProfileMenu && (
-            <div className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-2xl border border-gray-100 py-2 animate-in fade-in slide-in-from-top-2 duration-200">
+            <div className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-2xl border border-gray-100 py-2 animate-in fade-in slide-in-from-top-2 duration-200 z-50">
               <div className="px-4 py-3 border-b border-gray-50">
                 <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1">Institución</p>
                 <p className="text-sm font-bold text-gray-700 truncate">{user?.Institucion?.nombre || 'Sede Central'}</p>
               </div>
-              <button onClick={() => navigate('/perfil')} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-50 hover:text-blue-600 transition-colors text-left">
+              <button 
+                onClick={() => {
+                  setShowProfileMenu(false);
+                  navigate('/perfil');
+                }} 
+                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-50 hover:text-blue-600 transition-colors text-left"
+              >
                 <HiOutlineUserCircle className="w-5 h-5" />
                 Mi Perfil
               </button>
               <div className="h-px bg-gray-50 my-1"></div>
               <button 
-                onClick={logout}
+                onClick={() => {
+                  setShowProfileMenu(false);
+                  logout();
+                }}
                 className="w-full text-left px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors font-semibold"
               >
                 Cerrar Sesión
