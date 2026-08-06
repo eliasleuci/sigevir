@@ -3,11 +3,20 @@ import { io } from 'socket.io-client';
 import { AuthContext } from '../context/AuthContext';
 
 let SOCKET_URL = import.meta.env.VITE_SOCKET_URL;
+
+const isRemoteHost = typeof window !== 'undefined' && 
+  window.location.hostname !== 'localhost' && 
+  window.location.hostname !== '127.0.0.1';
+
+if (isRemoteHost && (!SOCKET_URL || SOCKET_URL.includes('localhost'))) {
+  SOCKET_URL = 'https://sigevir-backend.onrender.com';
+}
+
 if (!SOCKET_URL && import.meta.env.VITE_API_URL) {
   SOCKET_URL = import.meta.env.VITE_API_URL.replace(/\/api\/?$/, '');
 }
 if (!SOCKET_URL) {
-  SOCKET_URL = 'http://localhost:3002';
+  SOCKET_URL = isRemoteHost ? 'https://sigevir-backend.onrender.com' : 'http://localhost:3001';
 }
 const RECONNECT_DELAYS = [1000, 2000, 4000, 8000, 16000, 30000];
 
