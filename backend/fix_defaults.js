@@ -1,27 +1,53 @@
 import db from './src/models/index.js';
 
-async function fixDefaults() {
+async function fixAllDefaults() {
   try {
     await db.sequelize.authenticate();
-    console.log('Connection has been established successfully.');
-    
-    console.log('Setting DEFAULT NOW() for created_at and updated_at in retenciones...');
-    await db.sequelize.query('ALTER TABLE retenciones ALTER COLUMN created_at SET DEFAULT NOW();');
-    await db.sequelize.query('ALTER TABLE retenciones ALTER COLUMN updated_at SET DEFAULT NOW();');
-    
-    // Y ya que estamos, también para fecha_hora por las dudas, aunque Sequelize lo crea con defaultValue: NOW
-    // pero veamos si en postgres tiene DEFAULT:
-    await db.sequelize.query('ALTER TABLE retenciones ALTER COLUMN fecha_hora SET DEFAULT NOW();');
-    
-    console.log('Sending NOTIFY pgrst to reload schema...');
+    console.log('✅ Conexión establecida.');
+
+    const tables = [
+      'retenciones',
+      'vehiculos',
+      'vehicle_status_log',
+      'fotos_retenciones',
+      'historial_movimientos',
+      'resoluciones_judiciales',
+      'depositos',
+      'usuarios',
+      'instituciones',
+      'notificaciones'
+    ];
+
+    for (const t of tables) {
+      try {
+        await db.sequelize.query(`ALTER TABLE "${t}" ALTER COLUMN created_at SET DEFAULT NOW();`);
+      } catch (e) {
+        console.log(`info (${t} created_at): ${e.message}`);
+      }
+      try {
+        await db.sequelize.query(`ALTER TABLE "${t}" ALTER COLUMN updated_at SET DEFAULT NOW();`);
+      } catch (e) {
+        console.log(`info (${t} updated_at): ${e.message}`);
+      }
+    }
+
+    // Asegurar defaults especificos para retenciones
+    try {
+      await db.sequelize.query('ALTER TABLE retenciones ALTER COLUMN fecha_hora SET DEFAULT NOW();');
+      await db.sequelize.query('ALTER TABLE retenciones ALTER COLUMN estado_actual SET DEFAULT \'RETENIDO\';');
+    } catch (e) {
+      console.log(`info (retenciones specific): ${e.message}`);
+    }
+
+    console.log('Enviando NOTIFY pgrst a Supabase...');
     await db.sequelize.query("NOTIFY pgrst, 'reload schema';");
 
-    console.log('Defaults fixed.');
-  } catch (error) {
-    console.error('Error during ALTER TABLE:', error);
-  } finally {
+    console.log('🎉 Todos los campos DEFAULT NOW() configurados con éxito.');
     process.exit(0);
+  } catch (error) {
+    console.error('❌ Error configurando defaults:', error);
+    process.exit(1);
   }
 }
 
-fixDefaults();
+fixAllDefaults();

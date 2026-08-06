@@ -178,42 +178,64 @@ const NuevaRetencion = () => {
         )}
 
         {step === 3 && result && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-in zoom-in duration-500">
-            <div className="lg:col-span-2">
-              <PreviewActa pdfUrl={result.pdfUrl} />
+          <div className="animate-in zoom-in duration-500 space-y-6">
+
+            {/* Cabecera de éxito */}
+            <div className="flex flex-col items-center text-center py-6">
+              <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-4 shadow-lg shadow-green-100">
+                <HiOutlineCheckCircle className="w-12 h-12" />
+              </div>
+              <h2 className="text-3xl font-black text-gray-900">¡Retención Registrada!</h2>
+              <p className="text-gray-500 font-medium mt-2">
+                Expediente <span className="text-blue-600 font-black">{result.nro_expediente}</span> generado con éxito.
+              </p>
             </div>
-            <div className="lg:col-span-1">
-              <MuestraQR qrUrl={result.qrUrl} nroExpediente={result.nro_expediente} />
-              
-              <div className="mt-8 bg-blue-600 p-8 rounded-3xl text-white shadow-2xl shadow-blue-200 relative overflow-hidden">
-                <div className="relative z-10">
-                  <h4 className="text-xl font-bold mb-4">Próximos Pasos</h4>
-                  <ul className="space-y-4 text-sm font-medium text-blue-50 opacity-90">
-                    <li className="flex gap-3 items-start">
-                      <span className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center shrink-0">1</span>
-                      Imprime el acta y entrégala al ciudadano.
-                    </li>
-                    <li className="flex gap-3 items-start">
-                      <span className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center shrink-0">2</span>
-                      El vehículo debe ser trasladado al depósito asignado.
-                    </li>
-                    <li className="flex gap-3 items-start">
-                      <span className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center shrink-0">3</span>
-                      El personal de depósito escaneará el QR para confirmar el ingreso.
-                    </li>
-                  </ul>
-                  <button 
-                    onClick={() => window.location.reload()}
-                    className="mt-8 w-full py-4 bg-white text-blue-600 rounded-2xl font-black shadow-lg hover:bg-blue-50 transition-all"
-                  >
-                    Registrar Otra Retención
-                  </button>
+
+            {/* Contenido principal */}
+            <div className={`grid gap-8 ${result.pdfUrl ? 'grid-cols-1 lg:grid-cols-3' : 'grid-cols-1 max-w-md mx-auto'}`}>
+
+              {/* Vista previa del PDF — solo si existe */}
+              {result.pdfUrl && (
+                <div className="lg:col-span-2">
+                  <PreviewActa pdfUrl={result.pdfUrl} />
                 </div>
-                <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
+              )}
+
+              {/* QR + Próximos Pasos */}
+              <div className={`space-y-6 ${result.pdfUrl ? 'lg:col-span-1' : ''}`}>
+                <MuestraQR qrUrl={result.qrUrl} nroExpediente={result.nro_expediente} />
+
+                <div className="bg-blue-600 p-8 rounded-3xl text-white shadow-2xl shadow-blue-200 relative overflow-hidden">
+                  <div className="relative z-10">
+                    <h4 className="text-xl font-bold mb-4">Próximos Pasos</h4>
+                    <ul className="space-y-4 text-sm font-medium text-blue-50 opacity-90">
+                      <li className="flex gap-3 items-start">
+                        <span className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center shrink-0">1</span>
+                        Imprime el acta y entrégala al ciudadano.
+                      </li>
+                      <li className="flex gap-3 items-start">
+                        <span className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center shrink-0">2</span>
+                        El vehículo debe ser trasladado al depósito asignado.
+                      </li>
+                      <li className="flex gap-3 items-start">
+                        <span className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center shrink-0">3</span>
+                        El personal de depósito escaneará el QR para confirmar el ingreso.
+                      </li>
+                    </ul>
+                    <button
+                      onClick={() => window.location.reload()}
+                      className="mt-8 w-full py-4 bg-white text-blue-600 rounded-2xl font-black shadow-lg hover:bg-blue-50 transition-all"
+                    >
+                      Registrar Otra Retención
+                    </button>
+                  </div>
+                  <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
+                </div>
               </div>
             </div>
           </div>
         )}
+
       </div>
     </div>
   );

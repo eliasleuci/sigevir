@@ -25,7 +25,7 @@ const FormularioResolucion = ({ onSubmit, loading, vehiculo }) => {
         <div className="flex-1">
           <h4 className="text-xl font-black text-amber-900 tracking-tight uppercase leading-none">Advertencia Legal</h4>
           <p className="text-sm text-amber-800 mt-2 font-medium opacity-80 leading-relaxed">
-            Está por emitir una resolución para el dominio <span className="font-black underline">{vehiculo.dominio}</span> (Exp. {vehiculo.nro_expediente}). 
+            Está por emitir una resolución para el dominio <span className="font-black underline">{vehiculo.dominio}</span> (Exp. {vehiculo.nro_expediente || vehiculo.numero_expediente || vehiculo.expediente?.numero}). 
             Esta acción cambiará el estado del vehículo y notificará al personal del depósito.
           </p>
         </div>

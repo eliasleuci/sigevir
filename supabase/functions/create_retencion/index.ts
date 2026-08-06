@@ -86,6 +86,20 @@ Deno.serve(async (req) => {
       
     if (errUpdate) throw errUpdate;
 
+    // Registrar en audit_logs
+    await supabase.from('audit_logs').insert({
+      accion: 'RETENCION_CREADA',
+      entidad: 'retencion',
+      entidad_id: retencion.id,
+      usuario_email: body.agente_email || 'contacto@sigevir.com.ar',
+      usuario_nombre: body.agente_nombre || 'Agente de Campo',
+      origen: 'web',
+      detalle: {
+        nro_expediente: nroExpediente,
+        dominio: body.dominio
+      }
+    });
+
     return new Response(
       JSON.stringify({
         message: 'Retención creada',

@@ -74,12 +74,26 @@ const GestionCausas = () => {
   const handleEmitirResolucion = async (resolucionData) => {
     setLoading(true);
     try {
+      const nroExpediente = selectedVehiculo?.numero_expediente 
+        || selectedVehiculo?.nro_expediente 
+        || selectedVehiculo?.expediente?.numero;
+
+      if (!nroExpediente) {
+        toast.error('No se pudo determinar el número de expediente del vehículo.');
+        return;
+      }
+
       const payload = {
-        numero_expediente: selectedVehiculo.numero_expediente,
-        tipo: resolucionData.tipo.toLowerCase(),
+        numero_expediente: nroExpediente,          // el schema de causas lo exige como numero_expediente
+        tipo: resolucionData.tipo.toLowerCase(),   // el schema espera minúsculas: 'liberacion', 'subasta', etc.
         observaciones: resolucionData.observaciones,
-        documento_url: resolucionData.documento_id || null
       };
+      if (resolucionData.documento_id) {
+        payload.documento_url = resolucionData.documento_id;
+      }
+
+      console.log('[DEBUG] Payload resolución:', payload);
+
       await apiClient.post(`/causas/resoluciones`, payload);
       toast.success('¡Resolución emitida correctamente!');
       
@@ -88,11 +102,14 @@ const GestionCausas = () => {
       setSelectedVehiculo(response.data.data);
       setView('detail');
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Error al emitir resolución.');
+      const errMsg = error.response?.data?.error || error.response?.data?.message || 'Error al emitir resolución.';
+      toast.error(errMsg);
+      console.error('[ERROR] emitirResolucion:', error.response?.data);
     } finally {
       setLoading(false);
     }
   };
+
 
   return (
     <div className="max-w-7xl mx-auto py-8 px-4 space-y-12">

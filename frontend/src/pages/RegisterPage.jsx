@@ -136,6 +136,28 @@ const RegisterPage = () => {
 
   const values = watch();
   const selectedTipoId = watch('tipo_personal_id');
+  const userEmail = watch('email');
+
+  // Auto-asignación por dominio institucional de email
+  useEffect(() => {
+    if (!userEmail || !userEmail.includes('@') || tiposPersonal.length === 0) return;
+    const parts = userEmail.trim().toLowerCase().split('@');
+    if (parts.length < 2 || !parts[1].includes('.')) return;
+    const domain = parts[1];
+
+    const matched = tiposPersonal.find(t => {
+      if (!t.dominio_email) return false;
+      const cleanDom = t.dominio_email.replace('@', '').trim().toLowerCase();
+      return cleanDom === domain;
+    });
+
+    if (matched && String(selectedTipoId) !== String(matched.id)) {
+      setValue('tipo_personal_id', String(matched.id), { shouldValidate: true });
+      toast.info(`Dominio institucional @${domain} detectado. Se asignó automáticamente: ${matched.nombre}.`, {
+        toastId: 'domain-matched'
+      });
+    }
+  }, [userEmail, tiposPersonal, setValue, selectedTipoId]);
 
   const canAdvance = () => {
     if (step === 1) return values.nombre_completo?.length >= 3 && values.dni?.length >= 6 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email || '');
@@ -165,10 +187,10 @@ const RegisterPage = () => {
         password: data.password,
       });
       if (result.success) {
-        toast.success('Registro exitoso. Revisá tu email para verificar la cuenta.', {
-          autoClose: 6000,
+        toast.info('Registro exitoso. Tu cuenta ha quedado pendiente de aprobación por el administrador del sistema.', {
+          autoClose: 7000,
         });
-        navigate('/login');
+        navigate('/pending');
       } else {
         toast.error(result.error || 'Error al registrarse');
       }

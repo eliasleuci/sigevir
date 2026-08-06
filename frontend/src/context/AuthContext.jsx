@@ -144,7 +144,16 @@ export const AuthProvider = ({ children }) => {
         .then(res => res); // Force it to be a real promise
 
       const { data, error } = await Promise.race([queryPromise, timeoutPromise]);
-      if (error) throw error
+      if (error) {
+        if (error.code === 'PGRST116') {
+          // El perfil ya no existe, el usuario fue eliminado/rechazado. Cerramos sesión.
+          await supabase.auth.signOut();
+          setUser(null);
+          setPerfil(null);
+          return;
+        }
+        throw error;
+      }
       setPerfil(data)
     } catch (e) {
       console.error('Error cargando perfil:', e)
@@ -431,11 +440,37 @@ export const AuthProvider = ({ children }) => {
     setPendingEmail(email)
   }, [setPendingVerification, setPendingEmail])
 
+  // ── CAMBIAR / ESTABLECER CONTRASEÑA ────────────────────────────────────────
+  const cambiarPassword = useCallback(async (newPassword) => {
+    if (!SUPABASE_READY || !supabase) {
+      return { success: false, error: 'Supabase no configurado' }
+    }
+    if (!user) {
+      return { success: false, error: 'Debés iniciar sesión primero' }
+    }
+    try {
+      const { error } = await supabase.auth.updateUser({ password: newPassword })
+      if (error) throw error
+      return { success: true }
+    } catch (err) {
+      console.error('Error cambiando contraseña:', err)
+      let msg = 'Error al actualizar la contraseña'
+      if (err.message?.includes('weak')) msg = 'La contraseña es muy débil. Usá al menos 8 caracteres con mayúsculas, números y símbolos.'
+      if (err.message?.includes('same')) msg = 'La nueva contraseña debe ser diferente a la actual.'
+      return { success: false, error: msg }
+    }
+  }, [user])
+
   // ── Verificar si el usuario tiene cierto rol ───────────────────────────────
   const hasRole = useCallback((...roles) => {
     const currentRol = perfil?.rol || user?.rol
     return roles.includes(currentRol)
   }, [perfil, user])
+
+  // ── Detectar si el usuario tiene contraseña configurada ────────────────────
+  // Supabase guarda las identidades del usuario en `user.identities`.
+  // Si solo tiene 'google', no tiene contraseña. Si tiene 'email', sí.
+  const hasPassword = !!(user?.identities?.some(id => id.provider === 'email'))
 
   // ── Context value ──────────────────────────────────────────────────────────
   const value = {
@@ -445,6 +480,7 @@ export const AuthProvider = ({ children }) => {
     loading,
     pendingVerification,
     pendingEmail,
+    hasPassword,
     isAuthenticated:  !!(user),
     rol:              perfil?.rol || user?.rol || null,
     supabaseReady:    SUPABASE_READY,
@@ -461,6 +497,7 @@ export const AuthProvider = ({ children }) => {
     register,
     cargarPerfil,
     actualizarPerfil,
+    cambiarPassword,
     sendVerificationCode,
     verifyCode,
     startVerification,

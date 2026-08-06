@@ -10,13 +10,14 @@ const { ResolucionJudicial, Retencion, Deposito, Usuario } = db;
  * Validación del payload de creación de resolución judicial.
  */
 const crearResolucionSchema = Joi.object({
-  numero_expediente: Joi.string().required(),
+  numero_expediente: Joi.string().optional(),
+  nro_expediente: Joi.string().optional(),
   tipo: Joi.string()
-    .valid('LIBERACION', 'SUBASTA', 'COMPACTACION')
+    .valid('LIBERACION', 'SUBASTA', 'COMPACTACION', 'TRASLADO', 'OTRO')
     .required(),
   observaciones: Joi.string().allow('', null),
-  documento_url: Joi.string().uri().required()
-});
+  documento_url: Joi.string().allow('', null).optional()
+}).or('numero_expediente', 'nro_expediente');
 
 /**
  * Crea una resolución judicial y notifica al responsable del depósito.
@@ -35,32 +36,37 @@ export const crearResolucion = async (req, res, next) => {
     if (error) {
       return res.status(400).json({ success: false, error: error.message });
     }
-    const { numero_expediente, tipo, observaciones, documento_url } = value;
+    const nroExpediente = value.numero_expediente || value.nro_expediente;
+    const { tipo, observaciones, documento_url } = value;
 
-    // 2️⃣ Buscar la retención y validar estado
-    const retencion = await Retencion.findOne({ where: { numero_expediente } });
+    // 2️⃣ Buscar la retención por nro_expediente o numero_expediente
+    const retencion = await Retencion.findOne({
+      where: { numero_expediente: nroExpediente }
+    });
     if (!retencion) {
-      return res.status(404).json({ success: false, error: 'Retención no encontrada' });
+      return res.status(404).json({ success: false, error: `Retención no encontrada con expediente: ${nroExpediente}` });
     }
-    if (retencion.estado_actual !== 'en_deposito') {
+    const estadoActual = (retencion.estado_actual || '').toUpperCase();
+    const estadosPermitidos = ['EN_DEPOSITO', 'RETENIDO', 'RESOLUCION_PENDIENTE'];
+    if (!estadosPermitidos.includes(estadoActual)) {
       return res.status(400).json({
         success: false,
-        error: `La retención debe estar en estado "en_deposito" para emitir una resolución (actual: ${retencion.estado_actual})`
+        error: `La retención no puede recibir una resolución en su estado actual: ${retencion.estado_actual}`
       });
     }
 
     // 3️⃣ Persistir la resolución
     const resolucion = await ResolucionJudicial.create({
       retencion_id: retencion.id,
-      usuario_judicial_id: req.user.id, // El middleware auth coloca el usuario en req.user
-      tipo,
-      observaciones,
-      documento_url,
+      usuario_judicial_id: req.user?.id || req.user?.userId,
+      tipo: tipo.toUpperCase(),
+      observaciones: observaciones || null,
+      documento_url: documento_url || null,
       fecha_emision: new Date()
     });
 
     // 4️⃣ Actualizar estado de la retención
-    await retencion.update({ estado_actual: 'resolucion_pendiente' });
+    await retencion.update({ estado_actual: 'RESOLUCION_PENDIENTE' });
 
     // 5️⃣ Obtener responsable del depósito (si ya está creado)
     const deposito = await Deposito.findOne({ where: { retencion_id: retencion.id } });
@@ -103,8 +109,9 @@ export const crearResolucion = async (req, res, next) => {
 
     // Respuesta al cliente
     return res.status(201).json({
+      success: true,
       id: resolucion.id,
-      numero_expediente,
+      nro_expediente: nroExpediente,
       tipo: resolucion.tipo,
       observaciones: resolucion.observaciones,
       documento_url: resolucion.documento_url,

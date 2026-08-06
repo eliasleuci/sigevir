@@ -7,6 +7,7 @@ dotenv.config();
 const isDevelopment = process.env.NODE_ENV === 'development';
 
 let sequelize;
+let isFallback = false;
 
 if (process.env.DB_HOST === 'sqlite' || !process.env.DB_HOST) {
   logger.info('⚠️ DB_HOST no configurado o configurado como sqlite. Usando SQLite en memoria.');
@@ -51,11 +52,30 @@ if (process.env.DB_HOST === 'sqlite' || !process.env.DB_HOST) {
       }
     }
   );
+
+  try {
+    // Intentar autenticarse de forma síncrona (bloqueando el export) para ver si la DB está disponible
+    await sequelize.authenticate();
+  } catch (error) {
+    logger.error(`❌ Error al conectar a PostgreSQL: ${error.message}. Intentando fallback a SQLite en memoria...`);
+    // Fallback a SQLite
+    sequelize = new Sequelize('sqlite::memory:', {
+      logging: (msg) => logger.debug(msg),
+      define: {
+        timestamps: true,
+        underscored: true,
+        freezeTableName: true
+      }
+    });
+    isFallback = true;
+  }
 }
 
 export const connectDB = async () => {
   try {
-    await sequelize.authenticate();
+    if (!isFallback) {
+      await sequelize.authenticate();
+    }
     logger.info(`✅ Conexión establecida correctamente (${sequelize.getDialect()}).`);
     
     if (isDevelopment) {
@@ -73,36 +93,8 @@ export const connectDB = async () => {
       }
     }
   } catch (error) {
-    if (sequelize.getDialect() === 'postgres') {
-      logger.error('❌ Error al conectar a PostgreSQL. Intentando fallback a SQLite en memoria...', error.message);
-      
-      // Fallback a SQLite
-      sequelize = new Sequelize('sqlite::memory:', {
-        logging: (msg) => logger.debug(msg),
-        define: {
-          timestamps: true,
-          underscored: true,
-          freezeTableName: true
-        }
-      });
-      
-      try {
-        await sequelize.authenticate();
-        await sequelize.sync({ alter: true });
-        
-        // Importar dinámicamente el seeder para evitar dependencias circulares si las hubiera
-        const { seedDemoData } = await import('../setup/seedDemo.js');
-        await seedDemoData();
-        
-        logger.info('✅ Fallback a SQLite en memoria establecido correctamente para modo DEMO.');
-      } catch (sqliteError) {
-        logger.error('❌ Error crítico: Fallback a SQLite también falló.', sqliteError);
-        process.exit(1);
-      }
-    } else {
-      logger.error('❌ Error al conectar a la base de datos:', error);
-      process.exit(1);
-    }
+    logger.error('❌ Error fatal al conectar/sincronizar la base de datos:', error);
+    process.exit(1);
   }
 };
 

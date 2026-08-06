@@ -1,6 +1,7 @@
 import express from 'express';
 import { createClient } from '@supabase/supabase-js';
 import cors from 'cors';
+import emailService from './src/services/emailService.js';
 
 // Supabase client using service_role (secure, never sent to front)
 const supabase = createClient(
@@ -30,7 +31,6 @@ app.use(async (req, res, next) => {
   if (error || profile?.rol !== 'admin')
     return res.status(403).json({ error: 'Not authorized' });
 
-  // user is admin, continue
   req.adminId = user.id;
   next();
 });
@@ -39,6 +39,14 @@ app.use(async (req, res, next) => {
 app.post('/approve', async (req, res) => {
   const { userId, tipo_personal_id, rol } = req.body;
   console.log('Aprobar usuario:', { userId, tipo_personal_id, rol });
+  
+  // Obtener el email y nombre del usuario antes de aprobarlo para enviarle correo
+  const { data: userData } = await supabase
+    .from('perfiles')
+    .select('email, nombre_completo')
+    .eq('id', userId)
+    .single();
+
   const { error } = await supabase
     .from('perfiles')
     .update({ tipo_personal_id, rol, activo: true })
@@ -47,6 +55,12 @@ app.post('/approve', async (req, res) => {
   if (error) {
     console.error('Error aprobando usuario:', error);
     return res.status(400).json({ error: error.message });
+  }
+
+  // Send approval email
+  if (userData?.email) {
+    await emailService.sendAccountApproved(userData.email, userData.nombre_completo, rol)
+      .catch(err => console.error('Error enviando email de aprobación:', err));
   }
 
   res.json({ success: true });

@@ -12,15 +12,52 @@ const ConfirmarIngreso = () => {
   const [manualDominio, setManualDominio] = useState('');
 
   const handleScanSuccess = async (decodedText) => {
-    // El texto decodificado es el ID de la retención o el nro de expediente
+    if (!decodedText) return;
     setLoading(true);
     try {
-      // Buscamos la retención por el ID decodificado del QR
-      const response = await apiClient.get(`/retenciones/${decodedText}`);
-      setVehiculo(response.data.data);
-      setStep(2);
+      // Limpiar texto decodificado (si viene una URL, extraer el ID o expediente final)
+      let cleanText = decodedText.trim();
+      if (cleanText.includes('/')) {
+        const parts = cleanText.split('/');
+        cleanText = parts[parts.length - 1] || cleanText;
+      }
+
+      // 1. Intentar buscar como ID directo de retención
+      try {
+        const response = await apiClient.get(`/retenciones/${cleanText}`);
+        if (response.data?.data) {
+          setVehiculo(response.data.data);
+          setStep(2);
+          toast.success(`Vehículo detectado: ${response.data.data.dominio || response.data.data.nro_expediente}`);
+          return;
+        }
+      } catch (_) {
+        // Fallback a búsqueda avanzada si no es un UUID directo
+      }
+
+      // 2. Buscar por número de expediente o patente
+      const searchRes = await apiClient.post(`/busqueda/avanzada`, { numero_expediente: cleanText });
+      const resultados = searchRes.data?.resultados || searchRes.data?.data?.resultados || [];
+
+      if (resultados.length > 0) {
+        setVehiculo(resultados[0]);
+        setStep(2);
+        toast.success(`Vehículo detectado: ${resultados[0].dominio}`);
+      } else {
+        // 3. Probar por dominio
+        const searchDom = await apiClient.post(`/busqueda/avanzada`, { dominio: cleanText });
+        const domResultados = searchDom.data?.resultados || searchDom.data?.data?.resultados || [];
+        if (domResultados.length > 0) {
+          setVehiculo(domResultados[0]);
+          setStep(2);
+          toast.success(`Vehículo detectado: ${domResultados[0].dominio}`);
+        } else {
+          toast.error(`No se encontró retención para el código escaneado: "${cleanText}"`);
+        }
+      }
     } catch (error) {
-      toast.error('No se encontró una retención válida para este código QR.');
+      console.error('Error al procesar QR escaneado:', error);
+      toast.error('Error al consultar el código QR escaneado.');
     } finally {
       setLoading(false);
     }

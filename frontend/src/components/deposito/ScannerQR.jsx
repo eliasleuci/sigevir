@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Html5Qrcode } from 'html5-qrcode';
 import { HiOutlineCamera, HiOutlineQrcode, HiOutlineX } from 'react-icons/hi';
 
@@ -14,20 +14,27 @@ const ScannerQR = ({ onScanSuccess, onScanError }) => {
       const scanner = new Html5Qrcode(readerId);
       scannerRef.current = scanner;
 
-      await scanner.start(
-        { facingMode: 'environment' },
-        { fps: 10, qrbox: { width: 250, height: 250 } },
-        (decodedText) => {
-          scanner.stop().catch(() => {});
-          scannerRef.current = null;
-          setStarted(false);
-          onScanSuccess(decodedText);
-        },
-        () => {}
-      );
+      const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+      const onScan = (decodedText) => {
+        scanner.stop().catch(() => {});
+        scannerRef.current = null;
+        setStarted(false);
+        onScanSuccess(decodedText);
+      };
+
+      try {
+        // Intenta primero cámara trasera (móvil)
+        await scanner.start({ facingMode: 'environment' }, config, onScan, () => {});
+      } catch (envErr) {
+        console.warn('Cámara trasera no disponible, probando cámara frontal / webcam:', envErr);
+        // Fallback para laptops / webcams de PC
+        await scanner.start({ facingMode: 'user' }, config, onScan, () => {});
+      }
+
       setStarted(true);
     } catch (err) {
-      setError(err?.message || 'Error al acceder a la cámara');
+      console.error('Error final de cámara:', err);
+      setError(err?.message || 'No se pudo acceder a la cámara. Verificá los permisos del navegador.');
       if (onScanError) onScanError(err);
     }
   };

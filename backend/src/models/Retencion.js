@@ -132,6 +132,10 @@ Retencion.init({
     type: DataTypes.STRING,
     allowNull: true
   },
+  pdf_url: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
   estado_actual: {
     type: DataTypes.STRING,
     allowNull: false,
@@ -146,7 +150,7 @@ Retencion.init({
   tableName: 'retenciones',
   paranoid: true,
   indexes: [
-    { fields: ['numero_expediente'] },
+    { fields: ['nro_expediente'] },
 
     { fields: ['institucion_id'] },
     { fields: ['fecha_hora'] },

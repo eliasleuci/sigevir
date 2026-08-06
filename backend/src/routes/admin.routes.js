@@ -4,6 +4,7 @@ import checkPermanenciaProlongada from '../jobs/checkPermanenciaProlongada.js';
 import db from '../models/index.js';
 import logger from '../utils/logger.js';
 import { auditLog } from '../middleware/auditLog.js';
+import { supabaseAdmin } from '../config/supabase.js';
 
 const { Usuario, HistorialMovimiento } = db;
 const router = Router();
@@ -41,6 +42,40 @@ router.get('/usuarios', async (req, res, next) => {
 
     res.status(200).json({ success: true, data: usuarios });
   } catch (error) {
+    next(error);
+  }
+});
+
+// Eliminar / Rechazar usuario (solo admin)
+router.delete('/usuarios/:id', auditLog('ELIMINAR', 'USUARIO'), async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    
+    // Obtener email del usuario antes de eliminarlo para mandarle correo
+    const usuarioABorrar = await Usuario.findByPk(id);
+
+    // 1. Eliminar de auth.users usando PostgreSQL directamente para evitar errores de GoTrue
+    await db.sequelize.query(`DELETE FROM auth.users WHERE id = :id`, {
+      replacements: { id },
+      type: db.sequelize.QueryTypes.DELETE
+    });
+    
+    // 2. Eliminar de la tabla perfiles (por si falla el CASCADE o no hay Supabase)
+    await Usuario.destroy({ where: { id } });
+
+    // Enviar email de rechazo si se encontró el correo
+    if (usuarioABorrar && usuarioABorrar.email) {
+      try {
+        await emailService.sendAccountRejected(usuarioABorrar.email, usuarioABorrar.nombre_completo);
+        logger.info(`Email de rechazo enviado a ${usuarioABorrar.email}`);
+      } catch (err) {
+        logger.error(`Error enviando email de rechazo: ${err.message}`);
+      }
+    }
+
+    res.status(200).json({ success: true, message: 'Usuario eliminado correctamente' });
+  } catch (error) {
+    logger.error(`Error al eliminar usuario ${req.params.id}: ${error?.message}`);
     next(error);
   }
 });

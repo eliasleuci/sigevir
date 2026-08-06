@@ -5,8 +5,9 @@ import { AuthContext } from '../context/AuthContext'
  * Hook para acceder al contexto de autenticación.
  * Expone: user, perfil, loading, isAuthenticated, rol,
  *         isMock, supabaseReady, isAdmin, isAgenteCampo,
- *         isDeposito, isFiscalJuez, hasRole,
+ *         isDeposito, isFiscalJuez, hasRole, hasPassword,
  *         login, loginWithGoogle, logout, register,
+ *         cambiarPassword, actualizarPerfil,
  *         pendingVerification, pendingEmail,
  *         sendVerificationCode, verifyCode
  */

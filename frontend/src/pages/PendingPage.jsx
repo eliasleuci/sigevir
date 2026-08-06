@@ -15,11 +15,22 @@ const PendingPage = () => {
   const handleRefresh = async () => {
     if (!SUPABASE_READY || !supabase || !user?.id) return;
     try {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('perfiles')
         .select('tipo_personal_id, activo, rol')
         .eq('id', user.id)
         .single();
+
+      if (error) {
+        // PGRST116 significa que no se encontró ninguna fila. Si no existe el perfil, significa que fue RECHAZADO y ELIMINADO por el admin.
+        if (error.code === 'PGRST116') {
+          toast.error('Tu solicitud de cuenta ha sido rechazada por la institución.');
+          await logout();
+          navigate('/login', { replace: true });
+          return;
+        }
+        throw error;
+      }
 
       if (data?.tipo_personal_id && data?.activo) {
         toast.success('¡Tu cuenta fue aprobada! Ingresando...');
@@ -27,7 +38,7 @@ const PendingPage = () => {
       } else {
         toast.info('Tu cuenta aún está en revisión. Intentá más tarde.');
       }
-    } catch {
+    } catch (err) {
       toast.error('Error al verificar el estado de tu cuenta.');
     }
   };
@@ -54,9 +65,9 @@ const PendingPage = () => {
         <h1 className="text-3xl font-black text-gray-900 mb-3 tracking-tight">
           Solicitud pendiente
         </h1>
-        <p className="text-gray-500 font-medium leading-relaxed mb-8">
-          Tu cuenta fue registrada correctamente, pero aún no fue aprobada por el administrador del sistema.
-          Recibirás acceso una vez que tu solicitud sea revisada y aprobada.
+        <p className="text-sm text-slate-500 mb-6">
+          Tu cuenta fue registrada correctamente, pero aún no fue aprobada por el administrador del sistema. 
+          Recibirás una notificación por correo electrónico una vez que tu solicitud sea revisada.
         </p>
 
         {/* Info del usuario */}

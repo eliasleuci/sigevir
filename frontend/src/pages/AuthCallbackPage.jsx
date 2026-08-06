@@ -9,9 +9,26 @@ const AuthCallbackPage = () => {
   const handled = useRef(false);
   const { startVerification } = useAuth();
 
-  // ── Helper: redirect to 2FA verification or dashboard ─────────────────
-  const redirectAfterAuth = (userEmail) => {
+  // ── Helper: redirect to 2FA verification, pending approval or dashboard ─────────────────
+  const redirectAfterAuth = async (userEmail, userId) => {
     if (SUPABASE_READY && userEmail) {
+      // Verificar si el usuario está activo (aprobado por admin)
+      try {
+        const { data: profile } = await supabase
+          .from('perfiles')
+          .select('activo')
+          .eq('email', userEmail)
+          .single();
+
+        if (profile && !profile.activo) {
+          setStatus('Cuenta pendiente de aprobación por el administrador.');
+          navigate('/pending', { replace: true });
+          return;
+        }
+      } catch (err) {
+        console.warn('Error verificando activo en OAuth callback:', err);
+      }
+
       startVerification(userEmail);
       setStatus('Redirigiendo a verificación de seguridad...');
       navigate('/verify-otp', { replace: true, state: { email: userEmail } });

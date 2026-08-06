@@ -79,9 +79,11 @@ class DepositosController {
     try {
       const { id } = req.params;
       const pdfBuffer = await depositoService.generarConstanciaEntrega(id, req.user);
+      const buffer = Buffer.isBuffer(pdfBuffer) ? pdfBuffer : Buffer.from(pdfBuffer);
       res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Length', buffer.length);
       res.setHeader('Content-Disposition', 'attachment; filename=constancia_entrega_' + id + '.pdf');
-      res.send(pdfBuffer);
+      res.end(buffer);
     } catch (error) { next(error); }
   };
 }

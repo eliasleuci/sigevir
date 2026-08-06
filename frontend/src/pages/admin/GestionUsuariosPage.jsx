@@ -125,7 +125,33 @@ const GestionUsuariosPage = () => {
       console.error('Aprobación falló', err);
       toast.error(err.message || 'Error al aprobar usuario');
     }
-  };;
+  };
+
+  // Rechazar / Eliminar usuario (solo admin)
+  const handleReject = async (u) => {
+    if (!window.confirm(`¿Estás seguro de que querés ${isPending(u) ? 'rechazar' : 'eliminar'} al usuario ${u.nombre_completo || u.email}? Esta acción es irreversible.`)) {
+      return;
+    }
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
+      
+      const res = await fetch(`http://localhost:3001/api/admin/usuarios/${u.id}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        }
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.message || 'Error al eliminar usuario');
+      
+      toast.success(isPending(u) ? 'Usuario rechazado correctamente' : 'Usuario eliminado correctamente');
+      fetchUsuarios();
+    } catch (err) {
+      console.error('Eliminación falló', err);
+      toast.error(err.message || 'Error al eliminar usuario');
+    }
+  };
 
   const openCreateModal = () => {
     setEditingUser(null);
@@ -353,8 +379,13 @@ const GestionUsuariosPage = () => {
                           Aprobar
                         </button>
                       )}
+                      
                       <button onClick={() => openEditModal(u)} className="p-2 bg-gray-50 text-gray-400 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-all" title="Editar">
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                      </button>
+
+                      <button onClick={() => handleReject(u)} className="p-2 bg-gray-50 text-gray-400 hover:bg-red-50 hover:text-red-600 rounded-lg transition-all" title={isPending(u) ? "Rechazar solicitud" : "Eliminar usuario"}>
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                       </button>
                       <button onClick={() => handleToggleActivo(u)} className={`p-2 rounded-lg transition-all ${u.activo ? 'bg-red-50 text-red-400 hover:bg-red-100 hover:text-red-600' : 'bg-emerald-50 text-emerald-400 hover:bg-emerald-100 hover:text-emerald-600'}`} title={u.activo ? 'Desactivar' : 'Activar'}>
                         {u.activo ? (
