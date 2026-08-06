@@ -5,6 +5,7 @@ import db from '../models/index.js';
 import logger from '../utils/logger.js';
 import { auditLog } from '../middleware/auditLog.js';
 import { supabaseAdmin } from '../config/supabase.js';
+import emailService from '../services/emailService.js';
 
 const { Usuario, HistorialMovimiento } = db;
 const router = Router();

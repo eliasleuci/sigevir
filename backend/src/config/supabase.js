@@ -25,10 +25,7 @@ if (isSupabaseConfigured()) {
     auth: {
       autoRefreshToken: false,
       persistSession: false,
-    },
-    realtime: {
-      transport: null,
-    },
+    }
   });
 }
 
