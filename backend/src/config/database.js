@@ -1,6 +1,10 @@
 import { Sequelize } from 'sequelize';
 import dotenv from 'dotenv';
 import logger from '../utils/logger.js';
+import dns from 'dns';
+
+// Forzar a Node.js a usar IPv4 para conexiones, arregla ENETUNREACH en Render hacia Supabase
+dns.setDefaultResultOrder('ipv4first');
 
 dotenv.config();
 
