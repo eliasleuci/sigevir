@@ -53,7 +53,7 @@ const ListaPendientesEgreso = ({ vehiculos, onSelect, loading }) => {
                 ))
               ) : filteredVehiculos.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-20 text-center text-gray-400 font-medium italic">
+                  <td colSpan={6} className="px-4 sm:px-6 py-10 sm:py-20 text-center text-gray-400 font-medium italic">
                     No hay vehículos pendientes de egreso que coincidan con la búsqueda.
                   </td>
                 </tr>

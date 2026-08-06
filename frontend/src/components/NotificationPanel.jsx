@@ -38,7 +38,7 @@ const NotificationPanel = ({ isOpen, onClose }) => {
       />
 
       {/* Panel */}
-      <div className="absolute -right-16 sm:right-0 top-12 w-[320px] sm:w-96 bg-white rounded-2xl shadow-2xl
+      <div className="fixed sm:absolute right-4 sm:right-0 top-16 sm:top-12 w-[calc(100vw-32px)] sm:w-96 bg-white rounded-2xl shadow-2xl
         border border-gray-100 z-50 overflow-hidden">
 
         {/* Header */}

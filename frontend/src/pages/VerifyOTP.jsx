@@ -221,7 +221,7 @@ const VerifyOTP = () => {
             </div>
 
             {/* OTP Input Group */}
-            <div className="flex justify-center gap-2 sm:gap-3 mb-6">
+            <div className="flex justify-center gap-1 xs:gap-1.5 sm:gap-3 mb-6 w-full">
               {otp.map((digit, index) => (
                 <input
                   key={index}
@@ -237,7 +237,7 @@ const VerifyOTP = () => {
                   onPaste={index === 0 ? handlePaste : undefined}
                   disabled={loading}
                   className={
-                    'w-11 h-14 sm:w-13 sm:h-16 text-center text-xl sm:text-2xl font-bold border-2 rounded-xl shadow-sm ' +
+                    'w-7 h-10 xs:w-9 xs:h-12 sm:w-13 sm:h-16 text-center text-base xs:text-lg sm:text-2xl font-bold border-2 rounded-lg sm:rounded-xl shadow-sm ' +
                     'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ' +
                     'transition-all duration-200 ' +
                     (error

@@ -6,7 +6,7 @@ const FormularioBusquedaAvanzada = ({ onSearch, onClear, loading }) => {
   const { register, handleSubmit, reset } = useForm();
 
   return (
-    <div className="bg-white p-8 rounded-[40px] border border-gray-100 shadow-xl space-y-8 animate-in slide-in-from-top-8 duration-500">
+    <div className="bg-white p-4 sm:p-8 rounded-2xl sm:rounded-[40px] border border-gray-100 shadow-xl space-y-6 sm:space-y-8 animate-in slide-in-from-top-8 duration-500">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center">
@@ -106,7 +106,7 @@ const FormularioBusquedaAvanzada = ({ onSearch, onClear, loading }) => {
             <button 
               type="submit"
               disabled={loading}
-              className="w-full py-4 bg-blue-600 text-white rounded-[24px] font-black text-xl shadow-2xl shadow-blue-200 hover:bg-blue-700 transition-all transform active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3"
+              className="w-full py-3 sm:py-4 bg-blue-600 text-white rounded-xl sm:rounded-[24px] font-black text-base sm:text-xl shadow-2xl shadow-blue-200 hover:bg-blue-700 transition-all transform active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2 sm:gap-3"
             >
               {loading ? (
                 <div className="w-6 h-6 border-4 border-white/30 border-t-white rounded-full animate-spin"></div>
