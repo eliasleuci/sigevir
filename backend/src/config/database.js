@@ -77,6 +77,8 @@ export const connectDB = async () => {
       }
     }
   } catch (error) {
+    console.error('❌ Error fatal al conectar/sincronizar la base de datos:', error?.message);
+    console.error(error);
     logger.error('❌ Error fatal al conectar/sincronizar la base de datos:', error);
     process.exit(1);
   }
