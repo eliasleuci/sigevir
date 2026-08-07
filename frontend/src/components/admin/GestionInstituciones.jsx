@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { HiOutlineOfficeBuilding, HiOutlinePlus, HiOutlinePencil, HiOutlineTrash, HiOutlineX } from 'react-icons/hi';
+import React, { useState, useEffect, useRef } from 'react';
+import { HiOutlineOfficeBuilding, HiOutlinePlus, HiOutlinePencil, HiOutlineTrash, HiOutlineX, HiOutlineUpload, HiOutlineLink } from 'react-icons/hi';
 import { toast } from 'react-toastify';
 import apiClient from '../../services/apiClient';
+import { supabase } from '../../config/supabase';
 
 const TIPOS_INSTITUCION = ['POLICIAL', 'JUDICIAL', 'MUNICIPAL', 'NACIONAL', 'OTRO'];
 
@@ -10,6 +11,12 @@ const GestionInstituciones = () => {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Opciones de logo
+  const [logoMode, setLogoMode] = useState('url'); // 'url' o 'upload'
+  const [logoFile, setLogoFile] = useState(null);
+  const [logoPreview, setLogoPreview] = useState(null);
+  const fileInputRef = useRef(null);
   
   // Estado del formulario
   const [formData, setFormData] = useState({
@@ -23,11 +30,8 @@ const GestionInstituciones = () => {
   const fetchInstituciones = async () => {
     setLoading(true);
     try {
-      // Pedimos las instituciones, filtrando por activas si el backend lo permite
       const response = await apiClient.get('/instituciones');
-      // Aseguramos que data contenga la info (puede venir en response.data.data)
       const data = response.data?.data || response.data || [];
-      // Solo mostramos las activas
       setInstituciones(data.filter(inst => inst.activa));
     } catch (error) {
       toast.error('Error al cargar las instituciones');
@@ -42,6 +46,10 @@ const GestionInstituciones = () => {
   }, []);
 
   const openModal = (inst = null) => {
+    setLogoFile(null);
+    setLogoPreview(null);
+    setLogoMode('url');
+
     if (inst) {
       setFormData({
         id: inst.id,
@@ -50,6 +58,9 @@ const GestionInstituciones = () => {
         jurisdiccion: inst.jurisdiccion || '',
         logo_url: inst.logo_url || ''
       });
+      if (inst.logo_url) {
+        setLogoPreview(inst.logo_url);
+      }
     } else {
       setFormData({
         id: null,
@@ -71,6 +82,49 @@ const GestionInstituciones = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        toast.warning('La imagen no debe superar los 5MB');
+        return;
+      }
+      setLogoFile(file);
+      const objectUrl = URL.createObjectURL(file);
+      setLogoPreview(objectUrl);
+      // Limpiamos el campo de URL si sube archivo
+      setFormData(prev => ({ ...prev, logo_url: '' }));
+    }
+  };
+
+  const uploadLogoToSupabase = async (file) => {
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `logo-${Date.now()}-${Math.floor(Math.random() * 1000)}.${fileExt}`;
+      const filePath = `${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('instituciones-logos')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      const { data } = supabase.storage
+        .from('instituciones-logos')
+        .getPublicUrl(filePath);
+
+      return data.publicUrl;
+    } catch (error) {
+      console.error('Error uploading logo:', error);
+      throw new Error('No se pudo subir la imagen al servidor');
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.nombre.trim()) {
@@ -79,19 +133,29 @@ const GestionInstituciones = () => {
     
     setIsSubmitting(true);
     try {
+      let finalLogoUrl = formData.logo_url;
+
+      // Si eligió subir archivo y hay uno seleccionado, lo subimos
+      if (logoMode === 'upload' && logoFile) {
+        finalLogoUrl = await uploadLogoToSupabase(logoFile);
+      }
+
+      const payload = {
+        ...formData,
+        logo_url: finalLogoUrl
+      };
+
       if (formData.id) {
-        // Actualizar
-        await apiClient.put(`/instituciones/${formData.id}`, formData);
+        await apiClient.put(`/instituciones/${formData.id}`, payload);
         toast.success('Institución actualizada correctamente');
       } else {
-        // Crear nueva
-        await apiClient.post('/instituciones', formData);
+        await apiClient.post('/instituciones', payload);
         toast.success('Institución creada correctamente');
       }
       closeModal();
       fetchInstituciones();
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Error al guardar la institución');
+      toast.error(error.message || error.response?.data?.message || 'Error al guardar la institución');
       console.error(error);
     } finally {
       setIsSubmitting(false);
@@ -110,6 +174,15 @@ const GestionInstituciones = () => {
       }
     }
   };
+
+  // Cleanup de object URLs
+  useEffect(() => {
+    return () => {
+      if (logoPreview && logoPreview.startsWith('blob:')) {
+        URL.revokeObjectURL(logoPreview);
+      }
+    };
+  }, [logoPreview]);
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
@@ -254,19 +327,73 @@ const GestionInstituciones = () => {
                 />
               </div>
 
-              {/* Logo URL */}
+              {/* Logo / Selector */}
               <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Logo Institucional (URL)</label>
-                <input
-                  type="url"
-                  name="logo_url"
-                  value={formData.logo_url}
-                  onChange={handleInputChange}
-                  placeholder="https://ejemplo.com/logo.png"
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                />
+                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Logo Institucional</label>
+                
+                <div className="flex bg-gray-100 p-1 rounded-xl mb-3">
+                  <button 
+                    type="button" 
+                    onClick={() => setLogoMode('url')}
+                    className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-bold transition-all ${logoMode === 'url' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+                  >
+                    <HiOutlineLink className="w-4 h-4" /> Link Web
+                  </button>
+                  <button 
+                    type="button" 
+                    onClick={() => setLogoMode('upload')}
+                    className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-bold transition-all ${logoMode === 'upload' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+                  >
+                    <HiOutlineUpload className="w-4 h-4" /> Subir Archivo
+                  </button>
+                </div>
+
+                {logoMode === 'url' ? (
+                  <input
+                    type="url"
+                    name="logo_url"
+                    value={formData.logo_url}
+                    onChange={(e) => {
+                      handleInputChange(e);
+                      setLogoPreview(e.target.value);
+                    }}
+                    placeholder="https://ejemplo.com/logo.png"
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  />
+                ) : (
+                  <div className="flex items-center gap-4">
+                    <input 
+                      type="file" 
+                      accept="image/png, image/jpeg, image/webp"
+                      className="hidden" 
+                      ref={fileInputRef}
+                      onChange={handleFileChange}
+                    />
+                    <button 
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="px-4 py-3 bg-white border border-gray-200 text-gray-600 font-bold text-sm rounded-xl hover:bg-gray-50 transition-all flex items-center gap-2 w-full justify-center"
+                    >
+                      <HiOutlineUpload className="w-5 h-5 text-gray-400" />
+                      {logoFile ? logoFile.name : 'Seleccionar imagen...'}
+                    </button>
+                  </div>
+                )}
+
+                {/* Previsualización */}
+                {logoPreview && (
+                  <div className="mt-3 p-4 bg-gray-50 border border-gray-100 rounded-xl flex items-center justify-center">
+                    <img 
+                      src={logoPreview} 
+                      alt="Preview" 
+                      className="h-12 object-contain"
+                      onError={(e) => { e.target.style.display = 'none'; }}
+                    />
+                  </div>
+                )}
+                
                 <p className="text-[11px] text-gray-400 mt-2 font-medium">
-                  Este logo aparecerá en el encabezado de los comprobantes y actas PDF generadas por la institución.
+                  Recomendado: PNG con fondo transparente. Este logo aparecerá en el encabezado de los comprobantes generados.
                 </p>
               </div>
               
