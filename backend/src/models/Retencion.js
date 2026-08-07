@@ -196,6 +196,13 @@ Retencion.init({
   croquis_url: { type: DataTypes.STRING, allowNull: true },
   acta_inspeccion_url: { type: DataTypes.STRING, allowNull: true },
   deposito_institucion_id: { type: DataTypes.UUID, allowNull: true },
+
+  // ── Inventario de Vehículo ──────────────────────────────────────────────
+  inventario: {
+    type: DataTypes.JSONB,
+    allowNull: true,
+    defaultValue: {}
+  }
 }, {
   sequelize,
   modelName: 'Retencion',

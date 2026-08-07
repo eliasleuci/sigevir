@@ -93,6 +93,10 @@ const ConfirmarIngreso = () => {
       formData.append('espacio', ingresoData.espacio);
       formData.append('observaciones_ingreso', ingresoData.observaciones_ingreso || '');
       
+      if (ingresoData.inventario) {
+        formData.append('inventario', JSON.stringify(ingresoData.inventario));
+      }
+      
       if (ingresoData.fotos && ingresoData.fotos.length > 0) {
         ingresoData.fotos.forEach(f => formData.append('fotos', f.file));
       }

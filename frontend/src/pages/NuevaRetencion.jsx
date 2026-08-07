@@ -91,6 +91,8 @@ const NuevaRetencion = () => {
         estado_calzada: formData.estado_calzada || null,
         // Personas involucradas
         personas_involucradas: formData.personas_involucradas || [],
+        // Inventario del vehículo
+        inventario: formData.inventario || {}
       }),
     });
 

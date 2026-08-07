@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { HiOutlineMap, HiOutlineViewGrid, HiOutlineClipboardList, HiOutlineCamera } from 'react-icons/hi';
 import CargaFotos from '../registro/CargaFotos';
+import InventarioVehiculo from '../shared/InventarioVehiculo';
 
 const ingresoSchema = z.object({
   sector: z.string().min(1, 'Sector requerido'),
@@ -18,9 +19,10 @@ const FormularioConfirmacion = ({ vehiculo, onSubmit, loading }) => {
     resolver: zodResolver(ingresoSchema)
   });
   const [fotosIngreso, setFotosIngreso] = useState([]);
+  const [inventarioVehiculo, setInventarioVehiculo] = useState(vehiculo?.inventario || {});
 
   const handleFinalSubmit = (data) => {
-    onSubmit({ ...data, fotos: fotosIngreso });
+    onSubmit({ ...data, fotos: fotosIngreso, inventario: inventarioVehiculo });
   };
 
   return (
@@ -109,7 +111,13 @@ const FormularioConfirmacion = ({ vehiculo, onSubmit, loading }) => {
               <h3 className="font-bold text-lg">Inventario y Estado de Ingreso</h3>
             </div>
 
-            <div className="space-y-6">
+            <InventarioVehiculo
+              tipoVehiculo={vehiculo?.tipo_vehiculo}
+              value={inventarioVehiculo}
+              onChange={setInventarioVehiculo}
+            />
+
+            <div className="space-y-6 pt-4 border-t border-gray-100 mt-4">
               <div className="space-y-1">
                 <label className="text-sm font-semibold text-gray-700">Observaciones al Ingreso</label>
                 <textarea 

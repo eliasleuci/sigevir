@@ -41,7 +41,13 @@ class DepositoService {
         inventario_objetos: data.inventario_objetos,
         fecha_hora_ingreso: new Date()
       }, { transaction });
-      await retencion.update({ estado_actual: 'EN_DEPOSITO', deposito_id: ingreso.id }, { transaction });
+
+      const retencionUpdate = { estado_actual: 'EN_DEPOSITO', deposito_id: ingreso.id };
+      if (data.inventario) {
+        retencionUpdate.inventario = typeof data.inventario === 'string' ? JSON.parse(data.inventario) : data.inventario;
+      }
+      
+      await retencion.update(retencionUpdate, { transaction });
       await VehicleStatusLog.create({
         retencion_id: retencion.id, estado: 'EN_DEPOSITO', usuario_id: user.userId,
         observaciones: 'Ingreso confirmado en depósito.'

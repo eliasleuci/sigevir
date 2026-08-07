@@ -7,6 +7,7 @@ import { toast } from 'react-toastify';
 import MapaSelector from './MapaSelector';
 import CargaFotos from './CargaFotos';
 import SelectorDeposito from './SelectorDeposito';
+import InventarioVehiculo from '../shared/InventarioVehiculo';
 
 const FormularioNuevaRetencion = ({ onSubmit, loading, initialData = {} }) => {
   const { 
@@ -612,6 +613,15 @@ const FormularioNuevaRetencion = ({ onSubmit, loading, initialData = {} }) => {
           <p className="text-xs text-red-500 mt-1">{errors.deposito_institucion_id.message}</p>
         )}
       </section>
+
+      {/* ═══════════════════════════════════════════════════════════════════
+          SECCION 9: Inventario del Vehículo (NUEVA)
+         ═══════════════════════════════════════════════════════════════════ */}
+      <InventarioVehiculo
+        tipoVehiculo={watch('tipo_vehiculo')}
+        value={watch('inventario')}
+        onChange={(val) => setValue('inventario', val)}
+      />
 
       {/* ═══════════════════════════════════════════════════════════════════
           SECCION 10: Documentacion adicional (NUEVA)
