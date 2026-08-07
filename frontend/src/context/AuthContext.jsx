@@ -69,6 +69,15 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const initAuth = async () => {
       if (!SUPABASE_READY) {
+        const rememberMe = localStorage.getItem('sigevir_remember_me') === 'true'
+        const sessionActive = sessionStorage.getItem('sigevir_session_active') === 'true'
+        if (!rememberMe && !sessionActive) {
+          clearSession()
+          setLoading(false)
+          return
+        }
+        sessionStorage.setItem('sigevir_session_active', 'true')
+
         // Modo mock: recuperar del localStorage
         const saved = loadSession()
         if (saved) {
@@ -81,6 +90,9 @@ export const AuthProvider = ({ children }) => {
 
       // Modo Supabase: verificar sesión activa
       try {
+        const rememberMe = localStorage.getItem('sigevir_remember_me') === 'true'
+        const sessionActive = sessionStorage.getItem('sigevir_session_active') === 'true'
+        
         // 2FA: si hay verificación pendiente, NO restaurar sesión
         const pending2FA = sessionStorage.getItem('sigevir_2fa_pending') === 'true'
         if (pending2FA) {
@@ -89,6 +101,14 @@ export const AuthProvider = ({ children }) => {
           setLoading(false)
           return
         }
+
+        if (!rememberMe && !sessionActive) {
+          await supabase.auth.signOut()
+          clearSession()
+          setLoading(false)
+          return
+        }
+        sessionStorage.setItem('sigevir_session_active', 'true')
 
         const { data: { session } } = await supabase.auth.getSession()
         if (session?.user) {
@@ -185,7 +205,10 @@ export const AuthProvider = ({ children }) => {
   }, [user])
 
   // ── LOGIN ──────────────────────────────────────────────────────────────────
-  const login = useCallback(async (email, password) => {
+  const login = useCallback(async (email, password, rememberMe = false) => {
+    localStorage.setItem('sigevir_remember_me', rememberMe ? 'true' : 'false')
+    sessionStorage.setItem('sigevir_session_active', 'true')
+
     // ─── MODO MOCK (sin Supabase) ──────────────────────────────────────────
     if (!SUPABASE_READY) {
       const found = getUserByEmail(email.trim())
@@ -262,7 +285,10 @@ export const AuthProvider = ({ children }) => {
   }, [])
 
   // ── LOGIN CON GOOGLE ───────────────────────────────────────────────────────
-  const loginWithGoogle = useCallback(async () => {
+  const loginWithGoogle = useCallback(async (rememberMe = false) => {
+    localStorage.setItem('sigevir_remember_me', rememberMe ? 'true' : 'false')
+    sessionStorage.setItem('sigevir_session_active', 'true')
+
     if (!SUPABASE_READY) {
       return { success: false, error: 'Google OAuth requiere Supabase configurado. Configurá VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY.' }
     }

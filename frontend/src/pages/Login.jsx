@@ -9,10 +9,11 @@ import { toast } from 'react-hot-toast';
 const loginSchema = z.object({
   email: z.string().email('Email invalido'),
   password: z.string().min(6, 'La contrasena debe tener al menos 6 caracteres'),
+  rememberMe: z.boolean().optional(),
 });
 
 const Login = () => {
-  const { register, handleSubmit, formState: { errors } } = useForm({
+  const { register, handleSubmit, getValues, formState: { errors } } = useForm({
     resolver: zodResolver(loginSchema),
   });
   const { login, loginWithGoogle, supabaseReady } = useAuth();
@@ -23,7 +24,7 @@ const Login = () => {
   const onSubmit = async (data) => {
     setLoading(true);
     try {
-      const result = await login(data.email, data.password);
+      const result = await login(data.email, data.password, data.rememberMe);
       if (result.success) {
         if (result.pendingApproval) {
           toast.info('Tu cuenta está pendiente de aprobación por el administrador.');
@@ -52,7 +53,7 @@ const Login = () => {
     }
     setGoogleLoading(true);
     try {
-      const result = await loginWithGoogle();
+      const result = await loginWithGoogle(getValues('rememberMe'));
       if (!result.success) {
         toast.error(result.error || 'Error al iniciar con Google');
         setGoogleLoading(false);
@@ -97,7 +98,7 @@ const Login = () => {
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
-                  <input id="remember-me" name="remember-me" type="checkbox" className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" />
+                  <input id="remember-me" type="checkbox" {...register('rememberMe')} className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" />
                   <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">Recordarme</label>
                 </div>
                 <div className="text-sm">
