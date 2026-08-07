@@ -90,7 +90,7 @@ const Busqueda = () => {
         {view !== 'form' && (
           <button 
             onClick={() => setView('form')}
-            className="flex items-center gap-2 px-6 md:px-8 py-4 bg-white border border-gray-200 text-gray-600 rounded-2xl font-bold hover:bg-gray-50 transition-all shadow-xl shadow-gray-100"
+            className="flex items-center gap-2 px-6 md:px-8 py-4 bg-white border border-gray-200 text-gray-600 rounded-2xl font-bold hover:bg-gray-50 transition-all shadow-xl shadow-gray-100 print:hidden"
           >
             <HiOutlineArrowLeft className="w-6 h-6" />
             Nueva Búsqueda Avanzada

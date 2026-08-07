@@ -6,7 +6,7 @@ const FormularioBusquedaAvanzada = ({ onSearch, onClear, loading }) => {
   const { register, handleSubmit, reset } = useForm();
 
   return (
-    <div className="bg-white p-4 sm:p-8 rounded-2xl sm:rounded-[40px] border border-gray-100 shadow-xl space-y-6 sm:space-y-8 animate-in slide-in-from-top-8 duration-500 overflow-hidden max-w-full">
+    <div className="bg-white p-4 sm:p-8 rounded-2xl sm:rounded-[40px] border border-gray-100 shadow-xl space-y-6 sm:space-y-8 animate-in slide-in-from-top-8 duration-500 overflow-hidden max-w-full print:hidden">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center">

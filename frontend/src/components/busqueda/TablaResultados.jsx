@@ -1,7 +1,44 @@
 import React from 'react';
 import { HiOutlineChevronRight, HiOutlineDownload, HiOutlineEye, HiOutlinePrinter } from 'react-icons/hi';
+import { toast } from 'react-toastify';
 
-const TablaResultados = ({ resultados = [], onSelect, onExport, loading }) => {
+const TablaResultados = ({ resultados = [], onSelect, loading }) => {
+  const handleExportCSV = () => {
+    if (!resultados || resultados.length === 0) {
+      toast.warning('No hay resultados para exportar.');
+      return;
+    }
+    const headers = ['Dominio/Patente', 'Marca', 'Modelo', 'N° Expediente', 'Fecha Retención', 'Estado', 'Ubicación', 'Institución'];
+    const rows = resultados.map(r => [
+      `"${r.dominio || ''}"`,
+      `"${r.marca || ''}"`,
+      `"${r.modelo || ''}"`,
+      `"${r.numero_expediente || ''}"`,
+      `"${r.fecha_retencion ? new Date(r.fecha_retencion).toLocaleString('es-AR') : ''}"`,
+      `"${r.estado_actual || ''}"`,
+      `"${(r.localidad || '') + (r.provincia ? ', ' + r.provincia : '')}"`,
+      `"${r.institucion || ''}"`
+    ]);
+
+    const csvContent = 'data:text/csv;charset=utf-8,\uFEFF' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `sigevir_resultados_busqueda_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    toast.success('Archivo CSV descargado correctamente.');
+  };
+
+  const handlePrint = () => {
+    if (!resultados || resultados.length === 0) {
+      toast.warning('No hay resultados para imprimir.');
+      return;
+    }
+    window.print();
+  };
+
   return (
     <div className="bg-white rounded-[40px] border border-gray-100 shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-8 duration-700">
       <div className="p-4 sm:p-8 border-b border-gray-50 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gray-50/30">
@@ -10,15 +47,16 @@ const TablaResultados = ({ resultados = [], onSelect, onExport, loading }) => {
           <p className="text-sm text-gray-500 font-medium">Se encontraron {resultados.length} vehículos bajo los criterios seleccionados.</p>
         </div>
         
-        <div className="flex gap-2 flex-wrap">
+        <div className="flex gap-2 flex-wrap print:hidden">
           <button 
-            onClick={() => onExport('csv')}
+            onClick={handleExportCSV}
             className="flex items-center gap-2 px-4 sm:px-6 py-3 bg-white border border-gray-200 rounded-2xl text-sm font-bold text-gray-600 hover:bg-gray-50 transition-all shadow-sm"
           >
             <HiOutlineDownload className="w-5 h-5 text-blue-500" />
             Exportar CSV
           </button>
           <button 
+            onClick={handlePrint}
             className="flex items-center gap-2 px-4 sm:px-6 py-3 bg-white border border-gray-200 rounded-2xl text-sm font-bold text-gray-600 hover:bg-gray-50 transition-all shadow-sm"
           >
             <HiOutlinePrinter className="w-5 h-5 text-gray-400" />

@@ -130,6 +130,14 @@ const VisorAuditoria = () => {
   const getAccionConfig = (accion) =>
     ACCION_CONFIG[accion] || { color: 'bg-gray-100 text-gray-600', label: accion?.replace(/_/g, ' ') || '-' };
 
+  const handleDownloadPDF = () => {
+    if (!logs || logs.length === 0) {
+      toast.warn('No hay registros de auditoría para exportar.');
+      return;
+    }
+    window.print();
+  };
+
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       {/* Header */}
@@ -145,7 +153,7 @@ const VisorAuditoria = () => {
             )}
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 print:hidden">
           <button
             onClick={fetchLogs}
             disabled={loading}
@@ -154,7 +162,10 @@ const VisorAuditoria = () => {
             <HiOutlineRefresh className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
             Actualizar
           </button>
-          <button className="flex items-center gap-2 px-6 py-3 bg-gray-900 text-white rounded-2xl font-black shadow-lg hover:bg-black transition-all text-sm">
+          <button
+            onClick={handleDownloadPDF}
+            className="flex items-center gap-2 px-6 py-3 bg-gray-900 text-white rounded-2xl font-black shadow-lg hover:bg-black transition-all text-sm"
+          >
             <HiOutlineDownload className="w-5 h-5" />
             Descargar PDF
           </button>
@@ -165,7 +176,7 @@ const VisorAuditoria = () => {
       <div className="bg-white rounded-[40px] border border-gray-100 shadow-xl overflow-hidden">
 
         {/* Barra de filtros */}
-        <div className="p-6 border-b border-gray-100 bg-gray-50/40">
+        <div className="p-6 border-b border-gray-100 bg-gray-50/40 print:hidden">
           <div className="flex flex-wrap gap-3 items-center">
             {/* Búsqueda */}
             <div className="relative flex-1 min-w-[200px]">

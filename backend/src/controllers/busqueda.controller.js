@@ -77,8 +77,16 @@ class BusquedaController {
 
       if (fecha_desde || fecha_hasta) {
         whereRetencion.fecha_hora = {};
-        if (fecha_desde) whereRetencion.fecha_hora[Op.gte] = new Date(fecha_desde);
-        if (fecha_hasta) whereRetencion.fecha_hora[Op.lte] = new Date(fecha_hasta);
+        if (fecha_desde) {
+          const strDesde = typeof fecha_desde === 'string' ? fecha_desde.split('T')[0] : fecha_desde;
+          const d = new Date(`${strDesde}T00:00:00.000`);
+          whereRetencion.fecha_hora[Op.gte] = isNaN(d.getTime()) ? new Date(fecha_desde) : d;
+        }
+        if (fecha_hasta) {
+          const strHasta = typeof fecha_hasta === 'string' ? fecha_hasta.split('T')[0] : fecha_hasta;
+          const h = new Date(`${strHasta}T23:59:59.999`);
+          whereRetencion.fecha_hora[Op.lte] = isNaN(h.getTime()) ? new Date(fecha_hasta) : h;
+        }
       }
 
       // Ejecutar query con joins
