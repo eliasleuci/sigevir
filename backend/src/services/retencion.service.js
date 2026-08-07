@@ -83,6 +83,7 @@ class RetencionService {
         croquis_url: data.croquis_url || null,
         acta_inspeccion_url: data.acta_inspeccion_url || null,
         deposito_institucion_id: data.deposito_institucion_id || null,
+        inventario: data.inventario || {}
       }, { transaction });
 
       // Guardar personas involucradas si vinieron en el payload
@@ -351,7 +352,7 @@ class RetencionService {
 
     try {
       const camposVehiculo = ['marca', 'modelo', 'anio', 'color', 'tipo_vehiculo', 'numero_motor', 'numero_cuadro', 'danios_visibles'];
-      const camposRetencion = ['motivo_retencion', 'versus', 'num_cooperacion', 'num_sumario', 'num_sac', 'titular_nombre', 'titular_dni', 'titular_contacto', 'latitud', 'longitud', 'numero_comision', 'numero_movil', 'colaboracion_especial', 'coopera_policia_judicial', 'queda_consigna', 'consigna_nombre', 'consigna_cargo', 'consigna_dependencia', 'consigna_telefono', 'tipo_traslado', 'grua_dominio', 'grua_empresa', 'hora_hecho', 'numero_hecho', 'mecanica_hecho', 'tiene_camaras_privadas', 'tiene_carteles_nomenclatura', 'tiene_reductores_velocidad', 'estado_iluminacion', 'estado_calzada', 'croquis_url', 'acta_inspeccion_url'];
+      const camposRetencion = ['motivo_retencion', 'versus', 'num_cooperacion', 'num_sumario', 'num_sac', 'titular_nombre', 'titular_dni', 'titular_contacto', 'latitud', 'longitud', 'numero_comision', 'numero_movil', 'colaboracion_especial', 'coopera_policia_judicial', 'queda_consigna', 'consigna_nombre', 'consigna_cargo', 'consigna_dependencia', 'consigna_telefono', 'tipo_traslado', 'grua_dominio', 'grua_empresa', 'hora_hecho', 'numero_hecho', 'mecanica_hecho', 'tiene_camaras_privadas', 'tiene_carteles_nomenclatura', 'tiene_reductores_velocidad', 'estado_iluminacion', 'estado_calzada', 'croquis_url', 'acta_inspeccion_url', 'inventario'];
 
       const vehiculoUpdate = {};
       const retencionUpdate = {};
