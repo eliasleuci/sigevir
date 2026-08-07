@@ -10,6 +10,7 @@ import tiposPersonalRoutes from './tiposPersonal.routes.js';
 import reportesRoutes from './reportes.routes.js';
 import depositosDisponiblesRoutes from './depositosDisponibles.routes.js';
 import internalRoutes from './internal.routes.js';
+import institucionesRoutes from './instituciones.routes.js';
 
 const router = Router();
 
@@ -21,6 +22,9 @@ router.use('/internal', internalRoutes);
 
 // Rutas de tipos de personal (catálogo de roles)
 router.use('/tipos-personal', tiposPersonalRoutes);
+
+// Rutas de instituciones
+router.use('/instituciones', institucionesRoutes);
 
 // Rutas de reportes y estadisticas
 router.use('/reportes', reportesRoutes);
