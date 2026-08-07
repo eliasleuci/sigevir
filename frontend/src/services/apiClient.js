@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { supabase, SUPABASE_READY } from '../config/supabase';
 
 const apiClient = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:4001/api',
@@ -7,16 +8,12 @@ const apiClient = axios.create({
   },
 });
 
-function getSupabaseToken() {
+async function getSupabaseToken() {
   try {
-    // Supabase guarda la sesión con esta clave por defecto
-    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
-    const projectRef = supabaseUrl.match(/https:\/\/([^.]+)\.supabase\.co/)?.[1] || '';
-    if (projectRef) {
-      const raw = localStorage.getItem(`sb-${projectRef}-auth-token`);
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        return parsed?.access_token || null;
+    if (SUPABASE_READY && supabase) {
+      const { data: { session }, error } = await supabase.auth.getSession();
+      if (session) {
+        return session.access_token;
       }
     }
     // Fallback: buscar en sigevir_session (mock mode)
@@ -41,8 +38,8 @@ function isDemoMode() {
 }
 
 apiClient.interceptors.request.use(
-  (config) => {
-    const token = getSupabaseToken();
+  async (config) => {
+    const token = await getSupabaseToken();
     const demo = isDemoMode();
     if (demo) {
       config.headers['X-Demo-Mode'] = 'true';
