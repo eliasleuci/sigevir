@@ -59,8 +59,8 @@ const Navbar = ({ onToggleSidebar }) => {
             onClick={() => setShowProfileMenu(!showProfileMenu)}
             className="flex items-center gap-2 lg:gap-3 p-1.5 hover:bg-gray-50 rounded-xl transition-all"
           >
-            {perfil?.avatar_url ? (
-              <img src={perfil.avatar_url} alt="avatar" className="w-8 h-8 lg:w-10 lg:h-10 rounded-full object-cover" />
+            {perfil?.foto_perfil_url || perfil?.avatar_url ? (
+              <img src={perfil.foto_perfil_url || perfil.avatar_url} alt="avatar" className="w-8 h-8 lg:w-10 lg:h-10 rounded-full object-cover" />
             ) : (
               <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-lg bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-sm lg:text-lg">
                 {user?.name?.charAt(0) || 'U'}

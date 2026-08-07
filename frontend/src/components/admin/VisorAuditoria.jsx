@@ -3,7 +3,7 @@ import {
   HiOutlineSearch, HiOutlineClock, HiOutlineFilter,
   HiOutlineDownload, HiOutlineExclamationCircle,
   HiOutlineRefresh, HiOutlineShieldCheck, HiOutlineUser,
-  HiOutlineChevronLeft, HiOutlineChevronRight
+  HiOutlineChevronLeft, HiOutlineChevronRight, HiOutlineX
 } from 'react-icons/hi';
 import { supabase, SUPABASE_READY } from '../../config/supabase';
 import { toast } from 'react-toastify';
@@ -53,6 +53,7 @@ const VisorAuditoria = () => {
   const [filtroAccion, setFiltroAccion] = useState('');
   const [mostrarFiltros, setMostrarFiltros] = useState(false);
   const [isDemo, setIsDemo]     = useState(false);
+  const [selectedLog, setSelectedLog] = useState(null);
 
   const fetchLogs = useCallback(async () => {
     setLoading(true);
@@ -247,7 +248,11 @@ const VisorAuditoria = () => {
                 {logs.map((log) => {
                   const cfg = getAccionConfig(log.accion);
                   return (
-                    <tr key={log.id} className="hover:bg-gray-50/60 transition-colors group">
+                    <tr 
+                      key={log.id} 
+                      onClick={() => setSelectedLog(log)}
+                      className="hover:bg-gray-50/60 transition-colors group cursor-pointer"
+                    >
                       {/* Fecha */}
                       <td className="px-8 py-4">
                         <div className="flex items-center gap-2">
@@ -356,6 +361,74 @@ const VisorAuditoria = () => {
           </div>
         )}
       </div>
+
+      {/* Modal de Detalle */}
+      {selectedLog && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/40 backdrop-blur-sm animate-in fade-in duration-200">
+          <div 
+            className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden animate-in zoom-in-95 duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gray-50/50">
+              <div className="flex items-center gap-3">
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${getAccionConfig(selectedLog.accion).color}`}>
+                  <HiOutlineShieldCheck className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-black text-gray-900">Detalle de Auditoría</h3>
+                  <p className="text-xs text-gray-500 font-medium">ID: {selectedLog.id}</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setSelectedLog(null)}
+                className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
+              >
+                <HiOutlineX className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="p-6 max-h-[60vh] overflow-y-auto space-y-6">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-4 rounded-2xl bg-gray-50 border border-gray-100">
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Usuario</p>
+                  <p className="text-sm font-black text-gray-800">{selectedLog.usuario_nombre || 'Sistema'}</p>
+                  <p className="text-xs text-gray-500">{selectedLog.usuario_email || '-'}</p>
+                </div>
+                <div className="p-4 rounded-2xl bg-gray-50 border border-gray-100">
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Fecha y Origen</p>
+                  <p className="text-sm font-black text-gray-800">{new Date(selectedLog.created_at).toLocaleString('es-AR')}</p>
+                  <p className="text-xs text-gray-500 uppercase">{selectedLog.origen || 'WEB'}</p>
+                </div>
+              </div>
+              
+              <div>
+                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 px-1">Acción / Entidad</p>
+                <div className="flex items-center gap-2 px-1">
+                  <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-black uppercase tracking-wider ${getAccionConfig(selectedLog.accion).color}`}>
+                    {getAccionConfig(selectedLog.accion).label}
+                  </span>
+                  <span className="text-gray-400">en</span>
+                  <span className="text-xs font-bold text-gray-700 uppercase bg-gray-100 px-3 py-1.5 rounded-full">{selectedLog.entidad || '-'}</span>
+                </div>
+                {selectedLog.entidad_id && (
+                  <p className="text-xs text-gray-500 font-mono mt-2 px-2">Ref: {selectedLog.entidad_id}</p>
+                )}
+              </div>
+
+              {selectedLog.detalle && (
+                <div>
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 px-1">Payload / Detalles Técnicos</p>
+                  <div className="bg-gray-900 rounded-2xl p-4 overflow-x-auto">
+                    <pre className="text-[11px] text-green-400 font-mono leading-relaxed">
+                      {JSON.stringify(selectedLog.detalle, null, 2)}
+                    </pre>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

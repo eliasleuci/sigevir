@@ -31,7 +31,7 @@ const GestionUsuariosPage = () => {
   });
   const [formLoading, setFormLoading] = useState(false);
   const [tiposPersonal, setTiposPersonal] = useState([]);
-
+  const [docModal, setDocModal] = useState({ show: false, user: null, url: null, loading: false });
   useEffect(() => {
     const fetchTipos = async () => {
       const { data } = await getTiposPersonal();
@@ -117,6 +117,36 @@ const GestionUsuariosPage = () => {
     } catch (err) {
       toast.error('Error al verificar documentos');
     }
+  };
+
+  const handleViewDocument = async (u) => {
+    setDocModal({ show: true, user: u, url: null, loading: true });
+    
+    try {
+      if (!SUPABASE_READY) {
+        setTimeout(() => {
+           setDocModal({ show: true, user: u, url: 'mock', loading: false });
+        }, 500);
+        return;
+      }
+      
+      const { data, error } = await supabase.storage
+        .from('documentos-identidad')
+        .createSignedUrl(u.documento_identidad_url, 3600); // 1 hora
+        
+      if (error) throw error;
+      
+      setDocModal({ show: true, user: u, url: data.signedUrl, loading: false });
+    } catch (err) {
+      toast.error('Error al obtener el documento');
+      setDocModal(prev => ({ ...prev, loading: false }));
+    }
+  };
+
+  const handleApproveDocument = async () => {
+    if (!docModal.user) return;
+    await verificarDocumentos(docModal.user);
+    setDocModal({ show: false, user: null, url: null, loading: false });
   };
 
   // Aprobar usuario pendiente (solo admin)
@@ -385,18 +415,19 @@ const GestionUsuariosPage = () => {
                     {new Date(u.created_at).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' })}
                   </td>
                   <td className="px-6 py-4 text-right">
-                    <div className="flex gap-1.5 justify-end opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
-                      {/* Botón de verificación de documentos (solo si subió doc y aún no está verificado) */}
+                    <div className="flex gap-1.5 justify-end opacity-100">
+                      {/* Botón de ver documento (solo si subió doc y aún no está verificado) */}
                       {u.documento_identidad_url && !u.documentos_verificados && (
                         <button
-                          onClick={() => verificarDocumentos(u)}
-                          className="flex items-center gap-1 px-2.5 py-1.5 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 rounded-lg transition-all text-[11px] font-black border border-emerald-200"
-                          title="Verificar documentos de identidad"
+                          onClick={() => handleViewDocument(u)}
+                          className="flex items-center gap-1 px-2.5 py-1.5 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-lg transition-all text-[11px] font-black border border-blue-200"
+                          title="Ver documento de identidad"
                         >
                           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                           </svg>
-                          Verificar doc.
+                          Ver Doc.
                         </button>
                       )}
                       {/* Badge de documentos verificados */}
@@ -542,6 +573,52 @@ const GestionUsuariosPage = () => {
                   </button>
                 </div>
               </form>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Modal Ver Documento */}
+      <AnimatePresence>
+        {docModal.show && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[1100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="bg-white rounded-3xl shadow-2xl border border-gray-100 w-full max-w-2xl max-h-[90vh] flex flex-col">
+              <div className="p-6 border-b border-gray-100 flex items-center justify-between flex-shrink-0">
+                <div>
+                  <h3 className="text-lg font-bold text-gray-900">Validar Documento</h3>
+                  <p className="text-sm text-gray-500">Documento de: {docModal.user?.nombre_completo || docModal.user?.email}</p>
+                </div>
+                <button onClick={() => setDocModal({ show: false, user: null, url: null, loading: false })} className="p-2 hover:bg-gray-100 rounded-xl transition-colors">
+                  <svg className="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+              </div>
+
+              <div className="p-6 overflow-y-auto flex-1 flex flex-col items-center justify-center bg-gray-50/50">
+                {docModal.loading ? (
+                   <div className="flex flex-col items-center gap-3 py-12">
+                     <svg className="w-8 h-8 animate-spin text-blue-500" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                     <p className="text-sm text-gray-500 font-medium">Cargando documento...</p>
+                   </div>
+                ) : docModal.url ? (
+                   docModal.url === 'mock' || docModal.user?.documento_identidad_url.toLowerCase().endsWith('.pdf') ? (
+                     <iframe src={docModal.url !== 'mock' ? docModal.url : ''} className="w-full h-[500px] border-0 rounded-xl shadow-inner bg-white" title="Documento PDF" />
+                   ) : (
+                     <img src={docModal.url} alt="Documento" className="max-w-full max-h-[60vh] object-contain rounded-xl shadow-sm" />
+                   )
+                ) : (
+                   <div className="py-12 text-center text-gray-400">
+                     <p>No se pudo cargar el documento</p>
+                   </div>
+                )}
+              </div>
+
+              <div className="flex justify-end gap-3 p-6 border-t border-gray-100 flex-shrink-0 bg-white rounded-b-3xl">
+                <button type="button" onClick={() => setDocModal({ show: false, user: null, url: null, loading: false })} className="px-5 py-2.5 text-sm font-semibold text-gray-600 hover:bg-gray-50 rounded-xl transition-all">Cancelar</button>
+                <button type="button" onClick={handleApproveDocument} disabled={docModal.loading || !docModal.url} className="px-5 py-2.5 bg-emerald-500 text-white text-sm font-bold rounded-xl hover:bg-emerald-600 disabled:opacity-50 transition-all shadow-lg shadow-emerald-200 flex items-center gap-2">
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                  Aprobar Documento
+                </button>
+              </div>
             </motion.div>
           </motion.div>
         )}

@@ -36,6 +36,11 @@ const ProtectedRoute = ({ allowedRoles, children }) => {
     return <Navigate to="/pending" replace />;
   }
 
+  // Bloquear acceso si sus documentos no están verificados (y no está ya en la pantalla de perfil)
+  if (supabaseReady && perfil && !perfil.documentos_verificados && location.pathname !== '/perfil') {
+    return <Navigate to="/perfil" replace state={{ alert: 'verification_required' }} />;
+  }
+
   if (allowedRoles && !allowedRoles.includes(rol)) {
     return <Navigate to="/unauthorized" replace />;
   }
