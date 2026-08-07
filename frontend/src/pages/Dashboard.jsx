@@ -73,31 +73,10 @@ export default function Dashboard() {
     <div className="min-h-screen bg-blue-50 pb-12 font-sans">
       {/* Header Premium */}
       <header className="bg-white border-b border-gray-100 sticky top-0 z-30">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-center items-center">
           <div className="flex items-center gap-3">
             <img src="/icono-de-la-app.jpeg" alt="SIGEVIR" className="w-10 h-10 rounded-xl shadow-lg shadow-blue-500/20 object-cover" />
             <h1 className="text-xl font-black text-gray-900 tracking-tight">SIGEVIR</h1>
-          </div>
-          
-          <div className="flex items-center gap-6">
-
-            {/* Perfil Usuario */}
-            <div className="flex items-center gap-3 border-l border-gray-100 pl-6">
-              <div className="text-right hidden sm:block">
-                <p className="text-sm font-bold text-gray-900 leading-none">
-                  {user?.nombre_completo || 'Administrador'}
-                </p>
-                <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest mt-1">
-                  {rol?.replace('_', ' ') || 'MODO DEMO'}
-                </p>
-              </div>
-              <button
-                onClick={logout}
-                className="px-4 py-2 bg-red-50 text-red-600 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-red-600 hover:text-white transition-all transform active:scale-95"
-              >
-                Salir
-              </button>
-            </div>
           </div>
         </div>
       </header>
