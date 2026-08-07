@@ -183,7 +183,7 @@ class RetencionesController {
         'Content-Type': 'application/pdf',
         'Content-Disposition': `attachment; filename="comprobante-${dominio}.pdf"`,
       });
-      res.send(pdfBuffer);
+      res.send(Buffer.from(pdfBuffer));
     } catch (error) {
       next(error);
     }
