@@ -59,8 +59,10 @@ export const auditLog = (accion, entidad) => (req, res, next) => {
             detalle: JSON.stringify({
               metodo: req.method,
               ruta: req.originalUrl,
-              nro_expediente: req.body?.numero_expediente || req.body?.nro_expediente || data?.data?.nro_expediente || null,
-              dominio: req.body?.dominio || data?.data?.dominio || null
+              ...( (req.body?.numero_expediente || req.body?.nro_expediente || data?.data?.nro_expediente) ? { nro_expediente: req.body?.numero_expediente || req.body?.nro_expediente || data?.data?.nro_expediente } : {} ),
+              ...( (req.body?.dominio || data?.data?.dominio) ? { dominio: req.body?.dominio || data?.data?.dominio } : {} ),
+              ...( (req.body?.nombre || data?.data?.nombre) ? { nombre: req.body?.nombre || data?.data?.nombre } : {} ),
+              ...( (req.body?.tipo || data?.data?.tipo) ? { tipo: req.body?.tipo || data?.data?.tipo } : {} )
             }),
             ip: req.ip || req.connection?.remoteAddress || '127.0.0.1'
           }

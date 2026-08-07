@@ -411,19 +411,19 @@ const VisorAuditoria = () => {
                 </div>
               </div>
 
-              {/* Datos registrados de forma amigable (sin código JSON y filtrando rutas técnicas) */}
-              {selectedLog.detalle && Object.keys(selectedLog.detalle).filter(k => !['ruta', 'metodo', 'ip', 'user_agent'].includes(k)).length > 0 && (
+              {/* Datos registrados de forma amigable (sin código JSON y filtrando rutas técnicas y nulos) */}
+              {selectedLog.detalle && Object.entries(selectedLog.detalle).filter(([k, v]) => !['ruta', 'metodo', 'ip', 'user_agent'].includes(k) && v !== null && v !== undefined).length > 0 && (
                 <div>
                   <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 px-1">Datos Registrados</p>
                   <div className="bg-gray-50 rounded-2xl p-4 border border-gray-100">
                     <ul className="space-y-3">
                       {Object.entries(selectedLog.detalle)
-                        .filter(([k]) => !['ruta', 'metodo', 'ip', 'user_agent'].includes(k))
+                        .filter(([k, v]) => !['ruta', 'metodo', 'ip', 'user_agent'].includes(k) && v !== null && v !== undefined)
                         .map(([key, value]) => (
                           <li key={key} className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 text-sm">
                             <span className="font-bold text-gray-500 capitalize w-32">{key.replace(/_/g, ' ')}:</span>
                             <span className="text-gray-900 font-medium bg-white px-3 py-1.5 rounded-lg border border-gray-100 shadow-sm w-full">
-                              {typeof value === 'object' ? JSON.stringify(value) : String(value || '-')}
+                              {typeof value === 'object' ? JSON.stringify(value) : String(value)}
                             </span>
                           </li>
                         ))}
