@@ -29,8 +29,8 @@ class InstitucionService {
     const institucion = await db.Institucion.create({
       nombre,
       tipo,
-      jurisdiccion,
-      logo_url,
+      jurisdiccion: jurisdiccion || null,
+      logo_url: logo_url || null,
       activa: true
     });
 
@@ -44,8 +44,8 @@ class InstitucionService {
     const updateData = {};
     if (data.nombre !== undefined) updateData.nombre = data.nombre;
     if (data.tipo !== undefined) updateData.tipo = data.tipo;
-    if (data.jurisdiccion !== undefined) updateData.jurisdiccion = data.jurisdiccion;
-    if (data.logo_url !== undefined) updateData.logo_url = data.logo_url;
+    if (data.jurisdiccion !== undefined) updateData.jurisdiccion = data.jurisdiccion || null;
+    if (data.logo_url !== undefined) updateData.logo_url = data.logo_url || null;
     if (data.activa !== undefined) updateData.activa = data.activa;
 
     await institucion.update(updateData);
