@@ -14,6 +14,7 @@ import { FaGavel } from 'react-icons/fa';
 import GaleriaFotos from './GaleriaFotos';
 import TimelineEstados from './TimelineEstados';
 import InventarioObjetos from '../deposito/InventarioObjetos';
+import InventarioVehiculo from '../shared/InventarioVehiculo';
 
 const HistorialCompleto = ({ vehiculo, onEmitirResolucion }) => {
   const [activeTab, setActiveTab] = useState('vehiculo');
@@ -347,7 +348,17 @@ const HistorialCompleto = ({ vehiculo, onEmitirResolucion }) => {
               </div>
             </div>
 
-            <InventarioObjetos initialItems={vehiculo.deposito_activo?.inventario_objetos || vehiculo.inventario_objetos || []} readOnly={true} />
+            <div className="pt-6">
+              <InventarioVehiculo 
+                tipoVehiculo={vehiculo.tipo_vehiculo} 
+                value={vehiculo.inventario || {}} 
+                readonly={true} 
+              />
+            </div>
+
+            <div className="pt-6">
+              <InventarioObjetos initialItems={vehiculo.deposito_activo?.inventario_objetos || vehiculo.inventario_objetos || []} readOnly={true} />
+            </div>
           </div>
         )}
 
