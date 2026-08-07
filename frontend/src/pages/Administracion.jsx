@@ -3,6 +3,7 @@ import { HiOutlineUsers, HiOutlineOfficeBuilding, HiOutlineShieldCheck, HiOutlin
 import GestionUsuariosPage from './admin/GestionUsuariosPage';
 import GestionRoles from '../components/admin/GestionRoles';
 import VisorAuditoria from '../components/admin/VisorAuditoria';
+import GestionInstituciones from '../components/admin/GestionInstituciones';
 
 const Administracion = () => {
   const [activeTab, setActiveTab] = useState('usuarios');
@@ -46,13 +47,7 @@ const Administracion = () => {
 
       <div className="min-h-[500px]">
         {activeTab === 'usuarios' && <GestionUsuariosPage />}
-        {activeTab === 'instituciones' && (
-          <div className="py-20 text-center bg-white rounded-[40px] border border-dashed border-gray-200">
-            <HiOutlineOfficeBuilding className="w-20 h-20 text-gray-100 mx-auto mb-6" />
-            <h3 className="text-2xl font-black text-gray-900 mb-2 uppercase tracking-tighter">Gestión de Instituciones</h3>
-            <p className="text-gray-400 font-medium">Módulo en proceso de implementación para el próximo despliegue.</p>
-          </div>
-        )}
+        {activeTab === 'instituciones' && <GestionInstituciones />}
         {activeTab === 'auditoria' && <VisorAuditoria />}
         {activeTab === 'roles' && <GestionRoles />}
         {activeTab === 'config' && (
