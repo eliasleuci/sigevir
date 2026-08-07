@@ -3,6 +3,7 @@ import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { retencionSchema } from '../../schemas/retencion.schema';
 import { HiOutlineInformationCircle, HiOutlineUser, HiOutlineTruck, HiOutlineLocationMarker, HiOutlineSearch } from 'react-icons/hi';
+import { toast } from 'react-toastify';
 import MapaSelector from './MapaSelector';
 import CargaFotos from './CargaFotos';
 import SelectorDeposito from './SelectorDeposito';
@@ -103,12 +104,18 @@ const FormularioNuevaRetencion = ({ onSubmit, loading, initialData = {} }) => {
     });
   };
 
+  const onInvalid = (formErrors) => {
+    console.error('Errores de validación en el formulario:', formErrors);
+    const campos = Object.keys(formErrors).join(', ');
+    toast.error(`Revisa los datos ingresados. Hay un error en: ${campos}`);
+  };
+
   // Clases CSS reutilizadas del formulario existente
   const inputClass = "w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all";
   const inputErrorClass = "w-full px-4 py-2.5 rounded-xl border border-red-300 ring-1 ring-red-100 focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all";
 
   return (
-    <form id="form-retencion" onSubmit={handleSubmit(customSubmit)} className="space-y-8 pb-20">
+    <form id="form-retencion" onSubmit={handleSubmit(customSubmit, onInvalid)} className="space-y-8 pb-20">
       {/* ═══════════════════════════════════════════════════════════════════
           SECCION 1: Datos del Vehiculo (existente, sin cambios)
          ═══════════════════════════════════════════════════════════════════ */}

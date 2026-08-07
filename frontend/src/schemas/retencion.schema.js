@@ -1,82 +1,79 @@
-﻿import { z } from 'zod';
+import { z } from 'zod';
 
 export const retencionSchema = z.object({
   dominio: z.string()
-    .min(6, 'Dominio invalido')
+    .min(6, 'Dominio inválido (mínimo 6 caracteres)')
     .max(9, 'Dominio demasiado largo')
-    .regex(/^[A-Z0-9 ]+$/, 'Formato de dominio no valido (solo letras y numeros)'),
-  tipo_vehiculo: z.enum(['AUTO', 'MOTO', 'CAMION', 'PICKUP', 'OTRO']),
+    .regex(/^[A-Z0-9 ]+$/i, 'Formato de dominio no válido (solo letras y números)'),
+  tipo_vehiculo: z.enum(['AUTO', 'MOTO', 'CAMION', 'PICKUP', 'OTRO']).optional().default('AUTO'),
   marca: z.string().min(2, 'Marca requerida'),
   modelo: z.string().min(1, 'Modelo requerido'),
-  color: z.string().min(2, 'Color requerido'),
-  nro_motor: z.string().min(5, 'Numero de motor requerido'),
-  nro_cuadro: z.string().min(5, 'Numero de cuadro/chasis requerido'),
+  color: z.string().optional().nullable(),
+  nro_motor: z.string().optional().nullable(),
+  nro_cuadro: z.string().optional().nullable(),
 
-  titular_nombre: z.string().min(3, 'Nombre completo requerido'),
-  titular_dni: z.string()
-    .min(7, 'DNI debe tener al menos 7 digitos')
-    .max(8, 'DNI no puede superar los 8 digitos')
-    .regex(/^[0-9]+$/, 'DNI solo debe contener numeros'),
-  titular_domicilio: z.string().min(5, 'Domicilio requerido'),
+  // Datos del titular (opcionales para protocolo policial donde hay lista de involucrados)
+  titular_nombre: z.string().optional().nullable(),
+  titular_dni: z.string().optional().nullable(),
+  titular_domicilio: z.string().optional().nullable(),
 
-  motivo_retencion: z.string().min(10, 'Describe el motivo (minimo 10 caracteres)'),
-  lugar_retencion: z.string().min(5, 'Lugar de retencion requerido'),
-  observaciones: z.string().optional(),
+  motivo_retencion: z.string().min(5, 'Describe el motivo (mínimo 5 caracteres)'),
+  lugar_retencion: z.string().min(3, 'Lugar de retención requerido'),
+  observaciones: z.string().optional().nullable(),
 
-  latitud: z.number().min(-90).max(90).optional(),
-  longitud: z.number().min(-180).max(180).optional(),
+  latitud: z.any().optional().nullable(),
+  longitud: z.any().optional().nullable(),
 
-  institucion_id: z.string().uuid().optional(),
-  agente_id: z.string().uuid().optional(),
-  
-  deposito_institucion_id: z.string().uuid().optional(),
+  institucion_id: z.string().optional().nullable(),
+  agente_id: z.string().optional().nullable(),
+  deposito_institucion_id: z.string().optional().nullable(),
 
   // -- Datos del procedimiento policial --
-  numero_comision: z.string().optional(),
-  numero_movil: z.string().optional(),
+  numero_comision: z.string().optional().nullable(),
+  numero_movil: z.string().optional().nullable(),
   colaboracion_especial: z.array(z.string()).optional().default([]),
-  coopera_policia_judicial: z.boolean().optional(),
+  coopera_policia_judicial: z.any().optional().nullable(),
 
   // -- Consigna --
-  queda_consigna: z.boolean().optional().default(false),
-  consigna_nombre: z.string().optional(),
-  consigna_cargo: z.string().optional(),
-  consigna_dependencia: z.string().optional(),
-  consigna_telefono: z.string().optional(),
+  queda_consigna: z.any().optional().nullable(),
+  consigna_nombre: z.string().optional().nullable(),
+  consigna_cargo: z.string().optional().nullable(),
+  consigna_dependencia: z.string().optional().nullable(),
+  consigna_telefono: z.string().optional().nullable(),
 
   // -- Traslado --
-  tipo_traslado: z.enum(['PROPIOS_MEDIOS', 'GRUA']).optional(),
-  grua_dominio: z.string().optional(),
-  grua_empresa: z.string().optional(),
+  tipo_traslado: z.any().optional().nullable(),
+  grua_dominio: z.string().optional().nullable(),
+  grua_empresa: z.string().optional().nullable(),
 
-  // -- Declaracion judicial --
-  hora_hecho: z.string().optional(),
-  numero_hecho: z.string().optional(),
-  mecanica_hecho: z.string().optional(),
+  // -- Declaración judicial --
+  hora_hecho: z.string().optional().nullable(),
+  numero_hecho: z.string().optional().nullable(),
+  mecanica_hecho: z.string().optional().nullable(),
 
   // -- Entorno --
-  tiene_camaras_privadas: z.boolean().optional(),
-  tiene_carteles_nomenclatura: z.boolean().optional(),
-  tiene_reductores_velocidad: z.boolean().optional(),
-  estado_iluminacion: z.enum(['BUENA', 'REGULAR', 'MALA', 'SIN_ILUMINACION']).optional(),
-  estado_calzada: z.enum(['SECA', 'MOJADA', 'DETERIORADA', 'EN_OBRA']).optional(),
+  tiene_camaras_privadas: z.any().optional().nullable(),
+  tiene_carteles_nomenclatura: z.any().optional().nullable(),
+  tiene_reductores_velocidad: z.any().optional().nullable(),
+  estado_iluminacion: z.any().optional().nullable(),
+  estado_calzada: z.any().optional().nullable(),
 
-  // -- Personas involucradas (array dinamico) --
+  // -- Personas involucradas (array dinámico) --
   personas_involucradas: z.array(z.object({
-    rol: z.enum(['CONDUCTOR', 'ACOMPANANTE', 'PEATON', 'TESTIGO', 'OTRO']),
-    nombre_completo: z.string().min(3, 'Nombre requerido'),
-    edad: z.number().optional(),
-    dni: z.string().optional(),
-    domicilio: z.string().optional(),
-    telefono: z.string().optional(),
-    es_lesionado: z.boolean().optional().default(false),
-    tipo_lesion: z.string().optional(),
-    nosocomio_traslado: z.string().optional(),
+    rol: z.string().optional().nullable(),
+    nombre_completo: z.string().optional().nullable(),
+    edad: z.any().optional().nullable(),
+    dni: z.string().optional().nullable(),
+    domicilio: z.string().optional().nullable(),
+    telefono: z.string().optional().nullable(),
+    es_lesionado: z.any().optional().nullable(),
+    tipo_lesion: z.string().optional().nullable(),
+    nosocomio_traslado: z.string().optional().nullable(),
   })).optional().default([]),
 });
 
 export const resolucionSchema = z.object({
   tipo: z.enum(['LIBERACION', 'SUBASTA', 'COMPACTACION', 'OTRO']),
-  observaciones: z.string().min(10, 'Describe las observaciones de la resolucion'),
-  nro_expediente: z.string().min(1, 'Numero de expediente requerido'),
+  observaciones: z.string().min(10, 'Describe las observaciones de la resolución'),
+  nro_expediente: z.string().min(1, 'Número de expediente requerido'),
 });
