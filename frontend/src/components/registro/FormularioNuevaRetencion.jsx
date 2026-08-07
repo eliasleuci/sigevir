@@ -585,6 +585,28 @@ const FormularioNuevaRetencion = ({ onSubmit, loading, initialData = {} }) => {
       </section>
 
       {/* ═══════════════════════════════════════════════════════════════════
+          SECCION 8: Depósito de Destino (NUEVA)
+         ═══════════════════════════════════════════════════════════════════ */}
+      <section className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-6">
+        <div className="flex items-center gap-2 text-blue-600 mb-2">
+          <HiOutlineLocationMarker className="w-6 h-6" />
+          <h3 className="font-bold text-lg text-blue-600">Depósito de Destino</h3>
+        </div>
+        <p className="text-sm text-gray-500">
+          Seleccione el depósito donde se alojará el vehículo. El personal del depósito recibirá una notificación de que el vehículo está en camino.
+        </p>
+
+        <SelectorDeposito
+          coords={{ latitud: watch('latitud'), longitud: watch('longitud') }}
+          value={watch('deposito_institucion_id')}
+          onChange={(val) => setValue('deposito_institucion_id', val, { shouldValidate: true })}
+        />
+        {errors.deposito_institucion_id && (
+          <p className="text-xs text-red-500 mt-1">{errors.deposito_institucion_id.message}</p>
+        )}
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════════════════
           SECCION 10: Documentacion adicional (NUEVA)
          ═══════════════════════════════════════════════════════════════════ */}
       <section className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-6">
