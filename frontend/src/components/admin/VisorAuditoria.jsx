@@ -3,10 +3,8 @@ import {
   HiOutlineSearch, HiOutlineClock, HiOutlineFilter,
   HiOutlineDownload, HiOutlineExclamationCircle,
   HiOutlineRefresh, HiOutlineShieldCheck, HiOutlineUser,
-  HiOutlineChevronLeft, HiOutlineChevronRight, HiOutlineX,
-  HiOutlineExternalLink
+  HiOutlineChevronLeft, HiOutlineChevronRight, HiOutlineX
 } from 'react-icons/hi';
-import { useNavigate } from 'react-router-dom';
 import { supabase, SUPABASE_READY } from '../../config/supabase';
 import { toast } from 'react-toastify';
 
@@ -47,7 +45,6 @@ const ACCION_CONFIG = {
 const PAGE_SIZE = 20;
 
 const VisorAuditoria = () => {
-  const navigate = useNavigate();
   const [logs, setLogs]         = useState([]);
   const [loading, setLoading]   = useState(false);
   const [total, setTotal]       = useState(0);
@@ -132,27 +129,6 @@ const VisorAuditoria = () => {
 
   const getAccionConfig = (accion) =>
     ACCION_CONFIG[accion] || { color: 'bg-gray-100 text-gray-600', label: accion?.replace(/_/g, ' ') || '-' };
-
-  const handleVerCaso = (entidad, id) => {
-    if (!id) return;
-    switch (entidad?.toUpperCase()) {
-      case 'RETENCION':
-        navigate(`/retenciones/${id}`);
-        break;
-      case 'DEPOSITO':
-        navigate(`/depositos/${id}`);
-        break;
-      case 'CAUSA':
-        navigate(`/judicial/causas/${id}`);
-        break;
-      case 'PERFIL':
-      case 'USUARIO':
-        navigate(`/admin/usuarios`);
-        break;
-      default:
-        toast.info('No hay una vista específica para este tipo de registro.');
-    }
-  };
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
@@ -400,7 +376,6 @@ const VisorAuditoria = () => {
                 </div>
                 <div>
                   <h3 className="text-base font-black text-gray-900">Detalle de Auditoría</h3>
-                  <p className="text-xs text-gray-500 font-medium">ID: {selectedLog.id}</p>
                 </div>
               </div>
               <button 
@@ -434,21 +409,26 @@ const VisorAuditoria = () => {
                   <span className="text-gray-400">en</span>
                   <span className="text-xs font-bold text-gray-700 uppercase bg-gray-100 px-3 py-1.5 rounded-full">{selectedLog.entidad || '-'}</span>
                 </div>
-                {selectedLog.entidad_id && (
-                  <p className="text-xs text-gray-500 font-mono mt-2 px-2">Ref: {selectedLog.entidad_id}</p>
-                )}
               </div>
 
-              {/* Botón para ir al caso */}
-              {selectedLog.entidad_id && (
-                <div className="pt-4 border-t border-gray-100 flex justify-end">
-                  <button
-                    onClick={() => handleVerCaso(selectedLog.entidad, selectedLog.entidad_id)}
-                    className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-colors shadow-sm"
-                  >
-                    Ver detalles del {selectedLog.entidad?.toLowerCase() || 'registro'}
-                    <HiOutlineExternalLink className="w-5 h-5" />
-                  </button>
+              {/* Datos registrados de forma amigable (sin código JSON y filtrando rutas técnicas) */}
+              {selectedLog.detalle && Object.keys(selectedLog.detalle).filter(k => !['ruta', 'metodo', 'ip', 'user_agent'].includes(k)).length > 0 && (
+                <div>
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 px-1">Datos Registrados</p>
+                  <div className="bg-gray-50 rounded-2xl p-4 border border-gray-100">
+                    <ul className="space-y-3">
+                      {Object.entries(selectedLog.detalle)
+                        .filter(([k]) => !['ruta', 'metodo', 'ip', 'user_agent'].includes(k))
+                        .map(([key, value]) => (
+                          <li key={key} className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 text-sm">
+                            <span className="font-bold text-gray-500 capitalize w-32">{key.replace(/_/g, ' ')}:</span>
+                            <span className="text-gray-900 font-medium bg-white px-3 py-1.5 rounded-lg border border-gray-100 shadow-sm w-full">
+                              {typeof value === 'object' ? JSON.stringify(value) : String(value || '-')}
+                            </span>
+                          </li>
+                        ))}
+                    </ul>
+                  </div>
                 </div>
               )}
             </div>

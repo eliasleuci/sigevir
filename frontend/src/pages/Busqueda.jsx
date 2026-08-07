@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import FormularioBusquedaAvanzada from '../components/busqueda/FormularioBusquedaAvanzada';
 import TablaResultados from '../components/busqueda/TablaResultados';
 import HistorialCompleto from '../components/judicial/HistorialCompleto';
@@ -9,6 +9,7 @@ import { HiOutlineArrowLeft, HiOutlineSearchCircle } from 'react-icons/hi';
 
 const Busqueda = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [loading, setLoading] = useState(false);
   const [resultados, setResultados] = useState([]);
   const [view, setView] = useState('form'); // 'form', 'results', 'detail'
@@ -60,6 +61,14 @@ const Busqueda = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (location.state?.preselectVehiculoId) {
+      handleSelectVehiculo({ id: location.state.preselectVehiculoId });
+      // Limpiamos el estado para evitar re-ejecuciones al recargar la página
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
 
   const handleEmitirResolucion = () => {
     navigate('/judicial/causas', { state: { preselectExpediente: selectedVehiculo.numero_expediente } });
