@@ -4,6 +4,7 @@ import GestionUsuariosPage from './admin/GestionUsuariosPage';
 import GestionRoles from '../components/admin/GestionRoles';
 import VisorAuditoria from '../components/admin/VisorAuditoria';
 import GestionInstituciones from '../components/admin/GestionInstituciones';
+import GestionConfiguraciones from '../components/admin/GestionConfiguraciones';
 
 const Administracion = () => {
   const [activeTab, setActiveTab] = useState('usuarios');
@@ -50,13 +51,7 @@ const Administracion = () => {
         {activeTab === 'instituciones' && <GestionInstituciones />}
         {activeTab === 'auditoria' && <VisorAuditoria />}
         {activeTab === 'roles' && <GestionRoles />}
-        {activeTab === 'config' && (
-          <div className="py-20 text-center bg-white rounded-[40px] border border-dashed border-gray-200">
-            <HiOutlineShieldCheck className="w-20 h-20 text-gray-100 mx-auto mb-6" />
-            <h3 className="text-2xl font-black text-gray-900 mb-2 uppercase tracking-tighter">Panel de Control</h3>
-            <p className="text-gray-400 font-medium">Sección de configuración avanzada en desarrollo.</p>
-          </div>
-        )}
+        {activeTab === 'config' && <GestionConfiguraciones />}
       </div>
     </div>
   );

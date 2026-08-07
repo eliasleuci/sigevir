@@ -12,6 +12,7 @@ import Notificacion from './Notificacion.js';
 import HistorialMovimiento from './HistorialMovimiento.js';
 import PersonaInvolucrada from './PersonaInvolucrada.js';
 import DepositoInstitucion from './DepositoInstitucion.js';
+import Configuracion from './Configuracion.js';
 
 // Definir Asociaciones
 
@@ -93,7 +94,8 @@ const db = {
   Notificacion,
   HistorialMovimiento,
   PersonaInvolucrada,
-  DepositoInstitucion
+  DepositoInstitucion,
+  Configuracion
 };
 
 export default db;

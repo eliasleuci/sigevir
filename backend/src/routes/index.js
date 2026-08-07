@@ -11,6 +11,7 @@ import reportesRoutes from './reportes.routes.js';
 import depositosDisponiblesRoutes from './depositosDisponibles.routes.js';
 import internalRoutes from './internal.routes.js';
 import institucionesRoutes from './instituciones.routes.js';
+import configuracionesRoutes from './configuraciones.routes.js';
 
 const router = Router();
 
@@ -47,5 +48,8 @@ router.use('/notificaciones', notificacionesRoutes);
 
 // Rutas de administración (protegidas por RBAC)
 router.use('/admin', adminRoutes);
+
+// Rutas de configuracion global del sistema (protegidas)
+router.use('/configuraciones', configuracionesRoutes);
 
 export default router;
