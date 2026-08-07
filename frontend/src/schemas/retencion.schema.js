@@ -55,6 +55,7 @@ export const retencionSchema = z.object({
   tiene_camaras_privadas: z.any().optional().nullable(),
   tiene_carteles_nomenclatura: z.any().optional().nullable(),
   tiene_reductores_velocidad: z.any().optional().nullable(),
+  tipo_iluminacion: z.any().optional().nullable(),
   estado_iluminacion: z.any().optional().nullable(),
   estado_calzada: z.any().optional().nullable(),
 

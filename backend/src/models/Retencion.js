@@ -181,6 +181,11 @@ Retencion.init({
   tiene_camaras_privadas: { type: DataTypes.BOOLEAN, allowNull: true },
   tiene_carteles_nomenclatura: { type: DataTypes.BOOLEAN, allowNull: true },
   tiene_reductores_velocidad: { type: DataTypes.BOOLEAN, allowNull: true },
+  tipo_iluminacion: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    validate: { isIn: [['NATURAL', 'ARTIFICIAL', null]] }
+  },
   estado_iluminacion: {
     type: DataTypes.STRING,
     allowNull: true,

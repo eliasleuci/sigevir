@@ -78,6 +78,7 @@ class RetencionService {
         tiene_camaras_privadas: data.tiene_camaras_privadas ?? null,
         tiene_carteles_nomenclatura: data.tiene_carteles_nomenclatura ?? null,
         tiene_reductores_velocidad: data.tiene_reductores_velocidad ?? null,
+        tipo_iluminacion: data.tipo_iluminacion || null,
         estado_iluminacion: data.estado_iluminacion || null,
         estado_calzada: data.estado_calzada || null,
         croquis_url: data.croquis_url || null,
@@ -352,7 +353,7 @@ class RetencionService {
 
     try {
       const camposVehiculo = ['marca', 'modelo', 'anio', 'color', 'tipo_vehiculo', 'numero_motor', 'numero_cuadro', 'danios_visibles'];
-      const camposRetencion = ['motivo_retencion', 'versus', 'num_cooperacion', 'num_sumario', 'num_sac', 'titular_nombre', 'titular_dni', 'titular_contacto', 'latitud', 'longitud', 'numero_comision', 'numero_movil', 'colaboracion_especial', 'coopera_policia_judicial', 'queda_consigna', 'consigna_nombre', 'consigna_cargo', 'consigna_dependencia', 'consigna_telefono', 'tipo_traslado', 'grua_dominio', 'grua_empresa', 'hora_hecho', 'numero_hecho', 'mecanica_hecho', 'tiene_camaras_privadas', 'tiene_carteles_nomenclatura', 'tiene_reductores_velocidad', 'estado_iluminacion', 'estado_calzada', 'croquis_url', 'acta_inspeccion_url', 'inventario'];
+      const camposRetencion = ['motivo_retencion', 'versus', 'num_cooperacion', 'num_sumario', 'num_sac', 'titular_nombre', 'titular_dni', 'titular_contacto', 'latitud', 'longitud', 'numero_comision', 'numero_movil', 'colaboracion_especial', 'coopera_policia_judicial', 'queda_consigna', 'consigna_nombre', 'consigna_cargo', 'consigna_dependencia', 'consigna_telefono', 'tipo_traslado', 'grua_dominio', 'grua_empresa', 'hora_hecho', 'numero_hecho', 'mecanica_hecho', 'tiene_camaras_privadas', 'tiene_carteles_nomenclatura', 'tiene_reductores_velocidad', 'tipo_iluminacion', 'estado_iluminacion', 'estado_calzada', 'croquis_url', 'acta_inspeccion_url', 'inventario'];
 
       const vehiculoUpdate = {};
       const retencionUpdate = {};

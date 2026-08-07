@@ -568,9 +568,17 @@ const FormularioNuevaRetencion = ({ onSubmit, loading, initialData = {} }) => {
             Reductores de velocidad
           </label>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="space-y-1">
-            <label className="text-sm font-semibold text-gray-700">Iluminacion</label>
+            <label className="text-sm font-semibold text-gray-700">Tipo de iluminacion</label>
+            <select {...register('tipo_iluminacion')} className={`${inputClass} bg-white`}>
+              <option value="">-- Seleccionar --</option>
+              <option value="NATURAL">Natural</option>
+              <option value="ARTIFICIAL">Artificial</option>
+            </select>
+          </div>
+          <div className="space-y-1">
+            <label className="text-sm font-semibold text-gray-700">Estado de iluminacion</label>
             <select {...register('estado_iluminacion')} className={`${inputClass} bg-white`}>
               <option value="">-- Seleccionar --</option>
               <option value="BUENA">Buena</option>

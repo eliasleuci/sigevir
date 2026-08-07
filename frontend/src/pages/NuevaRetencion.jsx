@@ -87,6 +87,7 @@ const NuevaRetencion = () => {
         tiene_camaras_privadas: formData.tiene_camaras_privadas || false,
         tiene_carteles_nomenclatura: formData.tiene_carteles_nomenclatura || false,
         tiene_reductores_velocidad: formData.tiene_reductores_velocidad || false,
+        tipo_iluminacion: formData.tipo_iluminacion || null,
         estado_iluminacion: formData.estado_iluminacion || null,
         estado_calzada: formData.estado_calzada || null,
         // Personas involucradas
