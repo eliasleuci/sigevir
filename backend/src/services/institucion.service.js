@@ -1,6 +1,5 @@
 import db from '../models/index.js';
 import logger from '../utils/logger.js';
-import { createAuditLog } from '../middleware/auditLog.js';
 
 class InstitucionService {
   async listarInstituciones(query = {}) {
@@ -35,10 +34,6 @@ class InstitucionService {
       activa: true
     });
 
-    if (usuarioAudit) {
-      await createAuditLog('CREAR', 'INSTITUCION', institucion.id, 'admin', data, usuarioAudit);
-    }
-
     return institucion;
   }
 
@@ -55,10 +50,6 @@ class InstitucionService {
 
     await institucion.update(updateData);
 
-    if (usuarioAudit) {
-      await createAuditLog('MODIFICAR', 'INSTITUCION', institucion.id, 'admin', updateData, usuarioAudit);
-    }
-
     return institucion;
   }
 
@@ -68,10 +59,6 @@ class InstitucionService {
 
     // Soft delete o desactivación (preferimos desactivación para que no rompa foreign keys)
     await institucion.update({ activa: false });
-
-    if (usuarioAudit) {
-      await createAuditLog('ELIMINAR', 'INSTITUCION', institucion.id, 'admin', { activa: false }, usuarioAudit);
-    }
 
     return { message: 'Institución desactivada correctamente' };
   }
