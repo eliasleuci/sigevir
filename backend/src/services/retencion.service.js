@@ -248,7 +248,26 @@ class RetencionService {
     });
 
     if (!retencion) {
-      throw new AppError('Retenci�n no encontrada', 404);
+      throw new AppError('Retención no encontrada', 404);
+    }
+
+    // Buscar nombre actualizado en la tabla perfiles de Supabase si existe
+    if (retencion.agente_id) {
+      try {
+        const [perfilRow] = await db.sequelize.query(
+          `SELECT nombre_completo, email FROM perfiles WHERE id = :agenteId LIMIT 1`,
+          { replacements: { agenteId: retencion.agente_id }, type: db.sequelize.QueryTypes.SELECT }
+        );
+        if (perfilRow && perfilRow.nombre_completo) {
+          if (!retencion.agente) {
+            retencion.setDataValue('agente', { id: retencion.agente_id, nombre_completo: perfilRow.nombre_completo, email: perfilRow.email });
+          } else {
+            retencion.agente.setDataValue('nombre_completo', perfilRow.nombre_completo);
+          }
+        }
+      } catch (e) {
+        logger.warn(`No se pudo sincronizar perfil de agente: ${e.message}`);
+      }
     }
 
     this._validarPermisoLectura(retencion, user);
