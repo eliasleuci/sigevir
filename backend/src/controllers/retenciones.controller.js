@@ -168,7 +168,6 @@ class RetencionesController {
       const { id } = req.params;
       const retencion = await db.Retencion.findByPk(id, {
         include: [
-          { model: db.Vehiculo, as: 'vehiculo' },
           { model: db.DepositoInstitucion, as: 'deposito_institucion' }
         ],
       });
