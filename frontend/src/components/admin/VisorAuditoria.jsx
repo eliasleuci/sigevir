@@ -3,8 +3,10 @@ import {
   HiOutlineSearch, HiOutlineClock, HiOutlineFilter,
   HiOutlineDownload, HiOutlineExclamationCircle,
   HiOutlineRefresh, HiOutlineShieldCheck, HiOutlineUser,
-  HiOutlineChevronLeft, HiOutlineChevronRight, HiOutlineX
+  HiOutlineChevronLeft, HiOutlineChevronRight, HiOutlineX,
+  HiOutlineExternalLink
 } from 'react-icons/hi';
+import { useNavigate } from 'react-router-dom';
 import { supabase, SUPABASE_READY } from '../../config/supabase';
 import { toast } from 'react-toastify';
 
@@ -45,6 +47,7 @@ const ACCION_CONFIG = {
 const PAGE_SIZE = 20;
 
 const VisorAuditoria = () => {
+  const navigate = useNavigate();
   const [logs, setLogs]         = useState([]);
   const [loading, setLoading]   = useState(false);
   const [total, setTotal]       = useState(0);
@@ -129,6 +132,27 @@ const VisorAuditoria = () => {
 
   const getAccionConfig = (accion) =>
     ACCION_CONFIG[accion] || { color: 'bg-gray-100 text-gray-600', label: accion?.replace(/_/g, ' ') || '-' };
+
+  const handleVerCaso = (entidad, id) => {
+    if (!id) return;
+    switch (entidad?.toUpperCase()) {
+      case 'RETENCION':
+        navigate(`/retenciones/${id}`);
+        break;
+      case 'DEPOSITO':
+        navigate(`/depositos/${id}`);
+        break;
+      case 'CAUSA':
+        navigate(`/judicial/causas/${id}`);
+        break;
+      case 'PERFIL':
+      case 'USUARIO':
+        navigate(`/admin/usuarios`);
+        break;
+      default:
+        toast.info('No hay una vista específica para este tipo de registro.');
+    }
+  };
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
@@ -415,14 +439,16 @@ const VisorAuditoria = () => {
                 )}
               </div>
 
-              {selectedLog.detalle && (
-                <div>
-                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 px-1">Payload / Detalles Técnicos</p>
-                  <div className="bg-gray-900 rounded-2xl p-4 overflow-x-auto">
-                    <pre className="text-[11px] text-green-400 font-mono leading-relaxed">
-                      {JSON.stringify(selectedLog.detalle, null, 2)}
-                    </pre>
-                  </div>
+              {/* Botón para ir al caso */}
+              {selectedLog.entidad_id && (
+                <div className="pt-4 border-t border-gray-100 flex justify-end">
+                  <button
+                    onClick={() => handleVerCaso(selectedLog.entidad, selectedLog.entidad_id)}
+                    className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-colors shadow-sm"
+                  >
+                    Ver detalles del {selectedLog.entidad?.toLowerCase() || 'registro'}
+                    <HiOutlineExternalLink className="w-5 h-5" />
+                  </button>
                 </div>
               )}
             </div>
