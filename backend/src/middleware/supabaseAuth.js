@@ -118,6 +118,15 @@ export const authenticate = async (req, res, next) => {
       throw new AppError('Usuario inactivo o suspendido', 403, 'USER_INACTIVE');
     }
 
+    // --- Verificación de Modo Mantenimiento ---
+    if (usuario.rol !== 'admin') {
+      const mantenimientoConfig = await db.Configuracion.findOne({ where: { clave: 'MODO_MANTENIMIENTO' } });
+      if (mantenimientoConfig && mantenimientoConfig.valor === 'true') {
+        logger.warn(`Acceso bloqueado por mantenimiento para usuario: ${usuario.email}`);
+        throw new AppError('El sistema se encuentra en modo mantenimiento. Vuelve a intentar más tarde.', 503, 'MAINTENANCE_MODE');
+      }
+    }
+
     setReqUser(req, usuario);
     next();
   } catch (error) {

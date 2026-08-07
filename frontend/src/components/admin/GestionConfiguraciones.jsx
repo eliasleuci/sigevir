@@ -4,7 +4,11 @@ import {
   HiOutlineServer, 
   HiOutlineCurrencyDollar, 
   HiOutlineExclamationCircle,
-  HiOutlineSave
+  HiOutlineSave,
+  HiOutlinePlus,
+  HiOutlinePencil,
+  HiOutlineTrash,
+  HiOutlineX
 } from 'react-icons/hi';
 import { toast } from 'react-toastify';
 import apiClient from '../../services/apiClient';
@@ -18,6 +22,17 @@ const GestionConfiguraciones = () => {
   // Estado local para los valores que el usuario está editando
   const [formValues, setFormValues] = useState({});
 
+  // Estado del Modal de Creación/Edición
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingConfig, setEditingConfig] = useState(null); // null = Crear
+  const [modalData, setModalData] = useState({
+    clave: '',
+    valor: '',
+    descripcion: '',
+    categoria: '',
+    tipo: 'string'
+  });
+
   const fetchConfiguraciones = async () => {
     setLoading(true);
     try {
@@ -25,7 +40,6 @@ const GestionConfiguraciones = () => {
       const data = response.data?.data || response.data || [];
       setConfiguraciones(data);
       
-      // Inicializar el estado de formValues
       const initialValues = {};
       data.forEach(conf => {
         initialValues[conf.clave] = conf.tipo === 'boolean' ? conf.valor === 'true' : conf.valor;
@@ -50,7 +64,6 @@ const GestionConfiguraciones = () => {
   const handleSave = async () => {
     setSaving(true);
     try {
-      // Formatear payload
       const payload = Object.entries(formValues).map(([clave, valor]) => ({
         clave,
         valor: String(valor)
@@ -59,7 +72,6 @@ const GestionConfiguraciones = () => {
       await apiClient.put('/configuraciones', { configuraciones: payload });
       toast.success('Configuraciones guardadas correctamente');
       
-      // Recargar para tener los datos frescos
       await fetchConfiguraciones();
     } catch (error) {
       toast.error('Error al guardar configuraciones');
@@ -69,8 +81,51 @@ const GestionConfiguraciones = () => {
     }
   };
 
+  // --- Lógica del CRUD (Modal) ---
+  const openCreateModal = () => {
+    setEditingConfig(null);
+    setModalData({ clave: '', valor: '', descripcion: '', categoria: activeCategory, tipo: 'string' });
+    setIsModalOpen(true);
+  };
+
+  const openEditModal = (config) => {
+    setEditingConfig(config);
+    setModalData({ ...config });
+    setIsModalOpen(true);
+  };
+
+  const handleDelete = async (id, clave) => {
+    if (!window.confirm(`¿Estás seguro de eliminar la configuración '${clave}'? Esto podría afectar el funcionamiento del sistema.`)) return;
+    try {
+      await apiClient.delete(`/configuraciones/${id}`);
+      toast.success('Configuración eliminada');
+      fetchConfiguraciones();
+    } catch (error) {
+      toast.error('Error al eliminar');
+    }
+  };
+
+  const handleModalSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      if (editingConfig) {
+        await apiClient.put(`/configuraciones/${editingConfig.id}`, modalData);
+        toast.success('Estructura actualizada');
+      } else {
+        await apiClient.post('/configuraciones', modalData);
+        toast.success('Configuración creada');
+      }
+      setIsModalOpen(false);
+      fetchConfiguraciones();
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Error al procesar la solicitud');
+    }
+  };
+
   // Agrupar configuraciones por categoría
   const categorias = [...new Set(configuraciones.map(c => c.categoria))];
+  // Asegurar que siempre exista al menos la activa o GENERAL
+  if (!categorias.includes(activeCategory)) categorias.push(activeCategory);
   
   const ICONS = {
     GENERAL: HiOutlineServer,
@@ -98,18 +153,27 @@ const GestionConfiguraciones = () => {
           </div>
         </div>
         
-        <button 
-          onClick={handleSave}
-          disabled={saving || loading}
-          className="relative z-10 flex items-center gap-2 px-8 py-4 bg-gray-900 text-white rounded-2xl font-black shadow-xl hover:bg-black hover:-translate-y-1 hover:shadow-2xl transition-all disabled:opacity-50 disabled:transform-none"
-        >
-          {saving ? (
-            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-          ) : (
-            <HiOutlineSave className="w-6 h-6" />
-          )}
-          Guardar Cambios
-        </button>
+        <div className="relative z-10 flex gap-4">
+          <button 
+            onClick={openCreateModal}
+            className="flex items-center gap-2 px-6 py-4 bg-white text-blue-600 border border-blue-100 rounded-2xl font-black shadow-sm hover:bg-blue-50 transition-all"
+          >
+            <HiOutlinePlus className="w-5 h-5" />
+            Nueva Opción
+          </button>
+          <button 
+            onClick={handleSave}
+            disabled={saving || loading}
+            className="flex items-center gap-2 px-8 py-4 bg-gray-900 text-white rounded-2xl font-black shadow-xl hover:bg-black hover:-translate-y-1 hover:shadow-2xl transition-all disabled:opacity-50 disabled:transform-none"
+          >
+            {saving ? (
+              <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            ) : (
+              <HiOutlineSave className="w-6 h-6" />
+            )}
+            Guardar Cambios
+          </button>
+        </div>
 
         {/* Decoración */}
         <div className="absolute -right-20 -bottom-20 w-64 h-64 bg-blue-50/50 rounded-full blur-3xl pointer-events-none" />
@@ -151,14 +215,24 @@ const GestionConfiguraciones = () => {
               {activeCategory.replace(/_/g, ' ')}
             </h4>
             
-            <div className="space-y-8">
+            <div className="space-y-10">
               {currentCategoryConfigs.map(config => (
-                <div key={config.clave} className="flex flex-col md:flex-row md:items-start gap-4 md:gap-8 group">
+                <div key={config.clave} className="flex flex-col md:flex-row md:items-start gap-4 md:gap-8 group p-4 -mx-4 rounded-2xl hover:bg-gray-50 transition-colors relative">
                   
                   {/* Descripcion / Label */}
                   <div className="md:w-1/2">
-                    <label className="block text-sm font-black text-gray-900 uppercase tracking-wider mb-2">
+                    <label className="flex items-center gap-3 text-sm font-black text-gray-900 uppercase tracking-wider mb-2">
                       {config.clave.replace(/_/g, ' ')}
+                      
+                      {/* Botones de edición ocultos hasta hover */}
+                      <div className="hidden group-hover:flex items-center gap-1">
+                        <button onClick={() => openEditModal(config)} className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Editar Estructura">
+                          <HiOutlinePencil className="w-4 h-4" />
+                        </button>
+                        <button onClick={() => handleDelete(config.id, config.clave)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Eliminar Opción">
+                          <HiOutlineTrash className="w-4 h-4" />
+                        </button>
+                      </div>
                     </label>
                     <p className="text-sm text-gray-500 font-medium leading-relaxed">
                       {config.descripcion}
@@ -191,7 +265,7 @@ const GestionConfiguraciones = () => {
                           type="number"
                           value={formValues[config.clave] ?? ''}
                           onChange={(e) => handleInputChange(config.clave, e.target.value)}
-                          className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-lg font-black text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all hover:bg-white"
+                          className="w-full pl-12 pr-4 py-3 bg-white border border-gray-200 rounded-xl text-lg font-black text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all shadow-sm"
                         />
                       </div>
                     ) : (
@@ -200,7 +274,7 @@ const GestionConfiguraciones = () => {
                           type="text"
                           value={formValues[config.clave] ?? ''}
                           onChange={(e) => handleInputChange(config.clave, e.target.value)}
-                          className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-lg font-bold text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all hover:bg-white"
+                          className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-lg font-bold text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all shadow-sm"
                         />
                       </div>
                     )}
@@ -210,9 +284,111 @@ const GestionConfiguraciones = () => {
               ))}
               
               {currentCategoryConfigs.length === 0 && (
-                <p className="text-gray-400 font-medium italic">No hay configuraciones para esta categoría.</p>
+                <div className="text-center py-10">
+                  <p className="text-gray-400 font-medium italic mb-4">No hay configuraciones para esta categoría.</p>
+                  <button onClick={openCreateModal} className="text-blue-600 font-bold hover:underline">Crear la primera configuración</button>
+                </div>
               )}
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Crear / Editar Configuración */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/40 backdrop-blur-sm">
+          <div className="bg-white rounded-[32px] shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+              <h3 className="text-lg font-black text-gray-900">
+                {editingConfig ? 'Editar Configuración' : 'Nueva Configuración'}
+              </h3>
+              <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600 transition-colors">
+                <HiOutlineX className="w-6 h-6" />
+              </button>
+            </div>
+            
+            <form onSubmit={handleModalSubmit} className="p-6 space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Clave Única</label>
+                <input
+                  type="text"
+                  required
+                  disabled={!!editingConfig}
+                  value={modalData.clave}
+                  onChange={e => setModalData({...modalData, clave: e.target.value.toUpperCase().replace(/\s+/g, '_')})}
+                  placeholder="EJEMPLO_VALOR"
+                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-blue-500 outline-none disabled:opacity-50"
+                />
+              </div>
+
+              {!editingConfig && (
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Valor Inicial</label>
+                  <input
+                    type="text"
+                    required
+                    value={modalData.valor}
+                    onChange={e => setModalData({...modalData, valor: e.target.value})}
+                    placeholder="Valor por defecto..."
+                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-blue-500 outline-none"
+                  />
+                </div>
+              )}
+
+              <div>
+                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Descripción Corta</label>
+                <input
+                  type="text"
+                  required
+                  value={modalData.descripcion}
+                  onChange={e => setModalData({...modalData, descripcion: e.target.value})}
+                  placeholder="¿Para qué sirve esto?"
+                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-blue-500 outline-none"
+                />
+              </div>
+
+              <div className="flex gap-4">
+                <div className="flex-1">
+                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Categoría</label>
+                  <input
+                    type="text"
+                    required
+                    value={modalData.categoria}
+                    onChange={e => setModalData({...modalData, categoria: e.target.value.toUpperCase()})}
+                    placeholder="GENERAL, VALORES..."
+                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-blue-500 outline-none"
+                  />
+                </div>
+                <div className="flex-1">
+                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Tipo de Dato</label>
+                  <select
+                    value={modalData.tipo}
+                    onChange={e => setModalData({...modalData, tipo: e.target.value})}
+                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-blue-500 outline-none"
+                  >
+                    <option value="string">Texto</option>
+                    <option value="number">Número</option>
+                    <option value="boolean">Interruptor (Sí/No)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="pt-4 flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => setIsModalOpen(false)}
+                  className="flex-1 px-4 py-3 bg-gray-100 text-gray-600 rounded-xl font-bold hover:bg-gray-200 transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-colors shadow-lg shadow-blue-200"
+                >
+                  {editingConfig ? 'Guardar Cambios' : 'Crear Opción'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

@@ -18,4 +18,13 @@ router.get('/:clave', configuracionesController.getByClave);
 // Actualizar configuraciones en bloque
 router.put('/', auditLog('MODIFICACION', 'CONFIGURACION'), configuracionesController.updateMultiple);
 
+// Crear nueva configuración
+router.post('/', auditLog('CREACION', 'CONFIGURACION'), configuracionesController.create);
+
+// Modificar estructura de una configuración existente
+router.put('/:id', auditLog('MODIFICACION', 'CONFIGURACION'), configuracionesController.update);
+
+// Eliminar configuración
+router.delete('/:id', auditLog('ELIMINACION', 'CONFIGURACION'), configuracionesController.delete);
+
 export default router;

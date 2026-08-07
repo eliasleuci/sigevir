@@ -76,6 +76,78 @@ class ConfiguracionesController {
       }
     }
   }
+
+  // Crear nueva configuración
+  async create(req, res) {
+    try {
+      const { clave, valor, descripcion, categoria, tipo } = req.body;
+      
+      if (!clave || !valor) {
+        return res.status(400).json({ success: false, message: 'Clave y valor son requeridos' });
+      }
+
+      const existingConfig = await db.Configuracion.findOne({ where: { clave: clave.toUpperCase() } });
+      if (existingConfig) {
+        return res.status(400).json({ success: false, message: 'La clave ya existe' });
+      }
+
+      const newConfig = await db.Configuracion.create({
+        clave: clave.toUpperCase(),
+        valor: String(valor),
+        descripcion,
+        categoria: categoria ? categoria.toUpperCase() : 'GENERAL',
+        tipo: tipo || 'string'
+      });
+
+      res.status(201).json({ success: true, message: 'Configuración creada', data: newConfig });
+    } catch (error) {
+      logger.error(`Error al crear configuración: ${error.message}`);
+      res.status(500).json({ success: false, message: 'Error interno del servidor' });
+    }
+  }
+
+  // Modificar estructura de una configuración existente (todo menos la clave)
+  async update(req, res) {
+    try {
+      const { id } = req.params;
+      const { valor, descripcion, categoria, tipo } = req.body;
+
+      const config = await db.Configuracion.findByPk(id);
+      if (!config) {
+        return res.status(404).json({ success: false, message: 'Configuración no encontrada' });
+      }
+
+      await config.update({
+        valor: valor !== undefined ? String(valor) : config.valor,
+        descripcion: descripcion !== undefined ? descripcion : config.descripcion,
+        categoria: categoria ? categoria.toUpperCase() : config.categoria,
+        tipo: tipo || config.tipo
+      });
+
+      res.json({ success: true, message: 'Configuración actualizada', data: config });
+    } catch (error) {
+      logger.error(`Error al actualizar configuración: ${error.message}`);
+      res.status(500).json({ success: false, message: 'Error interno del servidor' });
+    }
+  }
+
+  // Eliminar configuración
+  async delete(req, res) {
+    try {
+      const { id } = req.params;
+      
+      const config = await db.Configuracion.findByPk(id);
+      if (!config) {
+        return res.status(404).json({ success: false, message: 'Configuración no encontrada' });
+      }
+
+      await config.destroy();
+      res.json({ success: true, message: 'Configuración eliminada' });
+    } catch (error) {
+      logger.error(`Error al eliminar configuración: ${error.message}`);
+      res.status(500).json({ success: false, message: 'Error interno del servidor' });
+    }
+  }
 }
 
 export default new ConfiguracionesController();
