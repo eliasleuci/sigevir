@@ -2,6 +2,7 @@ import { supabaseAdmin, isSupabaseConfigured } from '../config/supabase.js';
 import db from '../models/index.js';
 import { AppError } from './errorHandler.js';
 import logger from '../utils/logger.js';
+import { notificarUsuarioPendiente } from '../services/notificacionService.js';
 
 const { Usuario } = db;
 
@@ -94,20 +95,25 @@ export const authenticate = async (req, res, next) => {
           id: supabaseUser.id,
           email: supabaseUser.email,
           nombre_completo: metadata.nombre_completo || supabaseUser.email.split('@')[0],
-          rol: metadata.rol || 'admin',
+          rol: metadata.rol || 'agente_campo',
           institucion_id: metadata.institucion_id || '3e23f6e0-eeeb-477a-99a5-ecb93e49a074',
-          activo: true,
+          activo: false,
           password_hash: 'NOPASSWORD_SUPABASE'
         });
+
+        notificarUsuarioPendiente(
+          supabaseUser.email,
+          usuario.nombre_completo
+        ).catch(err => logger.error(`Error notificando usuario pendiente: ${err.message}`));
       } catch (err) {
         logger.error('Error creando usuario en BD local, mockeando en memoria: ' + err.message);
         usuario = {
           id: supabaseUser.id,
           email: supabaseUser.email,
           nombre_completo: metadata.nombre_completo || supabaseUser.email.split('@')[0],
-          rol: metadata.rol || 'admin',
+          rol: metadata.rol || 'agente_campo',
           institucion_id: metadata.institucion_id || '3e23f6e0-eeeb-477a-99a5-ecb93e49a074',
-          activo: true
+          activo: false
         };
       }
       }
