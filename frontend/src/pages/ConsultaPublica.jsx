@@ -99,7 +99,7 @@ const ConsultaPublica = () => {
                 }`}>
                   ESTADO: {resultado.estado_actual.replace(/_/g, ' ')}
                 </span>
-                <h3 className="mt-4 text-3xl font-black text-gray-900">{resultado.dominio}</h3>
+                <h3 className="mt-4 text-3xl font-black text-gray-900 uppercase tracking-widest">{resultado.dominio}</h3>
                 <p className="text-gray-500 font-bold mt-1 uppercase">{resultado.marca} {resultado.modelo}</p>
               </div>
 
