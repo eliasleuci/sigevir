@@ -12,8 +12,12 @@ import depositosDisponiblesRoutes from './depositosDisponibles.routes.js';
 import internalRoutes from './internal.routes.js';
 import institucionesRoutes from './instituciones.routes.js';
 import configuracionesRoutes from './configuraciones.routes.js';
+import publicRoutes from './public.routes.js';
 
 const router = Router();
+
+// Rutas públicas
+router.use('/public', publicRoutes);
 
 // Rutas de autenticación
 router.use('/auth', authRoutes);

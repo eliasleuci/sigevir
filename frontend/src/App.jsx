@@ -26,6 +26,7 @@ import Unauthorized from './pages/Unauthorized.jsx';
 import PendingPage from './pages/PendingPage.jsx';
 import Perfil from './pages/Perfil.jsx';
 import VerifyOTP from './pages/VerifyOTP.jsx';
+import ConsultaPublica from './pages/ConsultaPublica.jsx';
 
 const ROLES_ADMIN = ['admin'];
 const ROLES_RETENCION = ['admin', 'agente_campo'];
@@ -47,6 +48,7 @@ function App() {
             <Route path="/unauthorized" element={<Unauthorized />} />
             <Route path="/pending" element={<PendingPage />} />
             <Route path="/verify-otp" element={<VerifyOTP />} />
+            <Route path="/consulta" element={<ConsultaPublica />} />
 
             <Route element={<ProtectedRoute />}>
               <Route element={<MainLayout />}>

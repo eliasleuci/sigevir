@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { useAuth } from '../hooks/useAuth';
 import { useNavigate, Link } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
+import { HiOutlineSearch } from 'react-icons/hi';
 
 const loginSchema = z.object({
   email: z.string().email('Email invalido'),
@@ -148,6 +149,20 @@ const Login = () => {
               <Link to="/register" className="text-blue-600 font-semibold hover:text-blue-700">Registrarse</Link>
             </p>
           </div>
+        </div>
+
+        {/* Acceso para Ciudadanos */}
+        <div className="mt-8 text-center">
+          <p className="text-sm font-medium text-gray-500 mb-3">¿Te retuvieron el vehículo?</p>
+          <Link 
+            to="/consulta" 
+            className="inline-flex items-center gap-3 px-8 py-4 bg-white border border-gray-200 shadow-lg shadow-gray-200/50 text-gray-900 rounded-2xl font-black hover:bg-gray-50 hover:scale-105 transition-all"
+          >
+            <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center">
+              <HiOutlineSearch className="w-5 h-5" />
+            </div>
+            Consultar estado de mi vehículo
+          </Link>
         </div>
       </div>
     </div>
