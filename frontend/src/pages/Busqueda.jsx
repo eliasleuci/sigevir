@@ -75,24 +75,24 @@ const Busqueda = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto py-8 px-4 space-y-12">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div className="flex items-center gap-4">
-          <div className="w-14 h-14 bg-gray-900 text-white rounded-3xl flex items-center justify-center shadow-2xl shadow-gray-200">
-            <HiOutlineSearchCircle className="w-10 h-10" />
+    <div className="max-w-7xl mx-auto py-4 md:py-8 px-2 md:px-4 space-y-6 md:space-y-12">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6">
+        <div className="flex items-center gap-3 md:gap-4">
+          <div className="w-12 h-12 md:w-14 md:h-14 shrink-0 bg-gray-900 text-white rounded-2xl md:rounded-3xl flex items-center justify-center shadow-2xl shadow-gray-200">
+            <HiOutlineSearchCircle className="w-8 h-8 md:w-10 md:h-10" />
           </div>
           <div>
-            <h1 className="text-4xl font-black text-gray-900 tracking-tight leading-none mb-2">Buscador Inteligente</h1>
-            <p className="text-gray-500 font-medium">Localización de vehículos en todo el sistema jurisdiccional.</p>
+            <h1 className="text-2xl md:text-4xl font-black text-gray-900 tracking-tight leading-none mb-1 md:mb-2">Buscador Inteligente</h1>
+            <p className="text-xs md:text-sm text-gray-500 font-medium leading-relaxed">Localización de vehículos en todo el sistema jurisdiccional.</p>
           </div>
         </div>
 
         {view !== 'form' && (
           <button 
             onClick={() => setView('form')}
-            className="flex items-center gap-2 px-6 md:px-8 py-4 bg-white border border-gray-200 text-gray-600 rounded-2xl font-bold hover:bg-gray-50 transition-all shadow-xl shadow-gray-100 print:hidden"
+            className="w-full md:w-auto flex justify-center items-center gap-2 px-4 md:px-8 py-3 md:py-4 bg-white border border-gray-200 text-gray-600 rounded-xl md:rounded-2xl text-sm md:text-base font-bold hover:bg-gray-50 transition-all shadow-lg shadow-gray-100 print:hidden"
           >
-            <HiOutlineArrowLeft className="w-6 h-6" />
+            <HiOutlineArrowLeft className="w-5 h-5 md:w-6 md:h-6" />
             Nueva Búsqueda Avanzada
           </button>
         )}
@@ -114,12 +114,12 @@ const Busqueda = () => {
       )}
 
       {view === 'detail' && selectedVehiculo && (
-        <div className="animate-in zoom-in duration-500 space-y-6">
+        <div className="animate-in zoom-in duration-500 space-y-4 md:space-y-6">
           <button 
             onClick={() => setView('results')}
-            className="flex items-center gap-2 text-gray-400 hover:text-gray-900 font-bold transition-all px-4 py-2 bg-gray-50 rounded-xl"
+            className="w-full md:w-auto flex justify-center md:justify-start items-center gap-2 text-gray-500 hover:text-gray-900 font-bold transition-all px-4 py-3 md:py-2 bg-gray-50 rounded-xl text-sm"
           >
-            <HiOutlineArrowLeft className="w-5 h-5" />
+            <HiOutlineArrowLeft className="w-4 h-4 md:w-5 md:h-5" />
             Volver a los resultados
           </button>
           <HistorialCompleto vehiculo={selectedVehiculo} onEmitirResolucion={handleEmitirResolucion} />
