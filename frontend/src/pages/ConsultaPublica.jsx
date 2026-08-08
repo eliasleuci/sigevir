@@ -40,7 +40,7 @@ const ConsultaPublica = () => {
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 font-sans relative overflow-hidden flex flex-col justify-center">
       {/* Marca de agua de fondo */}
       <div 
-        className="absolute inset-0 pointer-events-none opacity-[0.03] z-0"
+        className="absolute inset-0 pointer-events-none opacity-10 z-0"
         style={{
           backgroundImage: 'url(/icono-de-la-app.jpeg)',
           backgroundSize: '300px',
