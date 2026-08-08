@@ -15,7 +15,6 @@ const ConfirmarIngreso = () => {
     if (!decodedText) return;
     setLoading(true);
     try {
-      // Limpiar texto decodificado (si viene una URL, extraer el ID o expediente final)
       let cleanText = decodedText.trim();
       if (cleanText.includes('/')) {
         const parts = cleanText.split('/');
@@ -32,15 +31,16 @@ const ConfirmarIngreso = () => {
           return;
         }
       } catch (_) {
-        // Fallback a búsqueda avanzada si no es un UUID directo
+        // Fallback a búsqueda avanzada
       }
 
-      // 2. Buscar por número de expediente o patente
+      // 2. Buscar por número de expediente
       const searchRes = await apiClient.post(`/busqueda/avanzada`, { numero_expediente: cleanText });
       const resultados = searchRes.data?.resultados || searchRes.data?.data?.resultados || [];
 
       if (resultados.length > 0) {
-        setVehiculo(resultados[0]);
+        const fullRes = await apiClient.get(`/retenciones/${resultados[0].id}`);
+        setVehiculo(fullRes.data?.data || resultados[0]);
         setStep(2);
         toast.success(`Vehículo detectado: ${resultados[0].dominio}`);
       } else {
@@ -48,7 +48,8 @@ const ConfirmarIngreso = () => {
         const searchDom = await apiClient.post(`/busqueda/avanzada`, { dominio: cleanText });
         const domResultados = searchDom.data?.resultados || searchDom.data?.data?.resultados || [];
         if (domResultados.length > 0) {
-          setVehiculo(domResultados[0]);
+          const fullRes = await apiClient.get(`/retenciones/${domResultados[0].id}`);
+          setVehiculo(fullRes.data?.data || domResultados[0]);
           setStep(2);
           toast.success(`Vehículo detectado: ${domResultados[0].dominio}`);
         } else {
@@ -72,7 +73,8 @@ const ConfirmarIngreso = () => {
       const response = await apiClient.post(`/busqueda/avanzada`, { dominio: manualDominio });
       const resultados = response.data?.resultados || response.data?.data?.resultados || [];
       if (resultados.length > 0) {
-        setVehiculo(resultados[0]);
+        const fullRes = await apiClient.get(`/retenciones/${resultados[0].id}`);
+        setVehiculo(fullRes.data?.data || resultados[0]);
         setStep(2);
       } else {
         toast.error('No se encontró ningún vehículo con esa patente.');

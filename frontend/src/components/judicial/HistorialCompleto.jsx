@@ -34,27 +34,27 @@ const HistorialCompleto = ({ vehiculo, onEmitirResolucion }) => {
   ];
 
   return (
-    <div className="bg-white rounded-[40px] border border-gray-100 shadow-2xl overflow-hidden flex flex-col min-h-[600px] animate-in zoom-in duration-500">
+    <div className="bg-white rounded-2xl md:rounded-[40px] border border-gray-100 shadow-2xl overflow-hidden flex flex-col min-h-[600px] animate-in zoom-in duration-500">
       {/* Header del Expediente */}
-      <div className="p-8 bg-gray-900 text-white flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-        <div className="flex items-center gap-4">
-          <div className="w-16 h-16 bg-blue-600 rounded-3xl flex items-center justify-center text-3xl font-black shadow-2xl shadow-blue-500/20">
+      <div className="p-5 md:p-8 bg-gray-900 text-white flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-6">
+        <div className="flex items-center gap-3 md:gap-4 w-full md:w-auto">
+          <div className="w-14 h-14 md:w-16 md:h-16 bg-blue-600 rounded-2xl md:rounded-3xl flex items-center justify-center text-2xl md:text-3xl font-black shadow-2xl shadow-blue-500/20 shrink-0">
             {vehiculo.dominio?.charAt(0)}
           </div>
-          <div>
-            <h2 className="text-3xl font-black tracking-tighter uppercase">{vehiculo.dominio}</h2>
-            <div className="flex items-center gap-3 mt-1">
-              <span className="text-xs font-bold text-gray-400 uppercase tracking-widest bg-white/10 px-2 py-0.5 rounded">
+          <div className="flex-1 min-w-0">
+            <h2 className="text-2xl md:text-3xl font-black tracking-tighter uppercase truncate">{vehiculo.dominio}</h2>
+            <div className="flex flex-wrap items-center gap-2 mt-1">
+              <span className="text-[10px] md:text-xs font-bold text-gray-400 uppercase tracking-widest bg-white/10 px-2 py-0.5 rounded whitespace-nowrap">
                 Expediente {vehiculo.nro_expediente || vehiculo.numero_expediente}
               </span>
-              <span className="text-xs font-bold text-blue-400 uppercase tracking-widest">{vehiculo.marca} {vehiculo.modelo}</span>
+              <span className="text-[10px] md:text-xs font-bold text-blue-400 uppercase tracking-widest whitespace-nowrap">{vehiculo.marca} {vehiculo.modelo}</span>
             </div>
           </div>
         </div>
 
-        <div className="flex flex-col items-end">
-          <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Estado Actual</p>
-          <span className={`px-6 py-2 rounded-2xl text-xs font-black uppercase tracking-widest border shadow-lg ${
+        <div className="flex flex-row md:flex-col items-center md:items-end justify-between w-full md:w-auto mt-2 md:mt-0 pt-4 md:pt-0 border-t border-white/10 md:border-0">
+          <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-0 md:mb-1">Estado Actual</p>
+          <span className={`px-4 md:px-6 py-1.5 md:py-2 rounded-xl md:rounded-2xl text-[10px] md:text-xs font-black uppercase tracking-widest border shadow-lg ${
             vehiculo.estado_actual === 'LIBERADO' ? 'bg-green-600 border-green-500 text-white shadow-green-200/20' : 
             vehiculo.estado_actual === 'RESOLUCION_PENDIENTE' ? 'bg-amber-500 border-amber-400 text-white shadow-amber-200/20' :
             'bg-blue-600 border-blue-500 text-white shadow-blue-200/20'
@@ -65,21 +65,19 @@ const HistorialCompleto = ({ vehiculo, onEmitirResolucion }) => {
       </div>
 
       {/* Tabs de Navegación */}
-      <div className="px-4 md:px-8 bg-gray-50 border-b border-gray-200 overflow-x-auto no-scrollbar relative">
-        {/* Hint visual para el scroll en mobile */}
-        <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-gray-50 to-transparent pointer-events-none md:hidden"></div>
-        <div className="flex gap-3 py-4 pr-8">
+      <div className="px-2 md:px-8 bg-gray-50 border-b border-gray-200 overflow-x-auto no-scrollbar relative">
+        <div className="flex gap-2 md:gap-3 py-3 md:py-4 pr-4 md:pr-8">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-6 py-3 rounded-full text-sm font-bold transition-all whitespace-nowrap border shadow-sm ${
+              className={`flex items-center gap-1.5 md:gap-2 px-4 md:px-6 py-2 md:py-3 rounded-full text-xs md:text-sm font-bold transition-all whitespace-nowrap border shadow-sm ${
                 activeTab === tab.id 
                 ? 'bg-blue-600 border-blue-600 text-white shadow-blue-200' 
                 : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-900'
               }`}
             >
-              <tab.icon className={`w-5 h-5 ${activeTab === tab.id ? 'text-white' : 'text-gray-400'}`} />
+              <tab.icon className={`w-4 h-4 md:w-5 md:h-5 ${activeTab === tab.id ? 'text-white' : 'text-gray-400'}`} />
               {tab.name}
             </button>
           ))}
@@ -87,7 +85,7 @@ const HistorialCompleto = ({ vehiculo, onEmitirResolucion }) => {
       </div>
 
       {/* Contenido de Tabs */}
-      <div className="flex-1 p-8 overflow-y-auto max-h-[70vh]">
+      <div className="flex-1 p-4 md:p-8 overflow-y-auto max-h-[70vh]">
         
         {/* TAB 1: VEHÍCULO */}
         {activeTab === 'vehiculo' && (
@@ -145,19 +143,19 @@ const HistorialCompleto = ({ vehiculo, onEmitirResolucion }) => {
         {activeTab === 'retencion' && (
           <div className="space-y-8 animate-in fade-in duration-300">
             {/* Lugar y Motivo */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="p-8 bg-blue-50 rounded-[40px] border border-blue-100">
-                <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-4">Lugar del Hecho</p>
-                <div className="flex items-center gap-3">
-                  <HiOutlineLocationMarker className="w-10 h-10 text-blue-400 flex-shrink-0" />
-                  <p className="text-xl font-bold text-blue-900">{vehiculo.calle_direccion || vehiculo.lugar_retencion || 'No especificado'}</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
+              <div className="p-5 md:p-8 bg-blue-50 rounded-2xl md:rounded-[40px] border border-blue-100">
+                <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-3 md:mb-4">Lugar del Hecho</p>
+                <div className="flex items-start md:items-center gap-2 md:gap-3">
+                  <HiOutlineLocationMarker className="w-8 h-8 md:w-10 md:h-10 text-blue-400 flex-shrink-0 mt-0.5 md:mt-0" />
+                  <p className="text-lg md:text-xl font-bold text-blue-900">{vehiculo.calle_direccion || vehiculo.lugar_retencion || 'No especificado'}</p>
                 </div>
-                <p className="mt-4 text-sm text-blue-700 font-medium opacity-80">Fecha de Retención: {vehiculo.fecha_hora ? new Date(vehiculo.fecha_hora).toLocaleString('es-AR') : 'N/D'}</p>
+                <p className="mt-3 md:mt-4 text-xs md:text-sm text-blue-700 font-medium opacity-80">Fecha de Retención: {vehiculo.fecha_hora ? new Date(vehiculo.fecha_hora).toLocaleString('es-AR') : 'N/D'}</p>
               </div>
 
-              <div className="p-8 bg-gray-50 rounded-[40px] border border-gray-100">
-                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">Motivo Legal</p>
-                <p className="text-lg font-bold text-gray-700 leading-relaxed italic">
+              <div className="p-5 md:p-8 bg-gray-50 rounded-2xl md:rounded-[40px] border border-gray-100">
+                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 md:mb-4">Motivo Legal</p>
+                <p className="text-base md:text-lg font-bold text-gray-700 leading-relaxed italic">
                   "{vehiculo.motivo_retencion}"
                 </p>
               </div>
@@ -415,12 +413,12 @@ const HistorialCompleto = ({ vehiculo, onEmitirResolucion }) => {
 
       {/* Footer Actions */}
       {!vehiculo.resolucion_judicial && (
-        <div className="p-8 bg-gray-50 border-t border-gray-100 flex justify-end">
+        <div className="p-4 md:p-8 bg-gray-50 border-t border-gray-100 flex justify-end">
           <button 
             onClick={onEmitirResolucion}
-            className="flex items-center gap-3 px-10 py-4 bg-blue-600 text-white rounded-2xl font-black shadow-2xl shadow-blue-200 hover:bg-blue-700 transition-all transform active:scale-[0.98]"
+            className="w-full md:w-auto flex items-center justify-center gap-2 md:gap-3 px-6 md:px-10 py-3 md:py-4 bg-blue-600 text-white rounded-xl md:rounded-2xl text-sm md:text-base font-black shadow-xl md:shadow-2xl shadow-blue-200 hover:bg-blue-700 transition-all transform active:scale-[0.98]"
           >
-            <FaGavel className="w-6 h-6" />
+            <FaGavel className="w-5 h-5 md:w-6 md:h-6" />
             Dictar Resolución Judicial
           </button>
         </div>

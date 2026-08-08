@@ -9,14 +9,17 @@ const apiClient = axios.create({
 });
 
 async function getSupabaseToken() {
-  try {
-    if (SUPABASE_READY && supabase) {
-      const { data: { session }, error } = await supabase.auth.getSession();
-      if (session) {
-        return session.access_token;
-      }
+  if (SUPABASE_READY && supabase) {
+    const { data: { session }, error } = await supabase.auth.getSession();
+    if (error) {
+      throw error; // Prevent false 401s on network errors
     }
-    // Fallback: buscar en sigevir_session (mock mode)
+    if (session) {
+      return session.access_token;
+    }
+  }
+  // Fallback: buscar en sigevir_session (mock mode)
+  try {
     const raw = localStorage.getItem('sigevir_session');
     if (!raw) return null;
     const parsed = JSON.parse(raw);
@@ -65,7 +68,7 @@ apiClient.interceptors.response.use(
     if (error.response?.status === 401) {
       try { localStorage.removeItem('sigevir_session'); } catch {}
       if (!window.location.pathname.includes('/login')) {
-        window.location.href = '/login?expired=true';
+        window.dispatchEvent(new CustomEvent('auth-error'));
       }
     }
     return Promise.reject(error);

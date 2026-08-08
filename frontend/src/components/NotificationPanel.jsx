@@ -1,4 +1,6 @@
+import { useNavigate } from 'react-router-dom';
 import { useNotifications } from '../hooks/useNotifications';
+import { useAuth } from '../hooks/useAuth';
 import NotificationItem from './NotificationItem';
 
 const TIPO_CONFIG = {
@@ -12,6 +14,21 @@ const TIPO_CONFIG = {
   DOC_DISPONIBLE:      { emoji: '📄', color: 'blue',   label: 'Documento disponible' },
 };
 
+const getRouteForNotification = (tipo, rol) => {
+  switch (tipo) {
+    case 'NUEVA_RETENCION':
+      return rol === 'deposito' || rol === 'admin' ? '/deposito/ingreso' : '/dashboard';
+    case 'INGRESO_DEPOSITO':
+      return rol === 'fiscal_juez' || rol === 'admin' ? '/judicial/causas' : '/dashboard';
+    case 'RESOLUCION_JUDICIAL':
+      return rol === 'deposito' || rol === 'admin' ? '/deposito/tramites-retiro' : '/dashboard';
+    case 'USUARIO_PENDIENTE':
+      return '/admin';
+    default:
+      return '/dashboard';
+  }
+};
+
 const NotificationPanel = ({ isOpen, onClose }) => {
   const {
     sortedNotifications,
@@ -20,6 +37,9 @@ const NotificationPanel = ({ isOpen, onClose }) => {
     markAsRead,
     isConnected,
   } = useNotifications();
+  
+  const { rol } = useAuth();
+  const navigate = useNavigate();
 
   if (!isOpen) return null;
 
@@ -27,6 +47,14 @@ const NotificationPanel = ({ isOpen, onClose }) => {
     sortedNotifications
       .filter(n => !n.leida_at && !n.read)
       .forEach(n => markAsRead(n.id));
+  };
+
+  const handleNotificationClick = (notif) => {
+    markAsRead(notif.id);
+    confirmNotification(notif.id);
+    const route = getRouteForNotification(notif.tipo, rol);
+    navigate(route);
+    onClose();
   };
 
   return (
@@ -93,10 +121,7 @@ const NotificationPanel = ({ isOpen, onClose }) => {
                   className={`flex items-start gap-3 px-5 py-4 border-b border-gray-50
                     hover:bg-gray-50 transition cursor-pointer
                     ${esNoLeida ? 'bg-blue-50/40' : ''}`}
-                  onClick={() => {
-                    markAsRead(notif.id);
-                    confirmNotification(notif.id);
-                  }}
+                  onClick={() => handleNotificationClick(notif)}
                 >
                   {/* Emoji */}
                   <span className="text-2xl flex-shrink-0 mt-0.5">

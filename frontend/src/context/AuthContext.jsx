@@ -331,6 +331,15 @@ export const AuthProvider = ({ children }) => {
     }
   }, [])
 
+  // ── Escuchar errores de auth (e.g. 401 real desde apiClient) ────────────────
+  useEffect(() => {
+    const handleAuthError = async () => {
+      await logout()
+    }
+    window.addEventListener('auth-error', handleAuthError)
+    return () => window.removeEventListener('auth-error', handleAuthError)
+  }, [logout])
+
   // ── 2FA: ENVIAR CÓDIGO DE VERIFICACIÓN ─────────────────────────────────────
   const sendVerificationCode = useCallback(async (email) => {
     if (!SUPABASE_READY || !supabase) {
