@@ -3,6 +3,7 @@ import FormularioNuevaRetencion from '../components/registro/FormularioNuevaRete
 import CargaFotos from '../components/registro/CargaFotos';
 import PreviewActa from '../components/registro/PreviewActa';
 import MuestraQR from '../components/registro/MuestraQR';
+import SelectorUnidadJudicial from '../components/registro/SelectorUnidadJudicial';
 import apiClient from '../services/apiClient';
 import { CREATE_RETENCION_URL } from '../config/api';
 import { uploadFotos } from '../api/uploadFotos';
@@ -17,16 +18,29 @@ const NuevaRetencion = () => {
   const [formData, setFormData] = useState(null);
   const [fotos, setFotos] = useState([]);
   const [result, setResult] = useState(null);
+  const [isInitializing, setIsInitializing] = useState(true);
 
   useEffect(() => {
     const borrador = localStorage.getItem('sigevir_borrador_retencion');
     if (borrador) {
       try {
-        setFormData(JSON.parse(borrador));
+        const parsed = JSON.parse(borrador);
+        if (Object.keys(parsed).length > 0) {
+          setTimeout(() => {
+            if (window.confirm('Se encontró un registro sin terminar. ¿Deseas recuperar los datos cargados para no tener que escribirlos de nuevo?')) {
+              setFormData(parsed);
+            } else {
+              localStorage.removeItem('sigevir_borrador_retencion');
+            }
+            setIsInitializing(false);
+          }, 100);
+          return;
+        }
       } catch (e) {
         console.error('Error al cargar borrador');
       }
     }
+    setIsInitializing(false);
   }, []);
 
   const handleNextStep = (data) => {
@@ -155,7 +169,7 @@ const NuevaRetencion = () => {
       </div>
 
       <div className="mt-10">
-        {step === 1 && (
+        {step === 1 && !isInitializing && (
           <div className="animate-in fade-in slide-in-from-right-4 duration-300">
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
               <h1 className="text-2xl font-black text-gray-900">Nueva Retención de Vehículo</h1>
@@ -169,8 +183,9 @@ const NuevaRetencion = () => {
               </button>
             </div>
             <FormularioNuevaRetencion 
+              key={formData ? 'with-data' : 'empty'}
               onSubmit={handleNextStep} 
-              initialData={formData} 
+              initialData={formData || {}} 
             />
           </div>
         )}
@@ -263,6 +278,9 @@ const NuevaRetencion = () => {
                   </div>
                   <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
                 </div>
+
+                {/* Nuevo Selector de Unidad Judicial */}
+                <SelectorUnidadJudicial retencionId={result.id} />
               </div>
             </div>
           </div>

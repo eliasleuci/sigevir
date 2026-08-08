@@ -132,7 +132,9 @@ const InventarioVehiculo = ({ tipoVehiculo, value, onChange, readonly = false })
         <HiOutlineDocumentText className="w-6 h-6 text-blue-600" />
         <div>
           <h3 className="font-black text-gray-900">Inventario del Vehículo</h3>
-          <p className="text-xs text-gray-500 font-medium">Opcional. Selecciona las partes presentes y su estado.</p>
+          <p className={`text-sm font-bold ${readonly ? 'text-gray-500' : 'text-red-600'}`}>
+            {readonly ? 'Partes presentes y estado registrado.' : 'Importante: Revisa e indica detalladamente las partes presentes y su estado.'}
+          </p>
         </div>
       </div>
 
@@ -151,8 +153,8 @@ const InventarioVehiculo = ({ tipoVehiculo, value, onChange, readonly = false })
               </button>
 
               {isOpen && (
-                <div className="px-6 pb-6 pt-2 bg-gray-50/50">
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-3">
+                <div className="px-6 pb-6 pt-2 bg-gray-50/50 max-h-[60vh] overflow-y-auto">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
                     {sec.items.map(item => {
                       const itemData = inventario[sec.id]?.[item] || {};
                       return (
@@ -160,15 +162,15 @@ const InventarioVehiculo = ({ tipoVehiculo, value, onChange, readonly = false })
                           
                           {sec.hasBRM ? (
                             // Modo B/R/M (Bueno, Regular, Malo)
-                            <div className="flex justify-between items-center w-full">
-                              <span className="text-xs font-bold text-gray-700 truncate w-1/2" title={item}>{item}</span>
-                              <div className="flex gap-1">
+                            <div className="flex justify-between items-center w-full py-1">
+                              <span className="text-sm font-bold text-gray-700 truncate w-1/2" title={item}>{item}</span>
+                              <div className="flex gap-2">
                                 {['B', 'R', 'M'].map(st => (
                                   <button
                                     key={st}
                                     type="button"
                                     onClick={() => handleStateChange(sec.id, item, 'estado', st)}
-                                    className={`w-7 h-7 rounded text-xs font-bold transition-all ${
+                                    className={`w-9 h-9 rounded text-sm font-bold transition-all ${
                                       itemData.estado === st ? (st === 'B' ? 'bg-green-100 text-green-700' : st === 'R' ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700') : 'bg-gray-100 text-gray-400 hover:bg-gray-200'
                                     }`}
                                   >
@@ -180,15 +182,15 @@ const InventarioVehiculo = ({ tipoVehiculo, value, onChange, readonly = false })
                           ) : (
                             // Modo Normal (Checkbox Presente/Ausente)
                             <>
-                              <label className="flex items-center gap-3 cursor-pointer">
+                              <label className="flex items-center gap-3 py-1 cursor-pointer">
                                 <input
                                   type="checkbox"
                                   disabled={readonly}
                                   checked={itemData.presente || false}
                                   onChange={() => handleCheckboxChange(sec.id, item)}
-                                  className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                                  className="w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
                                 />
-                                <span className={`text-xs font-bold truncate ${itemData.presente ? 'text-gray-900' : 'text-gray-500'}`} title={item}>
+                                <span className={`text-sm font-bold truncate ${itemData.presente ? 'text-gray-900' : 'text-gray-500'}`} title={item}>
                                   {item}
                                 </span>
                               </label>

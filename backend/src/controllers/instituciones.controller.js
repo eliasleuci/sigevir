@@ -12,6 +12,16 @@ class InstitucionesController {
     }
   };
 
+  listarJudiciales = async (req, res, next) => {
+    try {
+      const judiciales = await institucionService.listarInstituciones({ tipo: 'JUDICIAL' });
+      res.status(200).json({ success: true, data: judiciales });
+    } catch (error) {
+      logger.error(`Error al listar unidades judiciales: ${error?.message}`);
+      next(error);
+    }
+  };
+
   obtenerInstitucion = async (req, res, next) => {
     try {
       const institucion = await institucionService.obtenerInstitucion(req.params.id);

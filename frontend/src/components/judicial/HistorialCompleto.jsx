@@ -65,19 +65,21 @@ const HistorialCompleto = ({ vehiculo, onEmitirResolucion }) => {
       </div>
 
       {/* Tabs de Navegación */}
-      <div className="px-8 bg-gray-50/50 border-b border-gray-100 overflow-x-auto no-scrollbar">
-        <div className="flex gap-2 py-4">
+      <div className="px-4 md:px-8 bg-gray-50 border-b border-gray-200 overflow-x-auto no-scrollbar relative">
+        {/* Hint visual para el scroll en mobile */}
+        <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-gray-50 to-transparent pointer-events-none md:hidden"></div>
+        <div className="flex gap-3 py-4 pr-8">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-6 py-3 rounded-2xl text-sm font-bold transition-all whitespace-nowrap ${
+              className={`flex items-center gap-2 px-6 py-3 rounded-full text-sm font-bold transition-all whitespace-nowrap border shadow-sm ${
                 activeTab === tab.id 
-                ? 'bg-white text-blue-600 shadow-md ring-1 ring-gray-100' 
-                : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'
+                ? 'bg-blue-600 border-blue-600 text-white shadow-blue-200' 
+                : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-900'
               }`}
             >
-              <tab.icon className="w-5 h-5" />
+              <tab.icon className={`w-5 h-5 ${activeTab === tab.id ? 'text-white' : 'text-gray-400'}`} />
               {tab.name}
             </button>
           ))}

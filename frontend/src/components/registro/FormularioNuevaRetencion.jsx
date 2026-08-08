@@ -47,6 +47,20 @@ const FormularioNuevaRetencion = ({ onSubmit, loading, initialData = {} }) => {
     }
   }, [formValues]);
 
+  // Prevenir recarga accidental (ej: deslizar hacia abajo en móviles)
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      // Solo mostrar alerta si hay datos ingresados
+      const currentValues = getValues();
+      if (currentValues && currentValues.dominio) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [getValues]);
+
   const handleLocationChange = ({ lat, lng, direccion }) => {
     setCoords({ latitud: lat, longitud: lng });
     setValue('latitud', lat, { shouldValidate: true });

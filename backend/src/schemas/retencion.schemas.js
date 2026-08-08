@@ -2,7 +2,7 @@ import Joi from 'joi';
 
 export const createRetencionSchema = Joi.object({
   dominio: Joi.string().pattern(/^[A-Z]{3}[0-9]{3}$|^[A-Z]{2}[0-9]{3}[A-Z]{2}$/i).required().messages({
-    'string.pattern.base': 'El dominio debe tener formato ARG v·lido (ABC123 o AB123CD)'
+    'string.pattern.base': 'El dominio debe tener formato ARG v√°lido (ABC123 o AB123CD)'
   }),
   marca: Joi.string().required(),
   modelo: Joi.string().required(),
@@ -54,5 +54,6 @@ export const updateRetencionSchema = Joi.object({
   num_sac: Joi.string().allow('', null).optional(),
   titular_nombre: Joi.string().allow('', null).optional(),
   titular_dni: Joi.string().allow('', null).optional(),
-  titular_contacto: Joi.string().allow('', null).optional()
+  titular_contacto: Joi.string().allow('', null).optional(),
+  unidad_judicial_destino_id: Joi.string().uuid().allow(null).optional()
 }).min(1);

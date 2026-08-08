@@ -8,6 +8,8 @@ const router = Router();
 // Todas las rutas requieren autenticación
 router.use(authenticate);
 // Y autorización de administrador
+router.get('/judiciales', institucionesController.listarJudiciales);
+
 router.use(authorize('admin'));
 
 router.get('/', institucionesController.listarInstituciones);

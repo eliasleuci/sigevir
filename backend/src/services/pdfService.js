@@ -166,10 +166,15 @@ class PDFService {
             .dato .valor { font-weight: 600; color: #111827; }
             .qr-box { text-align: center; margin-top: 30px; padding: 20px; border: 2px dashed #2563eb; border-radius: 12px; }
             .footer { margin-top: 40px; text-align: center; font-size: 11px; color: #9ca3af; }
+            .watermark { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-45deg); font-size: 140px; color: rgba(37, 99, 235, 0.05); z-index: -1; white-space: nowrap; font-weight: 900; pointer-events: none; letter-spacing: 15px; }
           </style>
         </head>
-        <body>
+        <body style="position: relative; z-index: 1;">
+          <div class="watermark">SIGEVIR</div>
           <div class="header">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 10px;">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
             <h1>SIGEVIR</h1>
             <p>Sistema Integral de Gestión de Vehículos Retenidos</p>
           </div>
