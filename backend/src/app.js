@@ -18,6 +18,10 @@ import { validateEnv } from './utils/validateEnv.js';
 
 // Cargar variables de entorno
 dotenv.config();
+
+// Forzar zona horaria de Argentina (Buenos Aires) para todo el backend
+process.env.TZ = 'America/Argentina/Buenos_Aires';
+
 validateEnv();
 
 const app = express();
