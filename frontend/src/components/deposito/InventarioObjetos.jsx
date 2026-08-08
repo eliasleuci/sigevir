@@ -2,7 +2,9 @@ import React, { useState } from 'react';
 import { HiOutlinePlus, HiOutlineTrash, HiOutlineSave, HiOutlineArchive } from 'react-icons/hi';
 
 const InventarioObjetos = ({ initialItems = [], onSave, readOnly = false }) => {
-  const [items, setItems] = useState(initialItems.length > 0 ? initialItems : [{ id: 1, item: '', descripcion: '', estado: 'Bueno' }]);
+  const [items, setItems] = useState(
+    initialItems.length > 0 ? initialItems : (readOnly ? [] : [{ id: 1, item: '', descripcion: '', estado: 'Bueno' }])
+  );
 
   const addItem = () => {
     setItems([...items, { id: Date.now(), item: '', descripcion: '', estado: 'Bueno' }]);
@@ -45,54 +47,62 @@ const InventarioObjetos = ({ initialItems = [], onSave, readOnly = false }) => {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-50">
-            {items.map((item) => (
-              <tr key={item.id} className="group transition-colors hover:bg-gray-50/50">
-                <td className="px-6 py-3">
-                  <input 
-                    type="text" 
-                    value={item.item}
-                    readOnly={readOnly}
-                    onChange={(e) => updateItem(item.id, 'item', e.target.value)}
-                    placeholder="Ej: Auxilio, Estéreo..."
-                    className={`w-full bg-transparent border-none focus:ring-0 p-0 text-sm font-bold text-gray-700 placeholder-gray-300 ${readOnly ? 'cursor-default' : 'cursor-text'}`}
-                  />
+            {items.length === 0 ? (
+              <tr>
+                <td colSpan={readOnly ? 3 : 4} className="px-6 py-8 text-center text-gray-500 font-bold text-sm bg-gray-50/30">
+                  No se registraron objetos adicionales en el vehículo.
                 </td>
-                <td className="px-6 py-3">
-                  <input 
-                    type="text" 
-                    value={item.descripcion}
-                    readOnly={readOnly}
-                    onChange={(e) => updateItem(item.id, 'descripcion', e.target.value)}
-                    placeholder="Ej: Marca Sony, con cable..."
-                    className={`w-full bg-transparent border-none focus:ring-0 p-0 text-sm text-gray-600 placeholder-gray-300 ${readOnly ? 'cursor-default' : 'cursor-text'}`}
-                  />
-                </td>
-                <td className="px-6 py-3">
-                  <select 
-                    value={item.estado}
-                    disabled={readOnly}
-                    onChange={(e) => updateItem(item.id, 'estado', e.target.value)}
-                    className={`w-full bg-transparent border-none focus:ring-0 p-0 text-xs font-black uppercase tracking-wider ${
-                      item.estado === 'Bueno' ? 'text-green-600' : item.estado === 'Regular' ? 'text-amber-600' : 'text-red-600'
-                    }`}
-                  >
-                    <option value="Bueno">Bueno</option>
-                    <option value="Regular">Regular</option>
-                    <option value="Malo">Malo / Dañado</option>
-                  </select>
-                </td>
-                {!readOnly && (
-                  <td className="px-6 py-3 text-right">
-                    <button 
-                      onClick={() => removeItem(item.id)}
-                      className="p-2 text-gray-300 hover:text-red-500 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all"
-                    >
-                      <HiOutlineTrash className="w-5 h-5" />
-                    </button>
-                  </td>
-                )}
               </tr>
-            ))}
+            ) : (
+              items.map((item) => (
+                <tr key={item.id} className="group transition-colors hover:bg-gray-50/50">
+                  <td className="px-6 py-3">
+                    <input 
+                      type="text" 
+                      value={item.item}
+                      readOnly={readOnly}
+                      onChange={(e) => updateItem(item.id, 'item', e.target.value)}
+                      placeholder="Ej: Auxilio, Estéreo..."
+                      className={`w-full bg-transparent border-none focus:ring-0 p-0 text-sm font-bold text-gray-700 placeholder-gray-300 ${readOnly ? 'cursor-default' : 'cursor-text'}`}
+                    />
+                  </td>
+                  <td className="px-6 py-3">
+                    <input 
+                      type="text" 
+                      value={item.descripcion}
+                      readOnly={readOnly}
+                      onChange={(e) => updateItem(item.id, 'descripcion', e.target.value)}
+                      placeholder="Ej: Marca Sony, con cable..."
+                      className={`w-full bg-transparent border-none focus:ring-0 p-0 text-sm text-gray-600 placeholder-gray-300 ${readOnly ? 'cursor-default' : 'cursor-text'}`}
+                    />
+                  </td>
+                  <td className="px-6 py-3">
+                    <select 
+                      value={item.estado}
+                      disabled={readOnly}
+                      onChange={(e) => updateItem(item.id, 'estado', e.target.value)}
+                      className={`w-full bg-transparent border-none focus:ring-0 p-0 text-xs font-black uppercase tracking-wider ${
+                        item.estado === 'Bueno' ? 'text-green-600' : item.estado === 'Regular' ? 'text-amber-600' : 'text-red-600'
+                      }`}
+                    >
+                      <option value="Bueno">Bueno</option>
+                      <option value="Regular">Regular</option>
+                      <option value="Malo">Malo / Dañado</option>
+                    </select>
+                  </td>
+                  {!readOnly && (
+                    <td className="px-6 py-3 text-right">
+                      <button 
+                        onClick={() => removeItem(item.id)}
+                        className="p-2 text-gray-300 hover:text-red-500 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all"
+                      >
+                        <HiOutlineTrash className="w-5 h-5" />
+                      </button>
+                    </td>
+                  )}
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
