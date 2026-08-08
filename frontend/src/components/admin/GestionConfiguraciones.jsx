@@ -140,23 +140,23 @@ const GestionConfiguraciones = () => {
       
       {/* Encabezado */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 bg-white p-8 rounded-[40px] border border-gray-100 shadow-sm relative overflow-hidden">
-        <div className="relative z-10 flex items-center gap-5">
-          <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center shadow-inner">
-            <HiOutlineCog className="w-8 h-8" />
+        <div className="relative z-10 flex flex-row items-center gap-3 md:gap-6">
+          <div className="w-12 h-12 md:w-16 md:h-16 shrink-0 bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl md:rounded-2xl flex items-center justify-center text-white shadow-xl shadow-gray-200">
+            <HiOutlineCog className="w-6 h-6 md:w-8 md:h-8" />
           </div>
           <div>
-            <h3 className="text-2xl font-black text-gray-900 tracking-tight">Panel de Control</h3>
-            <p className="text-sm text-gray-500 font-medium mt-1 max-w-xl">
+            <h3 className="text-xl md:text-2xl font-black text-gray-900 tracking-tight">Panel de Control</h3>
+            <p className="text-xs md:text-sm text-gray-500 font-medium mt-1 max-w-xl">
               Configura variables globales, costos base, y comportamientos del sistema. 
               <span className="text-amber-600 font-bold ml-1">Cuidado: los cambios aplican inmediatamente.</span>
             </p>
           </div>
         </div>
         
-        <div className="relative z-10 flex gap-4">
+        <div className="relative z-10 flex gap-4 w-full md:w-auto">
           <button 
             onClick={openCreateModal}
-            className="flex items-center gap-2 px-6 py-4 bg-white text-blue-600 border border-blue-100 rounded-2xl font-black shadow-sm hover:bg-blue-50 transition-all"
+            className="w-full md:w-auto justify-center flex items-center gap-2 px-6 py-4 bg-white text-blue-600 border border-blue-100 rounded-2xl font-black shadow-sm hover:bg-blue-50 transition-all"
           >
             <HiOutlinePlus className="w-5 h-5" />
             Nueva Opción

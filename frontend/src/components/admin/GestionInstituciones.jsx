@@ -185,15 +185,15 @@ const GestionInstituciones = () => {
   }, [logoPreview]);
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+    <div className="space-y-4 md:space-y-8 animate-in fade-in duration-500">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 md:gap-6">
         <div>
-          <h3 className="text-2xl font-black text-gray-900 tracking-tight">Instituciones del Sistema</h3>
-          <p className="text-sm text-gray-500 font-medium">Gestión de sedes, jurisdicciones y tipos de organismos (Tránsito, Policía, Juzgados).</p>
+          <h3 className="text-xl md:text-2xl font-black text-gray-900 tracking-tight">Instituciones del Sistema</h3>
+          <p className="text-xs md:text-sm text-gray-500 font-medium">Gestión de sedes, jurisdicciones y tipos de organismos (Tránsito, Policía, Juzgados).</p>
         </div>
         <button 
           onClick={() => openModal()}
-          className="flex items-center gap-2 px-6 py-3 bg-gray-900 text-white rounded-2xl font-black shadow-lg hover:bg-black transition-all"
+          className="w-full md:w-auto justify-center flex items-center gap-2 px-6 py-3 bg-gray-900 text-white rounded-2xl font-black shadow-lg hover:bg-black transition-all"
         >
           <HiOutlinePlus className="w-5 h-5" />
           Nueva Institución

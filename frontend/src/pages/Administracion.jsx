@@ -18,29 +18,29 @@ const Administracion = () => {
   ];
 
   return (
-    <div className="max-w-7xl mx-auto py-8 px-4 space-y-12">
-      <div className="flex flex-col md:flex-row items-start md:items-center gap-5 mb-4">
-        <div className="shrink-0 w-16 h-16 bg-blue-600 text-white rounded-[24px] flex items-center justify-center shadow-2xl shadow-blue-200">
-          <HiOutlineCog className="w-10 h-10" />
+    <div className="max-w-7xl mx-auto py-4 md:py-8 px-2 md:px-4 space-y-6 md:space-y-12">
+      <div className="flex flex-row items-center gap-3 md:gap-5 mb-2 md:mb-4">
+        <div className="shrink-0 w-12 h-12 md:w-16 md:h-16 bg-blue-600 text-white rounded-2xl md:rounded-[24px] flex items-center justify-center shadow-2xl shadow-blue-200">
+          <HiOutlineCog className="w-6 h-6 md:w-10 md:h-10" />
         </div>
         <div>
-          <h1 className="text-4xl font-black text-gray-900 tracking-tight leading-none mb-2">Panel de Administración</h1>
-          <p className="text-gray-500 font-medium italic">Configuración maestra del sistema SIGEVIR y control de seguridad.</p>
+          <h1 className="text-2xl md:text-4xl font-black text-gray-900 tracking-tight leading-none mb-1 md:mb-2">Panel de Administración</h1>
+          <p className="text-xs md:text-base text-gray-500 font-medium italic">Configuración maestra del sistema SIGEVIR y control de seguridad.</p>
         </div>
       </div>
 
-      <div className="w-full flex gap-2 bg-white p-2 rounded-3xl border border-gray-100 shadow-xl overflow-x-auto no-scrollbar">
+      <div className="w-full flex gap-1.5 md:gap-2 bg-white p-1.5 md:p-2 rounded-2xl md:rounded-3xl border border-gray-100 shadow-xl overflow-x-auto no-scrollbar">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`shrink-0 flex items-center gap-2 sm:gap-3 px-4 md:px-8 py-3 sm:py-4 rounded-2xl text-xs sm:text-sm font-black uppercase tracking-widest transition-all whitespace-nowrap ${
+            className={`shrink-0 flex items-center gap-1.5 md:gap-3 px-3 md:px-8 py-2 md:py-4 rounded-xl md:rounded-2xl text-[10px] md:text-sm font-black uppercase tracking-widest transition-all whitespace-nowrap ${
               activeTab === tab.id
               ? 'bg-blue-600 text-white shadow-xl shadow-blue-200 sm:translate-y-[-2px]'
               : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50'
             }`}
           >
-            <tab.icon className={`w-6 h-6 ${activeTab === tab.id ? 'text-white' : 'text-gray-300'}`} />
+            <tab.icon className={`w-4 h-4 md:w-6 md:h-6 ${activeTab === tab.id ? 'text-white' : 'text-gray-300'}`} />
             {tab.name}
           </button>
         ))}

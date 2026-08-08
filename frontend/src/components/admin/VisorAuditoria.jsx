@@ -139,12 +139,12 @@ const VisorAuditoria = () => {
   };
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
+    <div className="space-y-4 md:space-y-8 animate-in fade-in duration-500">
       {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 md:gap-6">
         <div>
-          <h3 className="text-2xl font-black text-gray-900 tracking-tight">Historial de Auditoría</h3>
-          <p className="text-sm text-gray-500 font-medium mt-1">
+          <h3 className="text-xl md:text-2xl font-black text-gray-900 tracking-tight">Historial de Auditoría</h3>
+          <p className="text-xs md:text-sm text-gray-500 font-medium mt-1">
             Registro inmutable de todas las acciones críticas del sistema.
             {isDemo && (
               <span className="ml-2 px-2 py-0.5 bg-amber-100 text-amber-700 text-xs font-bold rounded-full">
