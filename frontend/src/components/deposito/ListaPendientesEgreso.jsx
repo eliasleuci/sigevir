@@ -31,6 +31,12 @@ const ListaPendientesEgreso = ({ vehiculos, onSelect, loading }) => {
         </div>
       </div>
 
+      <div className="flex justify-end md:hidden">
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-[10px] font-black uppercase tracking-widest animate-pulse border border-blue-100">
+          Deslizá para ver más <HiOutlineChevronRight className="w-3 h-3" />
+        </span>
+      </div>
+
       <div className="bg-white rounded-3xl border border-gray-100 shadow-xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left">
