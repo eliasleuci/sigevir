@@ -37,7 +37,7 @@ const ConsultaPublica = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 font-sans relative overflow-hidden flex flex-col justify-center">
+    <div className="min-h-[100dvh] bg-gray-50 py-8 md:py-12 px-4 sm:px-6 lg:px-8 font-sans relative flex flex-col justify-start md:justify-center overflow-y-auto">
       {/* Marca de agua de fondo */}
       <div 
         className="absolute inset-0 pointer-events-none opacity-10 z-0"

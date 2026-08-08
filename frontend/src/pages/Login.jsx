@@ -67,7 +67,7 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-blue-50 flex items-center justify-center py-12 sm:px-6 lg:px-8 font-sans">
+    <div className="min-h-[100dvh] bg-blue-50 flex items-start md:items-center justify-center py-8 md:py-12 sm:px-6 lg:px-8 font-sans overflow-y-auto">
       <div className="sm:mx-auto sm:w-full sm:max-w-4xl">
         <div className="bg-white shadow-2xl sm:rounded-3xl sm:border border-gray-100 overflow-hidden flex flex-col sm:flex-row">
           <div className="sm:w-2/5 bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 p-6 sm:p-10 flex flex-col items-center justify-center text-white relative overflow-hidden min-h-[200px] md:min-h-[250px]">
