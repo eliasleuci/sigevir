@@ -80,29 +80,29 @@ const FormularioNuevaRetencion = ({ onSubmit, loading, initialData = {} }) => {
 
     setIsSearching(true);
     try {
-      const res = await fetch(
-        `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(query)}&key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}`
-      );
-      if (!res.ok) {
-        const errText = await res.text();
-        console.error('Geocode request error', res.status, errText);
-        throw new Error('Geocode request failed');
+      if (!window.google || !window.google.maps) {
+        alert('El mapa de Google no está cargado. Intente en unos segundos.');
+        return;
       }
-      const data = await res.json();
-      console.log('Geocode response', data);
-      if (data.status === 'OK' && data.results && data.results.length > 0) {
-        const result = data.results[0];
-        const { lat, lng } = result.geometry.location;
-        const latNum = parseFloat(lat);
-        const lngNum = parseFloat(lng);
-        // actualizar mapa y direccion
-        handleLocationChange({ lat: latNum, lng: lngNum, direccion: result.formatted_address });
-      } else {
-        alert('No se encontro la direccion exacta. Intente con mas detalles.');
-      }
+      
+      const geocoder = new window.google.maps.Geocoder();
+      const data = await new Promise((resolve, reject) => {
+        geocoder.geocode({ address: query }, (results, status) => {
+          if (status === 'OK' && results && results.length > 0) {
+            resolve(results[0]);
+          } else {
+            reject(new Error('Geocode failed with status: ' + status));
+          }
+        });
+      });
+
+      const latNum = data.geometry.location.lat();
+      const lngNum = data.geometry.location.lng();
+      handleLocationChange({ lat: latNum, lng: lngNum, direccion: data.formatted_address });
+
     } catch (err) {
       console.error(err);
-      alert('Error al consultar la API de Google Maps. Verifique su conexion.');
+      alert('No se encontró la dirección exacta o hubo un error con el mapa.');
     } finally {
       setIsSearching(false);
     }
