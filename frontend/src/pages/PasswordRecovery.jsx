@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { Link } from 'react-router-dom';
 import apiClient from '../services/apiClient';
 import { toast } from 'react-toastify';
+import { supabase, SUPABASE_READY } from '../config/supabase';
 
 const recoverySchema = z.object({
   email: z.string().email('Ingresa un email válido')
@@ -20,11 +21,18 @@ const PasswordRecovery = () => {
   const onSubmit = async (data) => {
     setLoading(true);
     try {
-      await apiClient.post('/auth/recover-password', data);
+      if (SUPABASE_READY) {
+        const { error } = await supabase.auth.resetPasswordForEmail(data.email, {
+          redirectTo: `${window.location.origin}/reset-password`,
+        });
+        if (error) throw error;
+      } else {
+        await apiClient.post('/auth/recover-password', data);
+      }
       setSuccess(true);
       toast.success('Solicitud enviada exitosamente');
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Hubo un error al procesar tu solicitud');
+      toast.error(error.message || error.response?.data?.message || 'Hubo un error al procesar tu solicitud');
     } finally {
       setLoading(false);
     }

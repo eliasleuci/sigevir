@@ -45,6 +45,7 @@ function App() {
             <Route path="/auth/callback" element={<AuthCallbackPage />} />
             <Route path="/recovery" element={<PasswordRecovery />} />
             <Route path="/reset-password/:token" element={<ResetPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/unauthorized" element={<Unauthorized />} />
             <Route path="/pending" element={<PendingPage />} />
             <Route path="/verify-otp" element={<VerifyOTP />} />

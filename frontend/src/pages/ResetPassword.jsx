@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import apiClient from '../services/apiClient';
 import { toast } from 'react-toastify';
+import { supabase, SUPABASE_READY } from '../config/supabase';
 
 const resetSchema = z.object({
   password: z.string()
@@ -29,11 +30,16 @@ const ResetPassword = () => {
   const onSubmit = async (data) => {
     setLoading(true);
     try {
-      await apiClient.post(`/auth/reset-password/${token}`, { password: data.password });
+      if (SUPABASE_READY) {
+        const { error } = await supabase.auth.updateUser({ password: data.password });
+        if (error) throw error;
+      } else {
+        await apiClient.post(`/auth/reset-password/${token}`, { password: data.password });
+      }
       toast.success('¡Contraseña actualizada con éxito!');
       navigate('/login');
     } catch (error) {
-      toast.error(error.response?.data?.message || 'El enlace es inválido o ha expirado. Solicita uno nuevo.');
+      toast.error(error.message || error.response?.data?.message || 'Hubo un error al actualizar la contraseña.');
     } finally {
       setLoading(false);
     }
